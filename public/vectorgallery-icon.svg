@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="vgBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#07090E" />
+    </linearGradient>
+    <radialGradient id="vgGlow" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="vgFrame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="50%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#0D9488" />
+    </linearGradient>
+    <linearGradient id="vgPrism" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle obsidian container -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#vgBg)" stroke="#10B981" stroke-opacity="0.32" stroke-width="6" />
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#vgGlow)" />
+
+  <!-- Subtle stacked back gallery card -->
+  <g transform="rotate(-7 256 256)">
+    <rect x="122" y="106" width="268" height="256" rx="44" fill="#0F2922" stroke="#10B981" stroke-opacity="0.45" stroke-width="10" />
+  </g>
+
+  <!-- Primary gallery frame -->
+  <rect x="116" y="128" width="280" height="264" rx="46" fill="#0B1218" stroke="url(#vgFrame)" stroke-width="16" />
+
+  <!-- Precision Vector 'V' Gallery Mountain Prism -->
+  <path d="M168 206 L256 340 L344 206" fill="none" stroke="url(#vgPrism)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Inner lens / sun orb accent -->
+  <circle cx="322" cy="188" r="20" fill="#6EE7B7" />
+  <circle cx="322" cy="188" r="30" fill="#10B981" fill-opacity="0.25" />
+</svg>
+

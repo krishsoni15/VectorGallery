@@ -1,0 +1,123 @@
+// VECTORMIND — documents.ts
+// Document Library API: GET (list by projectId) and DELETE (remove by id)
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { createClient } from '@supabase/supabase-js'
+import { getServerUser } from '../../lib/supabase'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+const supabaseAnonKey = (serviceKey && !serviceKey.includes('your_')) ? serviceKey : (anonKey || '')
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return res.status(500).json({ error: 'Supabase not configured', step: 'config' })
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+
+  try {
+    const user = await getServerUser(req)
+
+    if (req.method === 'GET') {
+      const { projectId } = req.query
+      
+      const isValidUuid = (str?: string) => !!str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
+
+      if (!projectId || typeof projectId !== 'string' || !isValidUuid(projectId)) {
+        return res.status(200).json([])
+      }
+
+      let query = supabase
+        .from('nods_page')
+        .select('id, path, checksum, meta, project_id, nods_page_section(id)')
+        .eq('project_id', projectId)
+        .order('id', { ascending: false })
+
+      const { data: pages, error } = await query
+
+      if (error) {
+        throw error
+      }
+
+      const formattedPages = (pages || []).map((page: any) => ({
+        id: String(page.id),
+        path: page.path,
+        checksum: page.checksum,
+        meta: page.meta,
+        projectId: page.project_id,
+        sectionCount: page.nods_page_section ? page.nods_page_section.length : 0,
+      }))
+
+      return res.status(200).json(formattedPages)
+    }
+
+    if (req.method === 'DELETE') {
+      const { id, filename, projectId } = req.query
+
+      if (id && typeof id === 'string') {
+        const ids = id.split(',')
+
+        // First get documents to find storage URLs
+        const { data: pages } = await supabase
+          .from('nods_page')
+          .select('meta')
+          .in('id', ids)
+        
+        const storagePaths = (pages || [])
+          .map((p: any) => p.meta?.storagePath)
+          .filter(Boolean)
+
+        if (storagePaths.length > 0) {
+          // Attempt to delete from storage bucket
+          await supabase.storage.from('documents').remove(storagePaths)
+        }
+
+        // Delete the records (cascades to nods_page_section via ON DELETE CASCADE)
+        const { error } = await supabase
+          .from('nods_page')
+          .delete()
+          .in('id', ids)
+
+        if (error) throw error
+
+        return res.status(200).json({ success: true })
+      } else if (filename && projectId && typeof filename === 'string' && typeof projectId === 'string') {
+        const { data: pages } = await supabase
+          .from('nods_page')
+          .select('id, meta')
+          .eq('project_id', projectId)
+          .eq('path', filename)
+          
+        const ids = (pages || []).map(p => p.id)
+        const storagePaths = (pages || [])
+          .map((p: any) => p.meta?.storagePath)
+          .filter(Boolean)
+
+        if (storagePaths.length > 0) {
+          await supabase.storage.from('documents').remove(storagePaths)
+        }
+
+        if (ids.length > 0) {
+          const { error } = await supabase.from('nods_page').delete().in('id', ids)
+          if (error) throw error
+        }
+
+        return res.status(200).json({ success: true, deleted: ids.length })
+      } else {
+        return res.status(400).json({ error: 'Document ID or filename+projectId is required', step: 'validation' })
+      }
+    }
+
+    res.setHeader('Allow', ['GET', 'DELETE'])
+    return res.status(405).json({ error: `Method ${req.method} not allowed`, step: 'validation' })
+  } catch (err: any) {
+    console.error('[VectorGallery] Documents API error:', err)
+    return res.status(500).json({
+      error: err.message || 'Failed to process request',
+      step: 'database'
+    })
+  }
+}
