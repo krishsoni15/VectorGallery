@@ -1,19 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none">
-  <rect x="2" y="2" width="44" height="44" rx="12" fill="#FFFFFF" stroke="#DCE5DD" stroke-width="1.5" />
-  <rect x="4" y="4" width="40" height="40" rx="10" fill="#F7F8F3" fill-opacity="0.7" />
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="#FFFFFF" stroke="#E0E4DD" stroke-width="1.5" />
+  <rect x="4" y="4" width="40" height="40" rx="10" fill="#FAFAF7" />
+  <path d="M19.46 12.66 L28.54 12.66 L24 25.72 Z" fill="#E9EBE5" />
   <path
-    d="M12.98 13.94 L17.54 12.19 Q20.23 11.16 21.27 13.85 L27.33 29.64 Q28.36 32.34 25.67 33.37 L21.11 35.12 Q18.42 36.16 17.38 33.46 L11.32 17.67 Q10.29 14.98 12.98 13.94 Z"
-    fill="#087F5B"
-    fill-opacity="0.65"
+    d="M12.59 13.55 L17.81 11.76 Q20.15 10.94 21.11 13.27 L27.16 29.77 Q28.12 32.39 25.65 33.35 L21.39 35.0 Q18.77 35.96 17.81 33.49 L11.21 17.12 Q10.25 14.51 12.59 13.55 Z"
+    fill="#A6D9D0"
+    fill-opacity="0.82"
+    stroke="#087F5B"
+    stroke-opacity="0.35"
+    stroke-width="0.9"
   />
   <path
-    d="M30.46 12.19 L35.02 13.94 Q37.71 14.98 36.68 17.67 L30.62 33.46 Q29.58 36.16 26.89 35.12 L22.33 33.37 Q19.64 32.34 20.67 29.64 L26.73 13.85 Q27.77 11.16 30.46 12.19 Z"
+    d="M30.19 11.76 L35.41 13.55 Q37.75 14.51 36.79 17.12 L30.19 33.49 Q29.23 35.96 26.61 35.0 L22.35 33.35 Q19.88 32.39 20.84 29.77 L26.89 13.27 Q27.85 10.94 30.19 11.76 Z"
     fill="#087F5B"
-    fill-opacity="0.92"
-    stroke="#B8E7D4"
+    fill-opacity="0.94"
+    stroke="#C4EDE1"
     stroke-opacity="0.55"
     stroke-width="1"
   />
-  <path d="M24 25.92 L26.34 29.64 L24 33.35 L21.66 29.64 Z" fill="#B8E7D4" fill-opacity="0.9" />
-  <text x="58" y="31" fill="#0F241B" font-family="Manrope, Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">VectorGallery</text>
+  <path d="M24 25.51 L26.2 29.5 L24 33.21 L21.8 29.5 Z" fill="#C4EDE1" fill-opacity="0.95" />
+  <text x="58" y="31" fill="#181C19" font-family="Manrope, Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">VectorGallery</text>
 </svg>

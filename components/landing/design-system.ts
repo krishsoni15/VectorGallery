@@ -1,54 +1,57 @@
 /**
- * VectorGallery — "Digital Sanctuary" Design System
- * Single source of truth for palette tokens, fluid typography, spacing, motion,
- * component contracts, and WebGL aura configuration across the marketing site and auth shell.
+ * VectorGallery — Project Aura Design System
+ * Neutral-First Studio Palette (70% neutral canvas / 20% editorial media / 10% emerald-jade accent).
+ * Single source of truth for CSS tokens, fluid architectural typography, motion, and component contracts.
  */
 
 export const VG_PALETTE = {
   light: {
-    bg: '#F7F8F3',
+    bg: '#FAFAF7',
     surface: '#FFFFFF',
-    secondary: '#EEF3EC',
-    sage: '#E6EDE4',
-    mint: '#B8E7D4',
+    secondary: '#F0F1EC',
+    stone: '#E9EBE5',
+    sage: '#CEDBCD',
     primary: '#087F5B',
     primaryHover: '#066649',
     primaryDeep: '#05543C',
-    ink: '#0F241B',
-    inkSecondary: '#465B51',
-    inkMuted: '#5A6F65',
-    badgeInkOnSage: '#06674B',
-    border: '#DCE5DD',
-    borderStrong: '#C4D4C6',
+    mint: '#C4EDE1',
+    teal: '#A6D9D0',
+    ink: '#181C19',
+    inkSecondary: '#626B64',
+    inkMuted: '#737D75',
+    badgeInkOnSage: '#066649',
+    border: '#E0E4DD',
+    borderStrong: '#CBD2C7',
     forest: '#092219',
     forestSurface: '#0E2E22',
   },
   dark: {
-    bg: '#080E0C',
-    surface: '#101914',
-    secondary: '#111C17',
-    elevated: '#1C3329',
-    primary: '#53D9A3',
-    primaryInteractive: '#34C28B',
-    primaryHover: '#6EE4B5',
-    mint: '#B8E7D4',
-    ink: '#EFF7F3',
-    inkSecondary: '#9CB6AA',
-    inkMuted: '#749184',
-    ctaInkOnJade: '#061811',
-    border: 'rgba(180, 220, 198, 0.12)',
-    borderStrong: 'rgba(180, 220, 198, 0.24)',
-    forest: '#071A13',
-    forestSurface: '#0E291F',
+    bg: '#0B0D0C',
+    surface: '#131614',
+    secondary: '#171A18',
+    elevated: '#252A26',
+    primary: '#58D6A8',
+    primaryInteractive: '#40C495',
+    primaryHover: '#70DFB7',
+    mint: '#C4EDE1',
+    teal: '#75BDB3',
+    ink: '#F2F3EF',
+    inkSecondary: '#A3ADA5',
+    inkMuted: '#7F8A82',
+    ctaInkOnJade: '#071912',
+    border: 'rgba(255, 255, 255, 0.09)',
+    borderStrong: 'rgba(255, 255, 255, 0.16)',
+    forest: '#081812',
+    forestSurface: '#0D261D',
   },
   app: {
-    darkBg: '#080E0C',
-    darkSurface: '#101914',
-    darkSurface2: '#111C17',
-    darkInput: '#14211B',
+    darkBg: '#0B0D0C',
+    darkSurface: '#131614',
+    darkSurface2: '#171A18',
+    darkInput: '#1B1F1C',
     accent: '#087F5B',
-    accentLight: '#53D9A3',
-    accentGlow: 'rgba(83, 217, 163, 0.16)',
+    accentLight: '#58D6A8',
+    accentGlow: 'rgba(88, 214, 168, 0.15)',
   },
 } as const
 
@@ -59,9 +62,11 @@ export const VG_CSS_VARS_LIGHT: Record<string, string> = {
   '--vg-bg': VG_PALETTE.light.bg,
   '--vg-surface': VG_PALETTE.light.surface,
   '--vg-surface-2': VG_PALETTE.light.secondary,
-  '--vg-surface-soft': VG_PALETTE.light.sage,
+  '--vg-surface-soft': VG_PALETTE.light.stone,
+  '--vg-stone': VG_PALETTE.light.stone,
   '--vg-sage': VG_PALETTE.light.sage,
   '--vg-mint': VG_PALETTE.light.mint,
+  '--vg-teal': VG_PALETTE.light.teal,
   '--vg-brand': VG_PALETTE.light.primary,
   '--vg-brand-interactive': VG_PALETTE.light.primary,
   '--vg-brand-hover': VG_PALETTE.light.primaryHover,
@@ -74,9 +79,9 @@ export const VG_CSS_VARS_LIGHT: Record<string, string> = {
   '--vg-border': VG_PALETTE.light.border,
   '--vg-border-strong': VG_PALETTE.light.borderStrong,
   '--vg-shadow-card':
-    '0 18px 44px -18px rgba(15, 36, 27, 0.10), 0 4px 14px -4px rgba(8, 127, 91, 0.06)',
+    '0 18px 46px -22px rgba(24, 28, 25, 0.10), 0 2px 10px -2px rgba(24, 28, 25, 0.04)',
   '--vg-shadow-hero':
-    '0 32px 84px -22px rgba(15, 36, 27, 0.14), 0 10px 28px -10px rgba(8, 127, 91, 0.12)',
+    '0 36px 90px -28px rgba(24, 28, 25, 0.14), 0 8px 24px -10px rgba(8, 127, 91, 0.08)',
 }
 
 export const VG_CSS_VARS_DARK: Record<string, string> = {
@@ -84,8 +89,10 @@ export const VG_CSS_VARS_DARK: Record<string, string> = {
   '--vg-surface': VG_PALETTE.dark.surface,
   '--vg-surface-2': VG_PALETTE.dark.secondary,
   '--vg-surface-soft': VG_PALETTE.dark.elevated,
+  '--vg-stone': VG_PALETTE.dark.elevated,
   '--vg-sage': VG_PALETTE.dark.elevated,
   '--vg-mint': VG_PALETTE.dark.mint,
+  '--vg-teal': VG_PALETTE.dark.teal,
   '--vg-brand': VG_PALETTE.dark.primary,
   '--vg-brand-interactive': VG_PALETTE.dark.primaryInteractive,
   '--vg-brand-hover': VG_PALETTE.dark.primaryHover,
@@ -98,9 +105,9 @@ export const VG_CSS_VARS_DARK: Record<string, string> = {
   '--vg-border': VG_PALETTE.dark.border,
   '--vg-border-strong': VG_PALETTE.dark.borderStrong,
   '--vg-shadow-card':
-    '0 24px 60px -18px rgba(2, 7, 5, 0.72), 0 0 0 1px rgba(180, 220, 198, 0.08)',
+    '0 24px 60px -20px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.06)',
   '--vg-shadow-hero':
-    '0 40px 100px -22px rgba(2, 7, 5, 0.88), 0 0 80px -28px rgba(83, 217, 163, 0.18)',
+    '0 42px 100px -24px rgba(0, 0, 0, 0.88), 0 0 70px -30px rgba(88, 214, 168, 0.12)',
 }
 
 /**
@@ -115,8 +122,10 @@ export const VG_TAILWIND_COLORS = {
   'vg-bg': VG_PALETTE.light.bg,
   'vg-surface': VG_PALETTE.light.surface,
   'vg-secondary': VG_PALETTE.light.secondary,
+  'vg-stone': VG_PALETTE.light.stone,
   'vg-sage': VG_PALETTE.light.sage,
   'vg-mint': VG_PALETTE.light.mint,
+  'vg-teal': VG_PALETTE.light.teal,
   'vg-border': VG_PALETTE.light.border,
   'vg-brand': VG_PALETTE.light.primary,
   'vg-brand-deep': VG_PALETTE.light.primaryHover,
@@ -131,9 +140,12 @@ export const VG_TAILWIND_COLORS = {
 } as const
 
 /**
- * Fluid typography scale & editorial font policy.
- * Rule: Instrument Serif (`font-serif italic`) is reserved ONLY for 1-2 emotionally meaningful
- * words per section headline — never for full headings or body copy.
+ * Project Aura Fluid Typography Scale.
+ * Serif Restraint Rule:
+ * - Instrument Serif italic is reserved ONLY for 1 subtle editorial word in Hero (`keep`)
+ *   and 1 closing word in Final Invitation (`life`).
+ * - All 5 Chapter headings (Chapters 01–05) stay crisp modern architectural grotesk (Manrope).
+ * - Geist Mono is strictly for filenames, terminal code, and checksums (never section eyebrow badges).
  */
 export const VG_TYPOGRAPHY = {
   fonts: {
@@ -144,22 +156,22 @@ export const VG_TYPOGRAPHY = {
   },
   scale: {
     h1: {
-      fontSize: 'clamp(2.65rem, 5.6vw, 4.75rem)',
-      lineHeight: '1.0',
-      letterSpacing: '-0.038em',
+      fontSize: 'clamp(2.65rem, 6.4vw, 6.75rem)',
+      lineHeight: '0.96',
+      letterSpacing: '-0.045em',
       fontWeight: 700,
     },
     h2: {
-      fontSize: 'clamp(1.95rem, 3.8vw, 3.25rem)',
-      lineHeight: '1.08',
-      letterSpacing: '-0.03em',
+      fontSize: 'clamp(2rem, 4.4vw, 4.5rem)',
+      lineHeight: '1.03',
+      letterSpacing: '-0.036em',
       fontWeight: 700,
     },
     h3: {
-      fontSize: 'clamp(1.25rem, 2.1vw, 1.65rem)',
-      lineHeight: '1.22',
-      letterSpacing: '-0.02em',
-      fontWeight: 700,
+      fontSize: 'clamp(1.25rem, 2.1vw, 1.75rem)',
+      lineHeight: '1.2',
+      letterSpacing: '-0.022em',
+      fontWeight: 600,
     },
     h4: {
       fontSize: 'clamp(1.0625rem, 1.4vw, 1.25rem)',
@@ -168,67 +180,66 @@ export const VG_TYPOGRAPHY = {
       fontWeight: 600,
     },
     lead: {
-      fontSize: 'clamp(1.03125rem, 1.4vw, 1.1875rem)',
+      fontSize: 'clamp(1rem, 1.2vw, 1.1875rem)',
       lineHeight: '1.62',
       fontWeight: 400,
     },
     body: {
-      fontSize: 'clamp(0.9375rem, 1.05vw, 1rem)',
+      fontSize: 'clamp(1rem, 1.15vw, 1.1875rem)',
       lineHeight: '1.65',
       fontWeight: 400,
     },
     small: {
-      fontSize: '0.84375rem',
+      fontSize: '0.875rem',
       lineHeight: '1.55',
       fontWeight: 400,
     },
-    eyebrow: {
-      fontSize: '0.75rem',
-      lineHeight: '1.2',
-      letterSpacing: '0.16em',
-      fontWeight: 600,
+    kicker: {
+      fontSize: '0.8125rem',
+      lineHeight: '1.25',
+      letterSpacing: '-0.01em',
+      fontWeight: 500,
     },
   },
   editorialWordClass:
-    'font-serif italic font-normal text-[var(--vg-brand)] tracking-[-0.01em]',
+    'font-serif italic font-normal text-[var(--vg-brand)] tracking-[-0.015em]',
   editorialWordOnForestClass:
-    'font-serif italic font-normal text-[#B8E7D4] tracking-[-0.01em]',
+    'font-serif italic font-normal text-[#C4EDE1] tracking-[-0.015em]',
 } as const
 
 /**
- * Spacing, container widths, radii & shadow contracts.
+ * Spacious studio container widths (`85-92%` of 1440px canvas), section padding, radii & shadows.
  */
 export const VG_LAYOUT = {
   containers: {
-    narrow: 'max-w-[820px] mx-auto px-4 sm:px-6',
-    standard: 'max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8',
-    wide: 'max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8',
+    narrow: 'max-w-[840px] mx-auto px-5 sm:px-6',
+    standard: 'max-w-[1260px] mx-auto px-5 sm:px-8',
+    wide: 'max-w-[1340px] mx-auto px-5 sm:px-8',
   },
   sectionPadding: {
-    hero: 'pt-12 sm:pt-20 pb-20 sm:pb-28 lg:pb-32',
-    standard: 'py-20 sm:py-24 lg:py-28',
+    hero: 'pt-8 sm:pt-12 pb-16 sm:pb-24',
+    standard: 'py-24 sm:py-28 lg:py-32',
     compact: 'py-16 sm:py-20',
-    finalInvitation: 'py-24 sm:py-32',
+    finalInvitation: 'py-28 sm:py-36',
   },
   radii: {
-    control: 'rounded-xl',
-    card: 'rounded-2xl',
+    control: 'rounded-full',
+    panel: 'rounded-2xl',
     stage: 'rounded-3xl',
     monument: 'rounded-[2rem]',
-    device: 'rounded-[2.25rem]',
+    device: 'rounded-[2.4rem]',
     pill: 'rounded-full',
   },
   shadows: {
     card: 'shadow-[var(--vg-shadow-card)]',
     hero: 'shadow-[var(--vg-shadow-hero)]',
-    ctaLight: 'shadow-[0_12px_28px_-10px_rgba(8,127,91,0.42)]',
-    ctaDark: 'shadow-[0_12px_30px_-10px_rgba(83,217,163,0.32)]',
+    ctaLight: 'shadow-[0_14px_32px_-12px_rgba(8,127,91,0.36)]',
+    ctaDark: 'shadow-[0_14px_32px_-12px_rgba(88,214,168,0.24)]',
   },
 } as const
 
 /**
  * Motion standards & reduced-motion policy.
- * Always pair Framer Motion components with `useReducedMotion()` and `<MotionConfig reducedMotion="user">`.
  */
 export const VG_MOTION = {
   ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
@@ -236,10 +247,10 @@ export const VG_MOTION = {
   springParallax: { stiffness: 90, damping: 24 },
   durations: {
     micro: 0.18,
-    standard: 0.48,
-    editorial: 0.62,
-    stage: 0.78,
-    ambientSeconds: 10,
+    standard: 0.5,
+    editorial: 0.65,
+    stage: 0.8,
+    ambientSeconds: 11,
   },
   stagger: {
     tight: 0.045,
@@ -248,33 +259,32 @@ export const VG_MOTION = {
   },
   viewport: { once: true, amount: 'some' as const },
   reducedMotionPolicy:
-    'When prefers-reduced-motion is active, omit y/x/scale/blur transitions, disable parallax & continuous loops, and render atmospheric shaders static or via soft radial CSS fallback.',
+    'When prefers-reduced-motion is active, omit transform/blur animations, disable parallax & ambient loops, and render DarkVeil via static neutral-silk CSS fallback.',
 } as const
 
 /**
- * Reusable component class contracts in the Green Digital Sanctuary identity.
- * No blue, purple, or neon colors anywhere.
+ * Component style contracts in Project Aura Neutral-First system.
  */
 export const VG_COMPONENTS = {
   buttons: {
     primary:
-      'vg-cta inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#53D9A3] dark:hover:bg-[#6EE4B5] dark:text-[#061811] shadow-[0_12px_28px_-10px_rgba(8,127,91,0.42)] dark:shadow-[0_12px_28px_-10px_rgba(83,217,163,0.28)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
+      'vg-cta inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#58D6A8] dark:hover:bg-[#70DFB7] dark:text-[#071912] shadow-[0_14px_32px_-12px_rgba(8,127,91,0.36)] dark:shadow-[0_14px_32px_-12px_rgba(88,214,168,0.24)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
     primarySm:
-      'vg-cta inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl text-[13px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#53D9A3] dark:hover:bg-[#6EE4B5] dark:text-[#061811] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'vg-cta inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#58D6A8] dark:hover:bg-[#70DFB7] dark:text-[#071912] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
     secondary:
-      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
     secondarySm:
-      'inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl text-[13px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
     ghost:
-      'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#E6EDE4]/80 dark:hover:bg-[#1C3329]/75 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#F0F1EC]/90 dark:hover:bg-[#171A18] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
     forestPrimary:
-      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[#53D9A3] hover:bg-[#6EE4B5] text-[#061811] shadow-[0_14px_32px_-10px_rgba(83,217,163,0.35)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8E7D4]',
+      'inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full text-[14.5px] font-semibold bg-[#58D6A8] hover:bg-[#70DFB7] text-[#071912] shadow-[0_14px_34px_-10px_rgba(88,214,168,0.34)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4EDE1]',
     forestSecondary:
-      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[#13382A] hover:bg-[#194736] text-[#EFF7F3] border border-[#B8E7D4]/25 transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8E7D4]',
+      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-white/[0.08] hover:bg-white/[0.14] text-[#F2F3EF] border border-white/[0.18] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4EDE1]',
     tabActive:
-      'vg-cta bg-[#087F5B] text-[#FFFFFF] border-[#087F5B] dark:bg-[#53D9A3] dark:text-[#061811] dark:border-[#53D9A3] shadow-sm',
+      'vg-cta bg-[#087F5B] text-[#FFFFFF] border-[#087F5B] dark:bg-[#58D6A8] dark:text-[#071912] dark:border-[#58D6A8] shadow-sm',
     tabIdle:
-      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45',
+      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[#087F5B]/35 dark:hover:border-[#58D6A8]/35',
   },
   cards: {
     surface:
@@ -282,59 +292,62 @@ export const VG_COMPONENTS = {
     secondary:
       'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface-2)]',
     elevated:
-      'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] dark:bg-[#1C3329]/65 shadow-sm',
+      'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] dark:bg-[#171A18] shadow-sm',
     glass:
-      'rounded-3xl border border-[var(--vg-border)] bg-[#FFFFFF]/92 dark:bg-[#101914]/92 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
+      'rounded-2xl border border-[#E0E4DD] dark:border-white/[0.09] bg-[#FFFFFF]/86 dark:bg-[#131614]/84 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
     photoFrame:
       'rounded-2xl overflow-hidden border border-[var(--vg-border)] bg-[var(--vg-surface)] shadow-[var(--vg-shadow-card)]',
     forest:
-      'bg-[#092219] text-[#EFF7F3] border border-[#B8E7D4]/15',
+      'bg-[#092219] text-[#F2F3EF] border border-[#C4EDE1]/15',
   },
   badges: {
     sage:
-      'inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-medium bg-[#E6EDE4] text-[#06674B] border border-[#DCE5DD] dark:bg-[#1C3329] dark:text-[#53D9A3] dark:border-[#B8E7D4]/15',
+      'inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-medium bg-[#F0F1EC] text-[#181C19] border border-[#E0E4DD] dark:bg-[#171A18] dark:text-[#F2F3EF] dark:border-white/[0.09]',
     mint:
-      'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#B8E7D4]/55 text-[#065F46] border border-[#087F5B]/20 dark:bg-[#1C3329] dark:text-[#B8E7D4] dark:border-[#53D9A3]/25',
+      'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#C4EDE1]/65 text-[#066649] border border-[#087F5B]/15 dark:bg-[#252A26] dark:text-[#58D6A8] dark:border-[#58D6A8]/25',
     outline:
       'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border border-[var(--vg-border)]',
     monoTag:
       'font-mono text-[11px] px-2.5 py-0.5 rounded-md bg-[var(--vg-surface-2)] text-[var(--vg-ink-2)] border border-[var(--vg-border)]',
     photoScrim:
-      'vg-photo-caption px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#080E0C]/72 text-[#EFF7F3] backdrop-blur-md border border-[#B8E7D4]/15',
+      'vg-photo-caption px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#0B0D0C]/75 text-[#F2F3EF] backdrop-blur-md border border-white/[0.12]',
   },
   inputs: {
     search:
-      'w-full h-12 sm:h-13 pl-12 pr-4 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[15px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/30 focus:border-[var(--vg-brand)] transition-all',
+      'w-full h-12 sm:h-13 pl-12 pr-4 rounded-2xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[15px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 focus:border-[var(--vg-brand)] transition-all',
     field:
-      'w-full h-11 px-3.5 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/30 focus:border-[var(--vg-brand)] transition-all',
+      'w-full h-11 px-3.5 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 focus:border-[var(--vg-brand)] transition-all',
     codeBlock:
-      'p-5 rounded-2xl bg-[#080E0C] text-[#DCEFE5] font-mono text-[12.5px] leading-relaxed overflow-x-auto border border-[#B8E7D4]/15',
+      'p-5 rounded-2xl bg-[#0B0D0C] text-[#E6ECE7] font-mono text-[12.5px] leading-relaxed overflow-x-auto border border-white/[0.09]',
+  },
+  media: {
+    sculptureMask:
+      'radial-gradient(ellipse 64% 66% at 54% 48%, #000 38%, rgba(0,0,0,0.68) 62%, transparent 86%)',
   },
 } as const
 
 /**
- * WebGL DarkVeil Shader Guidance:
- * Existing components/DarkVeil.tsx outputs purple/violet (rgb 34,6,87) at hueShift=0.
- * Agent 2 MUST remap luminance onto botanical green stops (never default hueShift=0 purple).
+ * Neutral-First Silk Atmospheric Shader Specification (DarkVeil.tsx).
+ * Keeps 70%+ canvas strictly neutral (#FAFAF7 / #0B0D0C) with a quiet silk botanical shimmer.
  */
 export const VG_AURA_SHADER_SPEC = {
   lightStops: {
-    base: '#F7F8F3',
-    mid: '#E6EDE4',
-    highlight: '#B8E7D4',
-    deepAccent: '#087F5B',
-    opacityRange: [0.22, 0.34] as const,
+    base: '#FAFAF7',
+    mid: '#F0F1EC',
+    highlight: '#C4EDE1',
+    tealAccent: '#A6D9D0',
+    opacityRange: [0.18, 0.28] as const,
   },
   darkStops: {
-    base: '#080E0C',
-    mid: '#101914',
-    highlight: '#1C3329',
-    glowAccent: '#53D9A3',
-    opacityRange: [0.38, 0.54] as const,
+    base: '#0B0D0C',
+    mid: '#131614',
+    highlight: '#1D2923',
+    glowAccent: '#58D6A8',
+    tealAccent: '#75BDB3',
+    opacityRange: [0.22, 0.34] as const,
   },
   cssFallbackLight:
-    'radial-gradient(ellipse 72% 55% at 68% 18%, rgba(184, 231, 212, 0.45), rgba(230, 237, 228, 0.35) 45%, transparent 74%)',
+    'radial-gradient(ellipse 58% 60% at 70% 44%, rgba(166, 217, 208, 0.24), rgba(196, 237, 225, 0.16) 44%, transparent 74%)',
   cssFallbackDark:
-    'radial-gradient(ellipse 72% 55% at 68% 18%, rgba(28, 51, 41, 0.85), rgba(83, 217, 163, 0.14) 45%, transparent 74%)',
+    'radial-gradient(ellipse 58% 60% at 70% 44%, rgba(88, 214, 168, 0.11), rgba(117, 189, 179, 0.06) 44%, transparent 74%)',
 } as const
-

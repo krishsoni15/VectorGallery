@@ -15,18 +15,20 @@ const SIZE_MAP = {
   lg: { box: 42, text: 'text-[21px]', gap: 'gap-3' },
 }
 
-const LEFT_FRAME_PATH =
-  'M15.97 17.37 L22.6 14.82 Q26.52 13.32 28.03 17.24 L36.84 40.21 Q38.35 44.13 34.43 45.63 L27.8 48.18 Q23.88 49.68 22.37 45.76 L13.56 22.79 Q12.05 18.87 15.97 17.37 Z'
+/* Precision geometric planes echoing the physical ceramic & frosted-emerald Memory Fold V */
+const LEFT_FOLD_PLANE =
+  'M15.4 16.8 L23.0 14.2 Q26.4 13.0 27.8 16.4 L36.6 40.4 Q38.0 44.2 34.4 45.6 L28.2 48.0 Q24.4 49.4 23.0 45.8 L13.4 22.0 Q12.0 18.2 15.4 16.8 Z'
 
-const RIGHT_FRAME_PATH =
-  'M41.4 14.82 L48.03 17.37 Q51.95 18.87 50.44 22.79 L41.63 45.76 Q40.12 49.68 36.2 48.18 L29.57 45.63 Q25.65 44.13 27.16 40.21 L35.97 17.24 Q37.48 13.32 41.4 14.82 Z'
+const RIGHT_FOLD_PLANE =
+  'M41.0 14.2 L48.6 16.8 Q52.0 18.2 50.6 22.0 L41.0 45.8 Q39.6 49.4 35.8 48.0 L29.6 45.6 Q26.0 44.2 27.4 40.4 L36.2 16.4 Q37.6 13.0 41.0 14.2 Z'
 
-const APEX_HINGE_PATH = 'M32 34.8 L35.4 40.2 L32 45.6 L28.6 40.2 Z'
+const BACK_CERAMIC_WEDGE = 'M25.4 15.5 L38.6 15.5 L32.0 34.5 Z'
+
+const APEX_PRISM_FACET = 'M32.0 34.2 L35.2 40.0 L32.0 45.4 L28.8 40.0 Z'
 
 /**
- * VectorGallery "Connected Frames" Logo Mark.
- * Two overlapping translucent photo frames converging into a clean geometric V.
- * Light mode: emerald on crisp white. Dark mode & on-dark: jade/mint on deep forest.
+ * VectorGallery "Memory Fold" Connected Frames Logo.
+ * Ceramic neutral wedge + frosted glass left plane + satin emerald/jade right acrylic fold.
  */
 export function VectorGalleryLogo({
   variant = 'horizontal',
@@ -41,7 +43,7 @@ export function VectorGalleryLogo({
   const isOnDark = variant === 'on-dark'
   const isAnimated = variant === 'animated' && !prefersReduced
 
-  const darkGradId = `vg-dark-tile-${rawId}`
+  const darkGradId = `vg-fold-dark-${rawId}`
 
   return (
     <span className={cn('inline-flex items-center select-none', dims.gap, className)}>
@@ -55,12 +57,12 @@ export function VectorGalleryLogo({
       >
         <defs>
           <linearGradient id={darkGradId} x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#101914" />
-            <stop offset="100%" stopColor="#1C3329" />
+            <stop offset="0%" stopColor="#131614" />
+            <stop offset="100%" stopColor="#252A26" />
           </linearGradient>
         </defs>
 
-        {/* Rounded Sanctuary Tile */}
+        {/* Studio Beveled Tile */}
         {isMono ? (
           <rect
             x="1"
@@ -82,8 +84,8 @@ export function VectorGalleryLogo({
             height="62"
             rx="15"
             fill={`url(#${darkGradId})`}
-            stroke="#53D9A3"
-            strokeOpacity="0.28"
+            stroke="#58D6A8"
+            strokeOpacity="0.26"
             strokeWidth="1.5"
           />
         ) : (
@@ -94,7 +96,7 @@ export function VectorGalleryLogo({
               width="62"
               height="62"
               rx="15"
-              className="fill-[#FFFFFF] dark:fill-[#101914] stroke-[#DCE5DD] dark:stroke-[#53D9A3]/30"
+              className="fill-[#FFFFFF] dark:fill-[#131614] stroke-[#E0E4DD] dark:stroke-white/[0.12]"
               strokeWidth="1.5"
             />
             <rect
@@ -103,49 +105,62 @@ export function VectorGalleryLogo({
               width="57"
               height="57"
               rx="12.5"
-              className="fill-[#F7F8F3]/65 dark:fill-[#1C3329]/55"
+              className="fill-[#FAFAF7] dark:fill-[#171A18]"
             />
           </>
         )}
 
-        {/* Connected Translucent Photo Frames */}
+        {/* Back Ceramic Wedge */}
+        <path
+          d={BACK_CERAMIC_WEDGE}
+          className={cn(
+            isMono
+              ? 'fill-current opacity-20'
+              : isOnDark
+                ? 'fill-[#252A26]'
+                : 'fill-[#E9EBE5] dark:fill-[#252A26]'
+          )}
+        />
+
+        {/* Folded Planes */}
         {isAnimated ? (
           <>
             <motion.path
-              d={LEFT_FRAME_PATH}
+              d={LEFT_FOLD_PLANE}
               className={cn(
                 isMono
                   ? 'fill-current opacity-55'
                   : isOnDark
-                    ? 'fill-[#53D9A3]/65'
-                    : 'fill-[#087F5B]/65 dark:fill-[#53D9A3]/60'
+                    ? 'fill-[#75BDB3]/60 stroke-[#C4EDE1]/40'
+                    : 'fill-[#A6D9D0]/80 stroke-[#087F5B]/35 dark:fill-[#75BDB3]/58 dark:stroke-[#C4EDE1]/35'
               )}
+              strokeWidth="1"
               initial={{ opacity: 0, x: -4, y: -3 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             />
             <motion.path
-              d={RIGHT_FRAME_PATH}
+              d={RIGHT_FOLD_PLANE}
               className={cn(
                 isMono
                   ? 'fill-current opacity-95'
                   : isOnDark
-                    ? 'fill-[#B8E7D4]/92 stroke-[#53D9A3]/45'
-                    : 'fill-[#087F5B]/92 stroke-[#B8E7D4]/55 dark:fill-[#B8E7D4]/90 dark:stroke-[#53D9A3]/45'
+                    ? 'fill-[#58D6A8]/92 stroke-[#C4EDE1]/55'
+                    : 'fill-[#087F5B]/94 stroke-[#C4EDE1]/55 dark:fill-[#58D6A8]/90 dark:stroke-[#C4EDE1]/50'
               )}
-              strokeWidth="1.2"
+              strokeWidth="1.15"
               initial={{ opacity: 0, x: 4, y: -3 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             />
             <motion.path
-              d={APEX_HINGE_PATH}
+              d={APEX_PRISM_FACET}
               className={cn(
                 isMono
                   ? 'fill-current opacity-40'
                   : isOnDark
-                    ? 'fill-[#EFF7F3]/85'
-                    : 'fill-[#B8E7D4]/90 dark:fill-[#EFF7F3]/85'
+                    ? 'fill-[#F2F3EF]/90'
+                    : 'fill-[#C4EDE1]/95 dark:fill-[#F2F3EF]/90'
               )}
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -155,34 +170,35 @@ export function VectorGalleryLogo({
         ) : (
           <>
             <path
-              d={LEFT_FRAME_PATH}
+              d={LEFT_FOLD_PLANE}
               className={cn(
                 isMono
                   ? 'fill-current opacity-55'
                   : isOnDark
-                    ? 'fill-[#53D9A3]/65'
-                    : 'fill-[#087F5B]/65 dark:fill-[#53D9A3]/60'
+                    ? 'fill-[#75BDB3]/60 stroke-[#C4EDE1]/40'
+                    : 'fill-[#A6D9D0]/80 stroke-[#087F5B]/35 dark:fill-[#75BDB3]/58 dark:stroke-[#C4EDE1]/35'
               )}
+              strokeWidth="1"
             />
             <path
-              d={RIGHT_FRAME_PATH}
+              d={RIGHT_FOLD_PLANE}
               className={cn(
                 isMono
                   ? 'fill-current opacity-95'
                   : isOnDark
-                    ? 'fill-[#B8E7D4]/92 stroke-[#53D9A3]/45'
-                    : 'fill-[#087F5B]/92 stroke-[#B8E7D4]/55 dark:fill-[#B8E7D4]/90 dark:stroke-[#53D9A3]/45'
+                    ? 'fill-[#58D6A8]/92 stroke-[#C4EDE1]/55'
+                    : 'fill-[#087F5B]/94 stroke-[#C4EDE1]/55 dark:fill-[#58D6A8]/90 dark:stroke-[#C4EDE1]/50'
               )}
-              strokeWidth="1.2"
+              strokeWidth="1.15"
             />
             <path
-              d={APEX_HINGE_PATH}
+              d={APEX_PRISM_FACET}
               className={cn(
                 isMono
                   ? 'fill-current opacity-40'
                   : isOnDark
-                    ? 'fill-[#EFF7F3]/85'
-                    : 'fill-[#B8E7D4]/90 dark:fill-[#EFF7F3]/85'
+                    ? 'fill-[#F2F3EF]/90'
+                    : 'fill-[#C4EDE1]/95 dark:fill-[#F2F3EF]/90'
               )}
             />
           </>
@@ -197,8 +213,8 @@ export function VectorGalleryLogo({
             isMono
               ? 'text-current'
               : isOnDark
-                ? 'text-[#EFF7F3]'
-                : 'text-[#0F241B] dark:text-[#EFF7F3]'
+                ? 'text-[#F2F3EF]'
+                : 'text-[#181C19] dark:text-[#F2F3EF]'
           )}
         >
           VectorGallery
