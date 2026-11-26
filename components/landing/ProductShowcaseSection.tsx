@@ -177,7 +177,7 @@ export function ProductShowcaseSection() {
               {/* Left App Sidebar Mockup */}
               <aside
                 aria-label="Workspace navigation preview"
-                className="lg:col-span-3 border-b lg:border-b-0 lg:border-r border-[var(--vg-border)] bg-[var(--vg-surface-2)]/70 p-4 sm:p-5 flex flex-col justify-between gap-4"
+                className="lg:col-span-3 border-b lg:border-b-0 lg:border-r border-[var(--vg-border)] bg-[#EEF3EC]/85 dark:bg-[#111C17]/85 p-4 sm:p-5 flex flex-col justify-between gap-4"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -200,7 +200,7 @@ export function ProductShowcaseSection() {
                             'flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium text-left transition-colors',
                             active
                               ? 'bg-[var(--vg-surface)] text-[var(--vg-brand)] border border-[var(--vg-border)] shadow-sm font-semibold'
-                              : 'text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[var(--vg-surface)]/50'
+                              : 'text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#FFFFFF]/70 dark:hover:bg-[#101914]/70'
                           )}
                         >
                           <Icon className="w-4 h-4 shrink-0" />
@@ -489,7 +489,7 @@ export function ProductShowcaseSection() {
                                 className={cn(
                                   'p-3 rounded-xl border flex items-center gap-2.5',
                                   doc.active
-                                    ? 'bg-[var(--vg-surface-soft)] border-[var(--vg-brand)]/40'
+                                    ? 'bg-[var(--vg-surface-soft)] border-[#087F5B]/45 dark:border-[#53D9A3]/45'
                                     : 'bg-[var(--vg-surface-2)] border-[var(--vg-border)]'
                                 )}
                               >

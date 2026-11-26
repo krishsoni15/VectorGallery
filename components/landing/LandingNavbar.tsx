@@ -89,11 +89,11 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[var(--vg-surface-soft)]/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#E6EDE4]/80 dark:hover:bg-[#1C3329]/75 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
           >
             <Github className="w-4 h-4" />
             <span>GitHub</span>
-            {typeof stars === 'number' && (
+            {typeof stars === 'number' && stars > 0 && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[var(--vg-surface-soft)] text-[var(--vg-brand)]">
                 <Star className="w-3 h-3 fill-current" />
                 {stars}
@@ -103,7 +103,7 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
 
           <Link
             href="/login"
-            className="hidden sm:inline-flex items-center h-9 px-3 rounded-xl text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[var(--vg-surface-soft)]/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+            className="hidden sm:inline-flex items-center h-9 px-3 rounded-xl text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#E6EDE4]/80 dark:hover:bg-[#1C3329]/75 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
           >
             Sign in
           </Link>
@@ -133,7 +133,7 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
             animate={reduced ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
             transition={{ duration: 0.22 }}
-            className="lg:hidden overflow-hidden border-t border-[var(--vg-border)] bg-[var(--vg-surface)]/95 backdrop-blur-2xl"
+            className="lg:hidden overflow-hidden border-t border-[var(--vg-border)] bg-[#FFFFFF]/95 dark:bg-[#101914]/95 backdrop-blur-2xl"
           >
             <div className="px-5 py-5 space-y-1.5">
               {[

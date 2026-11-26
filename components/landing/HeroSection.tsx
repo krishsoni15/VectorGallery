@@ -111,8 +111,7 @@ export function HeroSection() {
       onMouseLeave={handleLeave}
       aria-label="VectorGallery overview"
       className={cn(
-        'relative overflow-hidden bg-[var(--vg-bg)]',
-        VG_LAYOUT.sectionPadding.hero
+        'relative overflow-hidden bg-[var(--vg-bg)] pt-10 sm:pt-16 pb-16 sm:pb-20'
       )}
     >
       {/* Botanical Green Atmospheric Aura (WebGL CPPN + CSS Gradient Fallback) */}
@@ -545,7 +544,7 @@ export function HeroSection() {
                 <div className="mt-3 grid grid-cols-2 gap-2.5">
                   <div
                     className={cn(
-                      'rounded-xl overflow-hidden border border-[var(--vg-border)] bg-[var(--vg-surface-2)] transition-opacity duration-200',
+                      'rounded-xl overflow-hidden border border-[var(--vg-border)] hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45 bg-[var(--vg-surface-2)] transition-all duration-200',
                       activeFilter === 'notes' && 'opacity-50'
                     )}
                   >
@@ -565,7 +564,7 @@ export function HeroSection() {
                   </div>
                   <div
                     className={cn(
-                      'rounded-xl overflow-hidden border border-[var(--vg-border)] bg-[var(--vg-surface-2)] transition-opacity duration-200',
+                      'rounded-xl overflow-hidden border border-[var(--vg-border)] hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45 bg-[var(--vg-surface-2)] transition-all duration-200',
                       activeFilter === 'mountains' && 'opacity-50'
                     )}
                   >

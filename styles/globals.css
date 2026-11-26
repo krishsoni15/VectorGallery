@@ -146,12 +146,10 @@ html.dark .vg-shell {
 }
 
 /* Primary sanctuary CTA text contrast guard */
-.vg-cta,
-.vg-blue-cta {
+.vg-cta {
   color: #FFFFFF;
 }
-html.dark .vg-cta,
-html.dark .vg-blue-cta {
+html.dark .vg-cta {
   color: #061811;
 }
 
@@ -698,8 +696,10 @@ html.light .vm-app-shell [class*="bg-zinc-950"] {
 
 html.light .vm-app-shell [class*="bg-white/"],
 html.light .vm-app-shell [class*="bg-slate-800"],
-html.light .vm-app-shell [class*="bg-zinc-800"] {
+html.light .vm-app-shell [class*="bg-zinc-800"],
+html.light .vm-app-shell .vm-doc-fallback {
   background-color: var(--vm-surface-2) !important;
+  background-image: none !important;
   border-color: var(--vm-border) !important;
 }
 

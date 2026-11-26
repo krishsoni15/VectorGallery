@@ -42,7 +42,7 @@ export function Section({
   const bgMap = {
     default: 'bg-[var(--vg-bg)]',
     secondary: 'bg-[var(--vg-surface-2)]',
-    soft: 'bg-[var(--vg-sage)]/75 dark:bg-[#111C17]',
+    soft: 'bg-[#E6EDE4]/75 dark:bg-[#111C17]',
     forest: 'bg-[#092219] text-[#EFF7F3]',
   }
 
@@ -74,7 +74,7 @@ export function SectionHeading({
     <div
       className={cn(
         'space-y-4',
-        align === 'center' ? 'text-center mx-auto max-w-3xl' : 'max-w-2xl',
+        align === 'center' ? 'text-center mx-auto max-w-[860px]' : 'max-w-2xl',
         className
       )}
     >
@@ -85,12 +85,20 @@ export function SectionHeading({
       )}
       <h2
         className="font-display font-bold tracking-[-0.03em] leading-[1.08] text-[var(--vg-ink)]"
-        style={{ fontSize: VG_TYPOGRAPHY.scale.h2.fontSize }}
+        style={{
+          fontSize: VG_TYPOGRAPHY.scale.h2.fontSize,
+          textWrap: 'balance',
+        }}
       >
         {title}
       </h2>
       {subtitle && (
-        <p className="text-[16px] sm:text-[18px] leading-[1.65] text-[var(--vg-ink-2)]">
+        <p
+          className={cn(
+            'text-[16px] sm:text-[18px] leading-[1.65] text-[var(--vg-ink-2)]',
+            align === 'center' && 'max-w-2xl mx-auto'
+          )}
+        >
           {subtitle}
         </p>
       )}
@@ -159,7 +167,7 @@ export function SecondaryButton({
 }: ActionLinkProps) {
   const baseClass = cn(
     size === 'sm' ? VG_COMPONENTS.buttons.secondarySm : VG_COMPONENTS.buttons.secondary,
-    'hover:border-[var(--vg-brand)]/40',
+    'hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45',
     className
   )
 

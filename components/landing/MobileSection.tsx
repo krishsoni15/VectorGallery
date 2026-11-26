@@ -96,11 +96,12 @@ export function MobileSection({
                 fontSize: VG_TYPOGRAPHY.scale.h2.fontSize,
                 lineHeight: VG_TYPOGRAPHY.scale.h2.lineHeight,
                 letterSpacing: VG_TYPOGRAPHY.scale.h2.letterSpacing,
+                textWrap: 'balance',
               }}
             >
               Your world,{' '}
               <em className={VG_TYPOGRAPHY.editorialWordClass}>wherever</em>{' '}
-              you go.
+              you{'\u00A0'}go.
             </h2>
 
             <p
@@ -211,7 +212,7 @@ export function MobileSection({
             <div
               role="tablist"
               aria-label="Flutter Android screen preview"
-              className="relative z-10 inline-flex items-center gap-1.5 p-1 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)]/95 backdrop-blur-md shadow-sm mb-5"
+              className="relative z-10 inline-flex items-center gap-1.5 p-1 rounded-full border border-[var(--vg-border)] bg-[#FFFFFF]/95 dark:bg-[#101914]/95 backdrop-blur-md shadow-sm mb-5"
             >
               {DEVICE_TABS.map((tab) => {
                 const active = activeTab === tab.id
@@ -236,9 +237,9 @@ export function MobileSection({
             </div>
 
             {/* Animated Phone -> Cloud Transfer Bridge */}
-            <div className="relative z-10 w-full max-w-[356px] mb-4 px-4 py-2.5 rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)]/90 backdrop-blur-md shadow-sm flex items-center justify-between gap-3">
+            <div className="relative z-10 w-full max-w-[356px] mb-4 px-4 py-2.5 rounded-2xl border border-[var(--vg-border)] bg-[#FFFFFF]/92 dark:bg-[#101914]/92 backdrop-blur-md shadow-sm flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 shrink-0">
-                <span className="w-7 h-7 rounded-lg bg-[#101914] border border-[#53D9A3]/30 flex items-center justify-center text-[#53D9A3]">
+                <span className="w-7 h-7 rounded-lg bg-[var(--vg-surface-soft)] border border-[var(--vg-border)] flex items-center justify-center text-[var(--vg-brand)]">
                   <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
                 </span>
                 <span className="text-[11px] font-mono text-[var(--vg-ink)]">DCIM</span>
@@ -280,7 +281,7 @@ export function MobileSection({
 
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-[11px] font-mono text-[var(--vg-brand)]">Vault</span>
-                <span className="w-7 h-7 rounded-lg bg-[var(--vg-surface-soft)] border border-[var(--vg-brand)]/25 flex items-center justify-center text-[var(--vg-brand)]">
+                <span className="w-7 h-7 rounded-lg bg-[var(--vg-surface-soft)] border border-[#087F5B]/25 dark:border-[#53D9A3]/25 flex items-center justify-center text-[var(--vg-brand)]">
                   <Cloud className="w-3.5 h-3.5" aria-hidden="true" />
                 </span>
               </div>

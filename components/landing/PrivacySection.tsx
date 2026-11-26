@@ -131,7 +131,7 @@ export function PrivacySection({
                 <>
                   Your memories{' '}
                   <em className={VG_TYPOGRAPHY.editorialWordClass}>belong</em>{' '}
-                  to you.
+                  to{'\u00A0'}you.
                 </>
               }
               subtitle="Open source under Apache-2.0. Self-host locally on your own machine or bring your own storage bucket and AI keys — never locked into our cloud."

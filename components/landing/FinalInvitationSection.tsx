@@ -48,7 +48,7 @@ export function FinalInvitationSection() {
       {/* Peripheral Framed Memory Accents on Wide Viewports */}
       <div
         aria-hidden="true"
-        className="pointer-events-none hidden lg:block absolute left-8 xl:left-16 top-1/2 -translate-y-1/2 w-44 -rotate-6 rounded-2xl overflow-hidden border border-[#B8E7D4]/20 shadow-2xl opacity-75"
+        className="pointer-events-none hidden xl:block absolute left-8 2xl:left-16 top-1/2 -translate-y-1/2 w-44 -rotate-6 rounded-2xl overflow-hidden border border-[#B8E7D4]/20 shadow-2xl opacity-75"
       >
         <img
           src="/landing/photos/valley-reflection.webp"
@@ -62,7 +62,7 @@ export function FinalInvitationSection() {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none hidden lg:block absolute right-8 xl:right-16 top-1/2 -translate-y-1/2 w-44 rotate-6 rounded-2xl overflow-hidden border border-[#B8E7D4]/20 shadow-2xl opacity-75"
+        className="pointer-events-none hidden xl:block absolute right-8 2xl:right-16 top-1/2 -translate-y-1/2 w-44 rotate-6 rounded-2xl overflow-hidden border border-[#B8E7D4]/20 shadow-2xl opacity-75"
       >
         <img
           src="/landing/photos/coffee-ritual.webp"
@@ -96,6 +96,7 @@ export function FinalInvitationSection() {
               fontSize: VG_TYPOGRAPHY.scale.h2.fontSize,
               lineHeight: VG_TYPOGRAPHY.scale.h2.lineHeight,
               letterSpacing: VG_TYPOGRAPHY.scale.h2.letterSpacing,
+              textWrap: 'balance',
             }}
           >
             Keep what makes{' '}

@@ -76,7 +76,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     (file.category === 'photos' ||
       file.category === 'screenshots' ||
       file.mime_type?.startsWith('image/') ||
-      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(file.original_name || ''))
+      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(file.original_name || file.name || ''))
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -270,6 +270,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
             {stats.recent_files.map((file: any) => {
+              const displayName = file.original_name || file.name || 'Vault memory'
               const thumbKey = String(file.thumbnail_url || file.id)
               const canRenderImg = isRenderableImage(file) && !brokenThumbs[thumbKey]
 
@@ -277,33 +278,44 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div
                   key={file.id}
                   onClick={() => onSelectFile(file)}
-                  className="group relative aspect-[4/5] rounded-xl overflow-hidden bg-zinc-900/70 cursor-pointer"
+                  className="group relative aspect-[4/5] rounded-xl overflow-hidden bg-zinc-900/70 border border-white/[0.08] cursor-pointer"
                 >
                   {canRenderImg ? (
-                    <img
-                      src={file.thumbnail_url}
-                      alt={file.original_name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                      loading="lazy"
-                      onError={() =>
-                        setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
-                      }
-                    />
+                    <>
+                      <img
+                        src={file.thumbnail_url}
+                        alt={displayName}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        loading="lazy"
+                        onError={() =>
+                          setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
+                        }
+                      />
+                      {/* Clean Photo Scrim Overlay */}
+                      <div className="photo-overlay absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent">
+                        <p className="text-[11px] font-medium text-[#FFFFFF] truncate">
+                          {displayName}
+                        </p>
+                        <p className="text-[9px] text-[#D4D4D8]/80 font-mono">
+                          {new Date(file.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </>
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-3 bg-gradient-to-br from-zinc-800/80 to-zinc-900">
-                      <FileText className="w-8 h-8 text-zinc-400 group-hover:text-emerald-400 transition-colors" />
+                    <div className="vm-doc-fallback w-full h-full flex flex-col justify-between p-3 bg-gradient-to-br from-[#14211B] to-[#0B1410]">
+                      <div className="flex-1 flex items-center justify-center">
+                        <FileText className="w-8 h-8 text-emerald-400/85 group-hover:text-emerald-400 transition-colors" />
+                      </div>
+                      <div className="pt-2 border-t border-white/[0.06]">
+                        <p className="text-[11px] font-medium text-zinc-100 truncate">
+                          {displayName}
+                        </p>
+                        <p className="text-[9px] text-zinc-400 font-mono">
+                          {new Date(file.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
                   )}
-
-                  {/* Clean Photo Scrim Overlay */}
-                  <div className="photo-overlay absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent">
-                    <p className="text-[11px] font-medium text-[#FFFFFF] truncate">
-                      {file.original_name}
-                    </p>
-                    <p className="text-[9px] text-[#D4D4D8]/80 font-mono">
-                      {new Date(file.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
                 </div>
               )
             })}

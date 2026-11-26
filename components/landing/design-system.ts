@@ -266,7 +266,7 @@ export const VG_COMPONENTS = {
     secondarySm:
       'inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl text-[13px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
     ghost:
-      'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[var(--vg-surface-soft)]/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#E6EDE4]/80 dark:hover:bg-[#1C3329]/75 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
     forestPrimary:
       'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[#53D9A3] hover:bg-[#6EE4B5] text-[#061811] shadow-[0_14px_32px_-10px_rgba(83,217,163,0.35)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8E7D4]',
     forestSecondary:
@@ -274,7 +274,7 @@ export const VG_COMPONENTS = {
     tabActive:
       'vg-cta bg-[#087F5B] text-[#FFFFFF] border-[#087F5B] dark:bg-[#53D9A3] dark:text-[#061811] dark:border-[#53D9A3] shadow-sm',
     tabIdle:
-      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[var(--vg-brand)]/40',
+      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45',
   },
   cards: {
     surface:
@@ -284,7 +284,7 @@ export const VG_COMPONENTS = {
     elevated:
       'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] dark:bg-[#1C3329]/65 shadow-sm',
     glass:
-      'rounded-3xl border border-[var(--vg-border)] bg-[var(--vg-surface)]/92 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
+      'rounded-3xl border border-[var(--vg-border)] bg-[#FFFFFF]/92 dark:bg-[#101914]/92 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
     photoFrame:
       'rounded-2xl overflow-hidden border border-[var(--vg-border)] bg-[var(--vg-surface)] shadow-[var(--vg-shadow-card)]',
     forest:
@@ -304,9 +304,9 @@ export const VG_COMPONENTS = {
   },
   inputs: {
     search:
-      'w-full h-12 sm:h-13 pl-12 pr-4 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[15px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--vg-brand)]/30 focus:border-[var(--vg-brand)] transition-all',
+      'w-full h-12 sm:h-13 pl-12 pr-4 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[15px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/30 focus:border-[var(--vg-brand)] transition-all',
     field:
-      'w-full h-11 px-3.5 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--vg-brand)]/30 focus:border-[var(--vg-brand)] transition-all',
+      'w-full h-11 px-3.5 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/30 focus:border-[var(--vg-brand)] transition-all',
     codeBlock:
       'p-5 rounded-2xl bg-[#080E0C] text-[#DCEFE5] font-mono text-[12.5px] leading-relaxed overflow-x-auto border border-[#B8E7D4]/15',
   },

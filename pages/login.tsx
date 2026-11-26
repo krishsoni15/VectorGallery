@@ -122,19 +122,22 @@ export default function LoginPage() {
           </div>
 
           <div className="relative z-10 max-w-md space-y-4">
-            <p className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#EFF7F3]">
+            <p
+              className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#EFF7F3]"
+              style={{ textWrap: 'balance' }}
+            >
               A{' '}
               <em className={VG_TYPOGRAPHY.editorialWordOnForestClass}>
                 calm
               </em>{' '}
-              home for every frame you keep.
+              home for every frame you{'\u00A0'}keep.
             </p>
-            <p className="text-[15px] text-[#9CB6AA] leading-relaxed">
+            <p className="text-[15px] text-[#B8E7D4]/80 leading-relaxed">
               Access your photo timeline, optical OCR screenshot archive, and grounded document search across desktop and Android.
             </p>
           </div>
 
-          <div className="relative z-10 flex items-center gap-6 text-[12px] font-mono text-[#749184]">
+          <div className="relative z-10 flex items-center gap-6 text-[12px] font-mono text-[#9CB6AA]">
             <span>AES-256-GCM BYOK KEYS</span>
             <span>·</span>
             <span>SHA-256 WI-FI SYNC</span>
@@ -157,7 +160,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-2.5">
               <Link
                 href="/install"
-                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[var(--vg-brand)]/45 transition-colors"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45 transition-colors"
               >
                 <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#53D9A3]" />
                 <span>Get APK</span>
@@ -207,7 +210,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[var(--vg-brand)]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/25 transition-all"
                   />
                 </div>
               </div>
@@ -228,7 +231,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[var(--vg-brand)]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/25 transition-all"
                   />
                   <button
                     type="button"

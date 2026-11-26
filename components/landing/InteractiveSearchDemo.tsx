@@ -341,7 +341,12 @@ export function InteractiveSearchDemo() {
   }
 
   return (
-    <Section id="search-demo" surface="default" ariaLabel="Interactive search demonstration">
+    <Section
+      id="search-demo"
+      surface="default"
+      ariaLabel="Interactive search demonstration"
+      className="pt-16 sm:pt-20 lg:pt-24 border-t border-[var(--vg-border)]"
+    >
       <Container>
         <MotionReveal>
           <SectionHeading
@@ -350,8 +355,8 @@ export function InteractiveSearchDemo() {
             title={
               <>
                 Remember the{' '}
-                <em className={VG_TYPOGRAPHY.editorialWordClass}>moment</em>. Find
-                the file.
+                <em className={VG_TYPOGRAPHY.editorialWordClass}>moment</em>.
+                Find the{'\u00A0'}file.
               </>
             }
             subtitle="Ask across your archive in plain language — preview real visual recall, optical screenshot OCR, and cited document passages on deterministic sample data."
@@ -521,7 +526,7 @@ export function InteractiveSearchDemo() {
                       key={item.id}
                       type="button"
                       onClick={() => setSelectedFile(item)}
-                      className="text-left rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface-2)] hover:border-[var(--vg-brand)]/60 hover:bg-[var(--vg-surface)] p-4 flex gap-4 items-start transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+                      className="text-left rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface-2)] hover:border-[#087F5B]/55 dark:hover:border-[#53D9A3]/55 hover:bg-[var(--vg-surface)] hover:shadow-[var(--vg-shadow-card)] hover:-translate-y-0.5 p-4 flex gap-4 items-start transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
                     >
                       <img
                         src={item.thumb}

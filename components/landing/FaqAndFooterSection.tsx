@@ -43,18 +43,18 @@ export function FaqAndFooterSection({ apkSizeLabel }: { apkSizeLabel?: string })
       >
         <Container>
           <MotionReveal>
-            <div className="text-center mx-auto max-w-2xl space-y-3.5">
+            <div className="text-center mx-auto max-w-3xl space-y-3.5">
               <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--vg-brand)]">
                 Frequently Asked Questions
               </p>
               <h2
                 id="faq-heading"
                 className="font-display font-bold tracking-[-0.03em] leading-[1.08] text-[var(--vg-ink)]"
-                style={{ fontSize: VG_TYPOGRAPHY.scale.h2.fontSize }}
+                style={{ fontSize: VG_TYPOGRAPHY.scale.h2.fontSize, textWrap: 'balance' }}
               >
-                Clear <em className={VG_TYPOGRAPHY.editorialWordClass}>answers</em>, before you start.
+                Clear <em className={VG_TYPOGRAPHY.editorialWordClass}>answers</em>, before you{'\u00A0'}start.
               </h2>
-              <p className="text-[15.5px] sm:text-[17px] leading-[1.65] text-[var(--vg-ink-2)]">
+              <p className="text-[15.5px] sm:text-[17px] leading-[1.65] text-[var(--vg-ink-2)] max-w-2xl mx-auto">
                 Six essentials verified directly against the VectorGallery codebase and documentation.
               </p>
             </div>
@@ -70,7 +70,7 @@ export function FaqAndFooterSection({ apkSizeLabel }: { apkSizeLabel?: string })
                   className={cn(
                     'rounded-2xl border transition-colors overflow-hidden bg-[var(--vg-surface)]',
                     isOpen
-                      ? 'border-[var(--vg-brand)]/35 shadow-[var(--vg-shadow-card)]'
+                      ? 'border-[#087F5B]/40 dark:border-[#53D9A3]/40 shadow-[var(--vg-shadow-card)]'
                       : 'border-[var(--vg-border)] shadow-sm'
                   )}
                 >
@@ -94,7 +94,7 @@ export function FaqAndFooterSection({ apkSizeLabel }: { apkSizeLabel?: string })
                   {isOpen && (
                     <div
                       id={panelId}
-                      className="px-5 sm:px-6 pb-5 pt-0 text-[14px] leading-relaxed text-[var(--vg-ink-2)] border-t border-[var(--vg-border)]/60"
+                      className="px-5 sm:px-6 pb-5 pt-0 text-[14px] leading-relaxed text-[var(--vg-ink-2)] border-t border-[var(--vg-border)]"
                     >
                       <p className="pt-3">{item.a}</p>
                     </div>
