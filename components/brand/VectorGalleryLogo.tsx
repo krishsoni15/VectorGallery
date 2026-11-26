@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useId } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface LogoProps {
-  variant?: 'horizontal' | 'mark' | 'monochrome' | 'animated'
+  variant?: 'horizontal' | 'mark' | 'monochrome' | 'animated' | 'on-dark'
   size?: 'sm' | 'md' | 'lg'
   className?: string
   showWordmark?: boolean
@@ -15,9 +15,18 @@ const SIZE_MAP = {
   lg: { box: 42, text: 'text-[21px]', gap: 'gap-3' },
 }
 
+const LEFT_FRAME_PATH =
+  'M15.97 17.37 L22.6 14.82 Q26.52 13.32 28.03 17.24 L36.84 40.21 Q38.35 44.13 34.43 45.63 L27.8 48.18 Q23.88 49.68 22.37 45.76 L13.56 22.79 Q12.05 18.87 15.97 17.37 Z'
+
+const RIGHT_FRAME_PATH =
+  'M41.4 14.82 L48.03 17.37 Q51.95 18.87 50.44 22.79 L41.63 45.76 Q40.12 49.68 36.2 48.18 L29.57 45.63 Q25.65 44.13 27.16 40.21 L35.97 17.24 Q37.48 13.32 41.4 14.82 Z'
+
+const APEX_HINGE_PATH = 'M32 34.8 L35.4 40.2 L32 45.6 L28.6 40.2 Z'
+
 /**
- * Custom Soft-Blue Vector Fold / Memory Stack SVG Logo.
- * Represents overlapping photo/document planes converging cleanly into a geometric V.
+ * VectorGallery "Connected Frames" Logo Mark.
+ * Two overlapping translucent photo frames converging into a clean geometric V.
+ * Light mode: emerald on crisp white. Dark mode & on-dark: jade/mint on deep forest.
  */
 export function VectorGalleryLogo({
   variant = 'horizontal',
@@ -26,9 +35,13 @@ export function VectorGalleryLogo({
   showWordmark = true,
 }: LogoProps) {
   const prefersReduced = useReducedMotion()
+  const rawId = useId().replace(/:/g, '')
   const dims = SIZE_MAP[size]
   const isMono = variant === 'monochrome'
+  const isOnDark = variant === 'on-dark'
   const isAnimated = variant === 'animated' && !prefersReduced
+
+  const darkGradId = `vg-dark-tile-${rawId}`
 
   return (
     <span className={cn('inline-flex items-center select-none', dims.gap, className)}>
@@ -41,60 +54,136 @@ export function VectorGalleryLogo({
         className="shrink-0"
       >
         <defs>
-          <linearGradient id="vg-logo-tile" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#397BEE" />
-            <stop offset="100%" stopColor="#1D4ED8" />
+          <linearGradient id={darkGradId} x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#101914" />
+            <stop offset="100%" stopColor="#1C3329" />
           </linearGradient>
         </defs>
 
-        <rect
-          width="64"
-          height="64"
-          rx="16"
-          fill={isMono ? 'currentColor' : 'url(#vg-logo-tile)'}
-          fillOpacity={isMono ? 0.12 : 1}
-        />
-        {!isMono && (
+        {/* Rounded Sanctuary Tile */}
+        {isMono ? (
           <rect
-            x="0.75"
-            y="0.75"
-            width="62.5"
-            height="62.5"
-            rx="15.25"
-            stroke="#93C5FD"
-            strokeOpacity="0.35"
+            x="1"
+            y="1"
+            width="62"
+            height="62"
+            rx="15"
+            fill="currentColor"
+            fillOpacity="0.12"
+            stroke="currentColor"
+            strokeOpacity="0.24"
             strokeWidth="1.5"
           />
+        ) : isOnDark ? (
+          <rect
+            x="1"
+            y="1"
+            width="62"
+            height="62"
+            rx="15"
+            fill={`url(#${darkGradId})`}
+            stroke="#53D9A3"
+            strokeOpacity="0.28"
+            strokeWidth="1.5"
+          />
+        ) : (
+          <>
+            <rect
+              x="1"
+              y="1"
+              width="62"
+              height="62"
+              rx="15"
+              className="fill-[#FFFFFF] dark:fill-[#101914] stroke-[#DCE5DD] dark:stroke-[#53D9A3]/30"
+              strokeWidth="1.5"
+            />
+            <rect
+              x="3.5"
+              y="3.5"
+              width="57"
+              height="57"
+              rx="12.5"
+              className="fill-[#F7F8F3]/65 dark:fill-[#1C3329]/55"
+            />
+          </>
         )}
 
+        {/* Connected Translucent Photo Frames */}
         {isAnimated ? (
           <>
             <motion.path
-              d="M15.5 19.5C14.7 17.8 15.9 16 17.7 16H24.2C25.3 16 26.3 16.7 26.7 17.7L34.4 36.2L30.8 45.2C29.9 47.3 27.1 47.3 26.2 45.2L15.5 19.5Z"
-              fill={isMono ? 'currentColor' : '#BFDBFE'}
-              fillOpacity={isMono ? 0.55 : 1}
-              initial={{ opacity: 0, x: -5, y: -4 }}
+              d={LEFT_FRAME_PATH}
+              className={cn(
+                isMono
+                  ? 'fill-current opacity-55'
+                  : isOnDark
+                    ? 'fill-[#53D9A3]/65'
+                    : 'fill-[#087F5B]/65 dark:fill-[#53D9A3]/60'
+              )}
+              initial={{ opacity: 0, x: -4, y: -3 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             />
             <motion.path
-              d="M48.5 19.5C49.3 17.8 48.1 16 46.3 16H39.8C38.7 16 37.7 16.7 37.3 17.7L28.5 39.2L30.9 45.9C31.7 48.2 34.7 48.2 35.6 46L48.5 19.5Z"
-              fill={isMono ? 'currentColor' : '#FFFFFF'}
-              initial={{ opacity: 0, x: 5, y: -4 }}
+              d={RIGHT_FRAME_PATH}
+              className={cn(
+                isMono
+                  ? 'fill-current opacity-95'
+                  : isOnDark
+                    ? 'fill-[#B8E7D4]/92 stroke-[#53D9A3]/45'
+                    : 'fill-[#087F5B]/92 stroke-[#B8E7D4]/55 dark:fill-[#B8E7D4]/90 dark:stroke-[#53D9A3]/45'
+              )}
+              strokeWidth="1.2"
+              initial={{ opacity: 0, x: 4, y: -3 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            />
+            <motion.path
+              d={APEX_HINGE_PATH}
+              className={cn(
+                isMono
+                  ? 'fill-current opacity-40'
+                  : isOnDark
+                    ? 'fill-[#EFF7F3]/85'
+                    : 'fill-[#B8E7D4]/90 dark:fill-[#EFF7F3]/85'
+              )}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
             />
           </>
         ) : (
           <>
             <path
-              d="M15.5 19.5C14.7 17.8 15.9 16 17.7 16H24.2C25.3 16 26.3 16.7 26.7 17.7L34.4 36.2L30.8 45.2C29.9 47.3 27.1 47.3 26.2 45.2L15.5 19.5Z"
-              fill={isMono ? 'currentColor' : '#BFDBFE'}
-              fillOpacity={isMono ? 0.55 : 1}
+              d={LEFT_FRAME_PATH}
+              className={cn(
+                isMono
+                  ? 'fill-current opacity-55'
+                  : isOnDark
+                    ? 'fill-[#53D9A3]/65'
+                    : 'fill-[#087F5B]/65 dark:fill-[#53D9A3]/60'
+              )}
             />
             <path
-              d="M48.5 19.5C49.3 17.8 48.1 16 46.3 16H39.8C38.7 16 37.7 16.7 37.3 17.7L28.5 39.2L30.9 45.9C31.7 48.2 34.7 48.2 35.6 46L48.5 19.5Z"
-              fill={isMono ? 'currentColor' : '#FFFFFF'}
+              d={RIGHT_FRAME_PATH}
+              className={cn(
+                isMono
+                  ? 'fill-current opacity-95'
+                  : isOnDark
+                    ? 'fill-[#B8E7D4]/92 stroke-[#53D9A3]/45'
+                    : 'fill-[#087F5B]/92 stroke-[#B8E7D4]/55 dark:fill-[#B8E7D4]/90 dark:stroke-[#53D9A3]/45'
+              )}
+              strokeWidth="1.2"
+            />
+            <path
+              d={APEX_HINGE_PATH}
+              className={cn(
+                isMono
+                  ? 'fill-current opacity-40'
+                  : isOnDark
+                    ? 'fill-[#EFF7F3]/85'
+                    : 'fill-[#B8E7D4]/90 dark:fill-[#EFF7F3]/85'
+              )}
             />
           </>
         )}
@@ -105,7 +194,11 @@ export function VectorGalleryLogo({
           className={cn(
             'font-display font-bold tracking-[-0.03em]',
             dims.text,
-            isMono ? 'text-current' : 'text-[#14233B] dark:text-[#F1F5FF]'
+            isMono
+              ? 'text-current'
+              : isOnDark
+                ? 'text-[#EFF7F3]'
+                : 'text-[#0F241B] dark:text-[#EFF7F3]'
           )}
         >
           VectorGallery
@@ -114,4 +207,3 @@ export function VectorGalleryLogo({
     </span>
   )
 }
-

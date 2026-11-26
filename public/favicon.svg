@@ -1,19 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <defs>
-    <linearGradient id="vg-tile-root" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#397BEE" />
-      <stop offset="100%" stop-color="#1D4ED8" />
+    <linearGradient id="vg-fav-root" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#087F5B" />
+      <stop offset="100%" stop-color="#05543C" />
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#vg-tile-root)" />
-  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="15.25" stroke="#93C5FD" stroke-opacity="0.35" stroke-width="1.5" />
+  <rect width="64" height="64" rx="16" fill="url(#vg-fav-root)" />
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="15.25" stroke="#B8E7D4" stroke-opacity="0.32" stroke-width="1.5" />
   <path
-    d="M15.5 19.5C14.7 17.8 15.9 16 17.7 16H24.2C25.3 16 26.3 16.7 26.7 17.7L34.4 36.2L30.8 45.2C29.9 47.3 27.1 47.3 26.2 45.2L15.5 19.5Z"
-    fill="#BFDBFE"
+    d="M15.97 17.37 L22.6 14.82 Q26.52 13.32 28.03 17.24 L36.84 40.21 Q38.35 44.13 34.43 45.63 L27.8 48.18 Q23.88 49.68 22.37 45.76 L13.56 22.79 Q12.05 18.87 15.97 17.37 Z"
+    fill="#B8E7D4"
+    fill-opacity="0.78"
   />
   <path
-    d="M48.5 19.5C49.3 17.8 48.1 16 46.3 16H39.8C38.7 16 37.7 16.7 37.3 17.7L28.5 39.2L30.9 45.9C31.7 48.2 34.7 48.2 35.6 46L48.5 19.5Z"
+    d="M41.4 14.82 L48.03 17.37 Q51.95 18.87 50.44 22.79 L41.63 45.76 Q40.12 49.68 36.2 48.18 L29.57 45.63 Q25.65 44.13 27.16 40.21 L35.97 17.24 Q37.48 13.32 41.4 14.82 Z"
     fill="#FFFFFF"
+    fill-opacity="0.96"
+  />
+  <path
+    d="M32 34.8 L35.4 40.2 L32 45.6 L28.6 40.2 Z"
+    fill="#53D9A3"
+    fill-opacity="0.85"
   />
 </svg>
-
