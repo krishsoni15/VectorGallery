@@ -1,10 +1,16 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react'
+import { VG_AURA_SHADER_SPEC } from '@/components/landing/design-system'
 
 const vertex = `
 attribute vec2 position;
 void main(){gl_Position=vec4(position,0.0,1.0);}
-`;
+`
 
+/**
+ * Botanical Sanctuary CPPN Shader.
+ * Remaps neural field luminance directly onto emerald/sage/mint stops
+ * (never purple/violet at hueShift = 0).
+ */
 const fragment = `
 #ifdef GL_ES
 precision lowp float;
@@ -17,8 +23,6 @@ uniform float uScan;
 uniform float uScanFreq;
 uniform float uWarp;
 uniform float uLightMode;
-#define iTime uTime
-#define iResolution uResolution
 
 vec4 buf[8];
 float rand(vec2 c){return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453);}
@@ -65,135 +69,324 @@ void mainImage(out vec4 fragColor,in vec2 fragCoord){
 }
 
 void main(){
-    vec4 col;mainImage(col,gl_FragCoord.xy);
-    col.rgb=hueShiftRGB(col.rgb,uHueShift);
-    float scanline_val=sin(gl_FragCoord.y*uScanFreq)*0.5+0.5;
-    col.rgb*=1.-(scanline_val*scanline_val)*uScan;
-    col.rgb+=(rand(gl_FragCoord.xy+uTime)-0.5)*uNoise;
-    vec3 result=clamp(col.rgb,0.0,1.0);
+    vec4 raw;
+    mainImage(raw,gl_FragCoord.xy);
+
+    float lum=dot(raw.rgb,vec3(0.299,0.587,0.114));
+    float peak=max(raw.r,max(raw.g,raw.b));
+    float flow=smoothstep(0.06,0.88,max(lum,peak*0.72));
+    float ribbon=smoothstep(0.18,0.78,raw.g*0.62+raw.b*0.38);
+    float crest=smoothstep(0.42,0.92,lum);
+
+    vec3 result;
     if(uLightMode>0.5){
-      float energy=max(result.r,max(result.g,result.b));
-      vec3 hue=result/max(energy,0.001);
-      float coverage=smoothstep(0.08,0.82,energy);
-      vec3 ink=mix(hue*0.32,hue*0.78,smoothstep(0.0,1.0,energy));
-      result=mix(vec3(1.0),ink,coverage*0.82);
+      /* Light mode: warm botanical ivory (#F7F8F3) -> sage (#E6EDE4) -> mint (#B8E7D4) -> emerald (#087F5B) */
+      vec3 baseIvory=vec3(0.969,0.973,0.953);
+      vec3 midSage=vec3(0.902,0.929,0.894);
+      vec3 hiMint=vec3(0.722,0.906,0.831);
+      vec3 deepEmerald=vec3(0.031,0.498,0.357);
+
+      result=mix(baseIvory,midSage,smoothstep(0.05,0.65,flow)*0.85);
+      result=mix(result,hiMint,smoothstep(0.24,0.82,ribbon)*0.56);
+      result=mix(result,deepEmerald,crest*0.13);
+    }else{
+      /* Dark mode: deep forest (#080E0C) -> canopy (#101914) -> moss (#1C3329) -> jade (#53D9A3) */
+      vec3 baseNight=vec3(0.031,0.055,0.047);
+      vec3 midCanopy=vec3(0.063,0.098,0.078);
+      vec3 hiMoss=vec3(0.110,0.200,0.161);
+      vec3 glowJade=vec3(0.325,0.851,0.639);
+
+      result=mix(baseNight,midCanopy,smoothstep(0.0,0.45,flow));
+      result=mix(result,hiMoss,smoothstep(0.22,0.76,ribbon));
+      result=mix(result,glowJade,crest*0.36);
     }
-    gl_FragColor=vec4(result,1.0);
+
+    if(abs(uHueShift)>0.01){
+      result=hueShiftRGB(result,uHueShift);
+    }
+
+    float scanline_val=sin(gl_FragCoord.y*uScanFreq)*0.5+0.5;
+    result*=1.-(scanline_val*scanline_val)*uScan;
+    result+=(rand(gl_FragCoord.xy+uTime)-0.5)*uNoise;
+    gl_FragColor=vec4(clamp(result,0.0,1.0),1.0);
 }
-`;
+`
 
 type Props = {
-  hueShift?: number;
-  noiseIntensity?: number;
-  scanlineIntensity?: number;
-  speed?: number;
-  scanlineFrequency?: number;
-  warpAmount?: number;
-  resolutionScale?: number;
-  lightMode?: boolean;
-};
+  hueShift?: number
+  noiseIntensity?: number
+  scanlineIntensity?: number
+  speed?: number
+  scanlineFrequency?: number
+  warpAmount?: number
+  resolutionScale?: number
+  lightMode?: boolean
+  className?: string
+}
 
+/**
+ * Botanical green atmospheric WebGL aurora background with:
+ * - CSS radial gradient fallback for non-WebGL browsers & reduced-motion users
+ * - Viewport intersection + tab visibility pausing
+ * - Resolution scaling for smooth frame pacing
+ */
 export default function DarkVeil({
   hueShift = 0,
-  noiseIntensity = 0,
+  noiseIntensity = 0.012,
   scanlineIntensity = 0,
-  speed = 0.5,
+  speed = 0.38,
   scanlineFrequency = 0,
-  warpAmount = 0,
-  resolutionScale = 1,
-  lightMode = false
+  warpAmount = 0.16,
+  resolutionScale = 0.55,
+  lightMode = false,
+  className = '',
 }: Props) {
-  const ref = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [webglActive, setWebglActive] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
+
+  const propsRef = useRef({
+    hueShift,
+    noiseIntensity,
+    scanlineIntensity,
+    speed,
+    scanlineFrequency,
+    warpAmount,
+    lightMode,
+  })
 
   useEffect(() => {
-    let animFrame = 0;
-    let cleanupFn: (() => void) | undefined;
+    propsRef.current = {
+      hueShift,
+      noiseIntensity,
+      scanlineIntensity,
+      speed,
+      scanlineFrequency,
+      warpAmount,
+      lightMode,
+    }
+  }, [
+    hueShift,
+    noiseIntensity,
+    scanlineIntensity,
+    speed,
+    scanlineFrequency,
+    warpAmount,
+    lightMode,
+  ])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const syncReduced = () => setReducedMotion(mq.matches)
+    syncReduced()
+    mq.addEventListener?.('change', syncReduced)
+    return () => mq.removeEventListener?.('change', syncReduced)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (reducedMotion) {
+      setWebglActive(false)
+      return
+    }
+
+    const container = containerRef.current
+    const canvas = canvasRef.current
+    if (!container || !canvas) return
+
+    let disposed = false
+    let animFrame = 0
+    let isIntersecting = true
+    let elapsed = 0
+    let lastTick = performance.now()
+    let cleanupFns: Array<() => void> = []
 
     const init = async () => {
-      if (typeof window === 'undefined') return;
-      const canvas = ref.current;
-      if (!canvas) return;
-      const parent = canvas.parentElement;
-      if (!parent) return;
-
       try {
-        const { Renderer, Program, Mesh, Triangle, Vec2 } = await import('ogl');
+        const { Renderer, Program, Mesh, Triangle, Vec2 } = await import('ogl')
+        if (disposed) return
 
         const renderer = new Renderer({
-          dpr: Math.min(window.devicePixelRatio, 2),
+          dpr: Math.min(window.devicePixelRatio || 1, 1.5),
           canvas,
           webgl: 1,
-        });
+          alpha: false,
+          antialias: false,
+          powerPreference: 'low-power',
+        })
 
-        const gl = renderer.gl;
-        if (!gl) return;
+        const gl = renderer.gl
+        if (!gl) {
+          setWebglActive(false)
+          return
+        }
 
-        const geometry = new Triangle(gl);
+        const geometry = new Triangle(gl)
+        const p = propsRef.current
         const program = new Program(gl, {
           vertex,
           fragment,
           uniforms: {
             uTime: { value: 0 },
             uResolution: { value: new Vec2() },
-            uHueShift: { value: hueShift },
-            uNoise: { value: noiseIntensity },
-            uScan: { value: scanlineIntensity },
-            uScanFreq: { value: scanlineFrequency },
-            uWarp: { value: warpAmount },
-            uLightMode: { value: lightMode ? 1 : 0 }
-          }
-        });
+            uHueShift: { value: p.hueShift },
+            uNoise: { value: p.noiseIntensity },
+            uScan: { value: p.scanlineIntensity },
+            uScanFreq: { value: p.scanlineFrequency },
+            uWarp: { value: p.warpAmount },
+            uLightMode: { value: p.lightMode ? 1 : 0 },
+          },
+        })
 
-        const mesh = new Mesh(gl, { geometry, program });
+        const mesh = new Mesh(gl, { geometry, program })
 
         const resize = () => {
-          if (!parent || !renderer) return;
-          const w = parent.clientWidth, h = parent.clientHeight;
-          if (w === 0 || h === 0) return;
-          renderer.setSize(w * resolutionScale, h * resolutionScale);
-          canvas.style.width = '100%';
-          canvas.style.height = '100%';
-          program.uniforms.uResolution.value.set(gl.drawingBufferWidth, gl.drawingBufferHeight);
-        };
+          if (disposed || !container) return
+          const w = container.clientWidth
+          const h = container.clientHeight
+          if (w <= 0 || h <= 0) return
+          renderer.setSize(
+            Math.max(1, Math.floor(w * resolutionScale)),
+            Math.max(1, Math.floor(h * resolutionScale))
+          )
+          canvas.style.width = '100%'
+          canvas.style.height = '100%'
+          program.uniforms.uResolution.value.set(
+            gl.drawingBufferWidth,
+            gl.drawingBufferHeight
+          )
+        }
 
-        window.addEventListener('resize', resize);
-        resize();
+        const renderFrame = (now: number) => {
+          const dt = Math.min((now - lastTick) / 1000, 0.1)
+          lastTick = now
+          const cur = propsRef.current
+          elapsed += dt * cur.speed
 
-        const start = performance.now();
+          program.uniforms.uTime.value = elapsed
+          program.uniforms.uHueShift.value = cur.hueShift
+          program.uniforms.uNoise.value = cur.noiseIntensity
+          program.uniforms.uScan.value = cur.scanlineIntensity
+          program.uniforms.uScanFreq.value = cur.scanlineFrequency
+          program.uniforms.uWarp.value = cur.warpAmount
+          program.uniforms.uLightMode.value = cur.lightMode ? 1 : 0
+          renderer.render({ scene: mesh })
+        }
 
-        const loop = () => {
-          if (!renderer) return;
-          program.uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
-          program.uniforms.uHueShift.value = hueShift;
-          program.uniforms.uNoise.value = noiseIntensity;
-          program.uniforms.uScan.value = scanlineIntensity;
-          program.uniforms.uScanFreq.value = scanlineFrequency;
-          program.uniforms.uWarp.value = warpAmount;
-          program.uniforms.uLightMode.value = lightMode ? 1 : 0;
-          renderer.render({ scene: mesh });
-          animFrame = requestAnimationFrame(loop);
-        };
+        const stopLoop = () => {
+          if (animFrame) {
+            cancelAnimationFrame(animFrame)
+            animFrame = 0
+          }
+        }
 
-        loop();
+        const startLoop = () => {
+          if (disposed || animFrame || !isIntersecting || document.hidden) return
+          lastTick = performance.now()
+          const tick = (now: number) => {
+            if (disposed || !isIntersecting || document.hidden) {
+              animFrame = 0
+              return
+            }
+            renderFrame(now)
+            animFrame = requestAnimationFrame(tick)
+          }
+          animFrame = requestAnimationFrame(tick)
+        }
 
-        cleanupFn = () => {
-          cancelAnimationFrame(animFrame);
-          window.removeEventListener('resize', resize);
-          try {
-            gl.getExtension('WEBGL_lose_context')?.loseContext();
-          } catch {}
-        };
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0]
+            isIntersecting = Boolean(entry?.isIntersecting)
+            if (isIntersecting && !document.hidden) {
+              startLoop()
+            } else {
+              stopLoop()
+            }
+          },
+          { threshold: 0.01 }
+        )
+        observer.observe(container)
+
+        const onVisibility = () => {
+          if (document.hidden) {
+            stopLoop()
+          } else if (isIntersecting) {
+            startLoop()
+          }
+        }
+        document.addEventListener('visibilitychange', onVisibility)
+
+        let resizeObserver: ResizeObserver | null = null
+        if (typeof ResizeObserver !== 'undefined') {
+          resizeObserver = new ResizeObserver(resize)
+          resizeObserver.observe(container)
+        }
+        window.addEventListener('resize', resize)
+
+        resize()
+        renderFrame(performance.now())
+        setWebglActive(true)
+        startLoop()
+
+        cleanupFns = [
+          stopLoop,
+          () => observer.disconnect(),
+          () => document.removeEventListener('visibilitychange', onVisibility),
+          () => resizeObserver?.disconnect(),
+          () => window.removeEventListener('resize', resize),
+          () => {
+            try {
+              gl.getExtension('WEBGL_lose_context')?.loseContext()
+            } catch {
+              // Ignore context cleanup errors
+            }
+          },
+        ]
       } catch (e) {
-        console.warn('DarkVeil WebGL initialization notice:', e);
+        setWebglActive(false)
+        console.warn('DarkVeil WebGL fallback active:', e)
       }
-    };
+    }
 
-    init();
+    init()
 
     return () => {
-      if (cleanupFn) cleanupFn();
-    };
-  }, [hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale, lightMode]);
+      disposed = true
+      cleanupFns.forEach((fn) => fn())
+    }
+  }, [reducedMotion, resolutionScale])
 
-  return <canvas ref={ref} className="w-full h-full block" />;
+  const fallbackGradient = lightMode
+    ? VG_AURA_SHADER_SPEC.cssFallbackLight
+    : VG_AURA_SHADER_SPEC.cssFallbackDark
+
+  return (
+    <div
+      ref={containerRef}
+      aria-hidden="true"
+      className={`relative w-full h-full overflow-hidden pointer-events-none ${className}`}
+    >
+      {/* Instant CSS radial botanical fallback (also serves non-WebGL & reduced-motion) */}
+      <div
+        className="absolute inset-0 transition-opacity duration-500"
+        style={{ backgroundImage: fallbackGradient }}
+      />
+
+      {!reducedMotion && (
+        <canvas
+          ref={canvasRef}
+          className={`absolute inset-0 w-full h-full block transition-opacity duration-700 ${
+            webglActive
+              ? lightMode
+                ? 'opacity-85'
+                : 'opacity-90'
+              : 'opacity-0'
+          }`}
+        />
+      )}
+    </div>
+  )
 }
