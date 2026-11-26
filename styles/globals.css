@@ -662,6 +662,189 @@ html.light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   SCOPED APP & ACCOUNT LIGHT MODE (.vm-app-shell)
+   Strictly scoped to /app and /account so .vg-shell stays untouched
+   ═══════════════════════════════════════════════════════════ */
+html.light .vm-app-shell,
+html.light .vm-app-shell main,
+html.light .vm-app-shell [class*="bg-[#090A0D]"],
+html.light .vm-app-shell [class*="bg-[#0A0C0F]"],
+html.light .vm-app-shell [class*="bg-[#0A0C10]"],
+html.light .vm-app-shell [class*="bg-[#0B0D12]"],
+html.light .vm-app-shell [class*="bg-slate-950"] {
+  background-color: var(--vm-bg) !important;
+  color: var(--vm-text) !important;
+}
+
+html.light .vm-app-shell aside,
+html.light .vm-app-shell header,
+html.light .vm-app-shell nav,
+html.light .vm-app-shell [class*="bg-[#0E1015]"],
+html.light .vm-app-shell [class*="bg-[#0C0E14]"],
+html.light .vm-app-shell [class*="bg-[#0F1117]"],
+html.light .vm-app-shell [class*="bg-[#12141A]"],
+html.light .vm-app-shell [class*="bg-[#12141C]"],
+html.light .vm-app-shell [class*="bg-[#13151D]"],
+html.light .vm-app-shell [class*="bg-[#13161F]"],
+html.light .vm-app-shell [class*="bg-[#14161C]"],
+html.light .vm-app-shell [class*="bg-slate-900"],
+html.light .vm-app-shell [class*="bg-zinc-900"],
+html.light .vm-app-shell [class*="bg-zinc-950"] {
+  background-color: var(--vm-surface) !important;
+  border-color: var(--vm-border) !important;
+  color: var(--vm-text) !important;
+}
+
+html.light .vm-app-shell [class*="bg-white/"],
+html.light .vm-app-shell [class*="bg-slate-800"],
+html.light .vm-app-shell [class*="bg-zinc-800"] {
+  background-color: var(--vm-surface-2) !important;
+  border-color: var(--vm-border) !important;
+}
+
+html.light .vm-app-shell [class*="hover:bg-white/"]:hover,
+html.light .vm-app-shell [class*="hover:bg-slate-800"]:hover,
+html.light .vm-app-shell [class*="hover:bg-slate-900"]:hover {
+  background-color: #E6EDE4 !important;
+}
+
+html.light .vm-app-shell [class*="from-emerald-950"] {
+  background: linear-gradient(90deg, #E6EDE4 0%, #EEF3EC 55%, #F7F8F3 100%) !important;
+  border-color: var(--vm-border) !important;
+}
+
+html.light .vm-app-shell [class*="border-white/"],
+html.light .vm-app-shell [class*="border-slate-800"],
+html.light .vm-app-shell [class*="border-slate-700"],
+html.light .vm-app-shell [class*="border-zinc-700"],
+html.light .vm-app-shell [class*="divide-white/"] > * + * {
+  border-color: var(--vm-border) !important;
+}
+
+html.light .vm-app-shell .text-white,
+html.light .vm-app-shell [class*="text-zinc-100"],
+html.light .vm-app-shell [class*="text-zinc-200"],
+html.light .vm-app-shell [class*="text-slate-100"],
+html.light .vm-app-shell [class*="text-slate-200"],
+html.light .vm-app-shell [class*="text-[#F4F5F7]"],
+html.light .vm-app-shell [class*="text-[#D4D4D8]"] {
+  color: var(--vm-text) !important;
+}
+
+html.light .vm-app-shell [class*="text-zinc-300"],
+html.light .vm-app-shell [class*="text-zinc-400"],
+html.light .vm-app-shell [class*="text-slate-300"],
+html.light .vm-app-shell [class*="text-slate-400"] {
+  color: var(--vm-text-muted) !important;
+}
+
+html.light .vm-app-shell [class*="text-zinc-500"],
+html.light .vm-app-shell [class*="text-zinc-600"],
+html.light .vm-app-shell [class*="text-slate-500"] {
+  color: var(--vm-text-dim) !important;
+}
+
+html.light .vm-app-shell [class*="text-emerald-300"],
+html.light .vm-app-shell [class*="text-emerald-400"],
+html.light .vm-app-shell [class*="text-teal-300"],
+html.light .vm-app-shell [class*="text-teal-400"] {
+  color: var(--vm-accent) !important;
+}
+
+html.light .vm-app-shell [class*="bg-emerald-500/"] {
+  background-color: rgba(8, 127, 91, 0.12) !important;
+}
+
+html.light .vm-app-shell [class*="border-emerald-500/"] {
+  border-color: rgba(8, 127, 91, 0.28) !important;
+}
+
+html.light .vm-app-shell [class*="from-white"][class*="bg-clip-text"] {
+  background-image: linear-gradient(to right, #0F241B, #465B51, #087F5B) !important;
+  color: transparent !important;
+}
+
+html.light .vm-app-shell input,
+html.light .vm-app-shell textarea,
+html.light .vm-app-shell select {
+  background-color: var(--vm-surface-input) !important;
+  color: var(--vm-text) !important;
+  border-color: var(--vm-border) !important;
+}
+
+html.light .vm-app-shell input::placeholder,
+html.light .vm-app-shell textarea::placeholder {
+  color: var(--vm-text-dim) !important;
+}
+
+html.light .vm-app-shell kbd {
+  background-color: var(--vm-surface-2) !important;
+  border-color: var(--vm-border) !important;
+  color: var(--vm-text-muted) !important;
+}
+
+html.light .vm-app-shell header button[class*="rounded-full"]:not(.bg-emerald-600):not(.bg-emerald-500) {
+  background-color: var(--vm-surface-2) !important;
+  border-color: var(--vm-border) !important;
+  color: var(--vm-text-muted) !important;
+}
+
+/* Protected solid CTAs, segment dots, photo overlays & dark lightbox */
+html.light .vm-app-shell .bg-emerald-600,
+html.light .vm-app-shell .bg-emerald-500,
+html.light .vm-app-shell .bg-red-600,
+html.light .vm-app-shell [class*="from-emerald-500"] {
+  background-color: #087F5B !important;
+  color: #FFFFFF !important;
+}
+html.light .vm-app-shell .bg-red-600 {
+  background-color: #DC2626 !important;
+}
+html.light .vm-app-shell .bg-emerald-600 *,
+html.light .vm-app-shell .bg-emerald-500 *,
+html.light .vm-app-shell .bg-red-600 *,
+html.light .vm-app-shell [class*="from-emerald-500"] * {
+  color: #FFFFFF !important;
+}
+
+html.light .vm-app-shell .bg-rose-500 { background-color: #F43F5E !important; }
+html.light .vm-app-shell .bg-blue-500 { background-color: #3B82F6 !important; }
+html.light .vm-app-shell .bg-purple-500 { background-color: #8B5CF6 !important; }
+html.light .vm-app-shell .bg-pink-500 { background-color: #EC4899 !important; }
+html.light .vm-app-shell .bg-emerald-400 { background-color: #10B981 !important; }
+
+html.light .vm-app-shell .photo-overlay,
+html.light .vm-app-shell .photo-overlay *,
+html.light .vm-app-shell .photo-overlay-pill {
+  color: #FFFFFF !important;
+}
+
+html.light .vm-app-shell .fixed.inset-0[class*="bg-black/70"],
+html.light .vm-app-shell .fixed.inset-0[class*="bg-black/75"],
+html.light .vm-app-shell .fixed.inset-0[class*="bg-black/80"] {
+  background-color: rgba(15, 36, 27, 0.45) !important;
+}
+
+html.light .vm-app-shell .fixed.inset-0[class*="bg-black/90"],
+html.light .vm-app-shell .fixed.inset-0[class*="bg-black/95"] {
+  background-color: rgba(8, 14, 12, 0.92) !important;
+}
+html.light .vm-app-shell [class*="bg-black/90"] .text-white,
+html.light .vm-app-shell [class*="bg-black/95"] .text-white {
+  color: #EFF7F3 !important;
+}
+html.light .vm-app-shell [class*="bg-black/90"] aside,
+html.light .vm-app-shell [class*="bg-black/95"] aside {
+  background-color: var(--vm-surface) !important;
+  color: var(--vm-text) !important;
+  border-color: var(--vm-border) !important;
+}
+html.light .vm-app-shell [class*="bg-black/90"] aside .text-white,
+html.light .vm-app-shell [class*="bg-black/95"] aside .text-white {
+  color: var(--vm-text) !important;
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
