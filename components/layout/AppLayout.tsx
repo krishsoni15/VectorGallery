@@ -117,7 +117,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const userDisplayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Personal Vault'
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#090A0D] text-[#F4F5F7] font-sans antialiased">
+    <div className="vm-app-shell flex h-screen w-screen overflow-hidden bg-[#090A0D] text-[#F4F5F7] font-sans antialiased">
       {/* ─── Mobile Slide-over Navigation Drawer ─── */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">

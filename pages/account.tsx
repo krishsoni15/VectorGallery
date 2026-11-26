@@ -183,7 +183,7 @@ export default function AccountPage() {
 
   if (authLoading || (!user && fetching)) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="vm-app-shell min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin" />
           <p className="text-sm font-medium text-slate-400">Loading account portal...</p>
@@ -193,7 +193,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div className="vm-app-shell min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950">
       <Head>
         <title>Account & API Keys — VectorGallery</title>
       </Head>

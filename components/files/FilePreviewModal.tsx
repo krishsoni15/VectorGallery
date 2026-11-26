@@ -41,6 +41,14 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 }) => {
   const [showInfo, setShowInfo] = useState(true)
   const [copiedText, setCopiedText] = useState(false)
+  const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({})
+
+  const isRenderableImage = (item: any) =>
+    Boolean(item?.thumbnail_url) &&
+    (item.category === 'photos' ||
+      item.category === 'screenshots' ||
+      item.mime_type?.startsWith('image/') ||
+      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(item.original_name || ''))
 
   // Current file index in filesList
   const currentIndex = file && filesList.length > 0 ? filesList.findIndex((f) => f.id === file.id) : -1
@@ -90,7 +98,9 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
     return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
   }
 
-  const isImage = file.category === 'photos' || file.category === 'screenshots' || file.mime_type?.startsWith('image/')
+  const isImage = isRenderableImage(file)
+  const mainThumbKey = String(file.thumbnail_url || file.id)
+  const canRenderMainImage = isImage && !brokenThumbs[mainThumbKey]
   const formattedDate = new Date(file.created_at).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -213,16 +223,19 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 
         {/* Center Preview Display */}
         <div className={`relative flex items-center justify-center w-full h-full transition-all duration-300 ${showInfo ? 'pr-0 lg:pr-96' : ''}`}>
-          {isImage && file.thumbnail_url ? (
+          {canRenderMainImage ? (
             <img
               src={file.thumbnail_url}
               alt={file.original_name}
               className="max-h-[82vh] max-w-[90vw] object-contain rounded-lg shadow-2xl drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]"
+              onError={() =>
+                setBrokenThumbs((prev) => ({ ...prev, [mainThumbKey]: true }))
+              }
             />
           ) : (
             <div className="flex flex-col items-center justify-center p-12 rounded-3xl bg-[#0F1117]/80 border border-white/[0.08] space-y-4 text-center max-w-md mx-4">
               <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-400">
-                <FileText className="w-12 h-12" />
+                {isImage ? <ImageIcon className="w-12 h-12" /> : <FileText className="w-12 h-12" />}
               </div>
               <div>
                 <h4 className="text-base font-bold text-white">{file.original_name}</h4>
@@ -257,7 +270,8 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/70 backdrop-blur-xl border border-white/[0.1] max-w-[92vw] sm:max-w-xl overflow-x-auto scrollbar-none shadow-2xl">
               {filesList.map((f, i) => {
                 const isSelected = f.id === file.id
-                const hasThumb = f.thumbnail_url
+                const fThumbKey = String(f.thumbnail_url || f.id)
+                const hasThumb = isRenderableImage(f) && !brokenThumbs[fThumbKey]
                 return (
                   <button
                     key={f.id}
@@ -270,7 +284,14 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                     }`}
                   >
                     {hasThumb ? (
-                      <img src={f.thumbnail_url} alt={f.original_name} className="w-full h-full object-cover" />
+                      <img
+                        src={f.thumbnail_url}
+                        alt={f.original_name}
+                        className="w-full h-full object-cover"
+                        onError={() =>
+                          setBrokenThumbs((prev) => ({ ...prev, [fThumbKey]: true }))
+                        }
+                      />
                     ) : (
                       <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-400 font-mono">
                         {i + 1}

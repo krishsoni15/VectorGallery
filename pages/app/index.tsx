@@ -309,7 +309,7 @@ export default function AppPage() {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Personal Vault'
 
   return (
-    <>
+    <div className="vm-app-shell">
       <Head>
         <title>VectorGallery — Personal AI Cloud & Digital Memory</title>
         <meta name="description" content="Personal AI Cloud Storage & Intelligent Digital Memory Platform" />
@@ -490,6 +490,6 @@ export default function AppPage() {
         onTrash={handleTrashFile}
         onDownload={handleDownloadFile}
       />
-    </>
+    </div>
   )
 }

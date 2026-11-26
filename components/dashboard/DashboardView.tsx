@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import {
   HardDrive,
@@ -69,6 +69,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateTab,
   onSelectFile,
 }) => {
+  const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({})
+
+  const isRenderableImage = (file: any) =>
+    Boolean(file?.thumbnail_url) &&
+    (file.category === 'photos' ||
+      file.category === 'screenshots' ||
+      file.mime_type?.startsWith('image/') ||
+      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(file.original_name || ''))
+
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return 'Good morning'
@@ -261,10 +270,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
             {stats.recent_files.map((file: any) => {
-              const isMedia =
-                file.category === 'photos' ||
-                file.category === 'screenshots' ||
-                file.thumbnail_url
+              const thumbKey = String(file.thumbnail_url || file.id)
+              const canRenderImg = isRenderableImage(file) && !brokenThumbs[thumbKey]
 
               return (
                 <div
@@ -272,12 +279,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   onClick={() => onSelectFile(file)}
                   className="group relative aspect-[4/5] rounded-xl overflow-hidden bg-zinc-900/70 cursor-pointer"
                 >
-                  {isMedia && file.thumbnail_url ? (
+                  {canRenderImg ? (
                     <img
                       src={file.thumbnail_url}
                       alt={file.original_name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                       loading="lazy"
+                      onError={() =>
+                        setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
+                      }
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-3 bg-gradient-to-br from-zinc-800/80 to-zinc-900">

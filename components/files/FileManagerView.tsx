@@ -61,6 +61,14 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
   const [sortAsc, setSortAsc] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [photoAlbum, setPhotoAlbum] = useState<'all' | 'wishes' | 'screenshots' | 'favorites'>('all')
+  const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({})
+
+  const isRenderableImage = (file: any) =>
+    Boolean(file?.thumbnail_url) &&
+    (file.category === 'photos' ||
+      file.category === 'screenshots' ||
+      file.mime_type?.startsWith('image/') ||
+      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(file.original_name || ''))
 
   const isPhotosMode = activeCategory === 'photos'
 
@@ -495,18 +503,29 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                               : 'border-white/[0.08] hover:border-emerald-500/50'
                           }`}
                         >
-                          {file.thumbnail_url ? (
-                            <img
-                              src={file.thumbnail_url}
-                              alt={file.original_name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-zinc-900">
-                              <ImageIcon className="w-8 h-8 text-zinc-600" />
-                            </div>
-                          )}
+                          {(() => {
+                            const thumbKey = String(file.thumbnail_url || file.id)
+                            const canRenderImg = isRenderableImage(file) && !brokenThumbs[thumbKey]
+                            if (canRenderImg) {
+                              return (
+                                <img
+                                  src={file.thumbnail_url}
+                                  alt={file.original_name}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                  loading="lazy"
+                                  onError={() =>
+                                    setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
+                                  }
+                                />
+                              )
+                            }
+                            const FallbackIcon = getFileIcon(file)
+                            return (
+                              <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+                                <FallbackIcon className="w-8 h-8 text-zinc-600" />
+                              </div>
+                            )
+                          })()}
 
                           {/* Vignette Gradients */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/35 opacity-60 group-hover:opacity-90 transition-opacity" />
@@ -621,15 +640,22 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                 >
                   {/* Thumbnail Preview Area */}
                   <div className="relative h-32 rounded-xl bg-zinc-950/60 overflow-hidden flex items-center justify-center border border-white/[0.04]">
-                    {file.thumbnail_url && (file.category === 'photos' || file.category === 'screenshots') ? (
-                      <img
-                        src={file.thumbnail_url}
-                        alt={file.original_name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <Icon className="w-10 h-10 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
-                    )}
+                    {(() => {
+                      const thumbKey = String(file.thumbnail_url || file.id)
+                      const canRenderImg = isRenderableImage(file) && !brokenThumbs[thumbKey]
+                      return canRenderImg ? (
+                        <img
+                          src={file.thumbnail_url}
+                          alt={file.original_name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={() =>
+                            setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
+                          }
+                        />
+                      ) : (
+                        <Icon className="w-10 h-10 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                      )
+                    })()}
 
                     {/* Top action badges */}
                     <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

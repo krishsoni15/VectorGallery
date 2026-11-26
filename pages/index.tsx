@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
-import {
-  CommunityAndFormatsSection,
-  type GitHubRepoStats,
-} from '@/components/landing/CommunityAndFormatsSection'
-import { EmotionalStorySection } from '@/components/landing/EmotionalStorySection'
 import { FaqAndFooterSection } from '@/components/landing/FaqAndFooterSection'
-import { FeatureBentoSection } from '@/components/landing/FeatureBentoSection'
+import { FinalInvitationSection } from '@/components/landing/FinalInvitationSection'
 import { HeroSection } from '@/components/landing/HeroSection'
-import { HowItWorksAndMemories } from '@/components/landing/HowItWorksAndMemories'
 import { InteractiveSearchDemo } from '@/components/landing/InteractiveSearchDemo'
 import { LandingNavbar } from '@/components/landing/LandingNavbar'
-import { ProductAndMobileSection } from '@/components/landing/ProductAndMobileSection'
-import { ScrollMemoryStory } from '@/components/landing/ScrollMemoryStory'
+import { MobileSection } from '@/components/landing/MobileSection'
+import {
+  PrivacySection,
+  type GitHubRepoStats,
+} from '@/components/landing/PrivacySection'
+import { ProductShowcaseSection } from '@/components/landing/ProductShowcaseSection'
+import { SanctuaryMotionConfig } from '@/components/landing/motion'
 import { REPO_URL } from '@/components/landing/tokens'
 
 const STRUCTURED_DATA = {
@@ -82,50 +81,50 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="vg-shell min-h-screen flex flex-col selection:bg-[#397BEE]/20 selection:text-[#14233B] dark:selection:text-[#F1F5FF]">
-      <Head>
-        <title>VectorGallery — Personal AI Cloud & Digital Memory Vault</title>
-        <meta
-          name="description"
-          content="Your digital life, beautifully connected. Open-source Personal AI Cloud combining private photo and document storage, OCR search, grounded AI answers, and non-destructive Android backup."
-        />
-        <meta property="og:title" content="VectorGallery — Personal AI Cloud & Digital Memory Vault" />
-        <meta
-          property="og:description"
-          content="Open-source personal cloud storage, photo timeline, OCR screenshot intelligence, document indexing, and Flutter Android backup."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="/brand/social-preview.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="VectorGallery — Your Digital Memories, Beautifully Connected" />
-        <meta
-          name="twitter:description"
-          content="Store photos, PDFs, screenshots & notes with natural-language search, grounded AI citations, and non-destructive Android Wi-Fi backup."
-        />
-        <meta name="twitter:image" content="/brand/social-preview.png" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
-        />
-      </Head>
+    <SanctuaryMotionConfig>
+      <div className="vg-shell min-h-screen flex flex-col selection:bg-[#087F5B]/20 dark:selection:bg-[#53D9A3]/25 selection:text-[#0F241B] dark:selection:text-[#EFF7F3]">
+        <Head>
+          <title>VectorGallery — Personal AI Cloud &amp; Digital Memory Vault</title>
+          <meta
+            name="description"
+            content="Your digital life, beautifully connected. Open-source Personal AI Cloud combining private photo and document storage, OCR search, grounded AI answers, and non-destructive Android backup."
+          />
+          <meta property="og:title" content="VectorGallery — Personal AI Cloud & Digital Memory Vault" />
+          <meta
+            property="og:description"
+            content="Open-source personal cloud storage, photo timeline, OCR screenshot intelligence, document indexing, and Flutter Android backup."
+          />
+          <meta property="og:type" content="website" />
+          <meta property="og:image" content="/brand/social-preview.png" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content="VectorGallery — Your Digital Memories, Beautifully Connected" />
+          <meta
+            name="twitter:description"
+            content="Store photos, PDFs, screenshots & notes with natural-language search, grounded AI citations, and non-destructive Android Wi-Fi backup."
+          />
+          <meta name="twitter:image" content="/brand/social-preview.png" />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+          />
+        </Head>
 
-      <LandingNavbar
-        stars={githubStats.live ? githubStats.stars : null}
-        hasLocalApk={hasLocalApk}
-      />
+        <LandingNavbar
+          stars={githubStats.live ? githubStats.stars : null}
+          hasLocalApk={hasLocalApk}
+        />
 
-      <main id="main-content" className="flex-1">
-        <HeroSection />
-        <ScrollMemoryStory />
-        <InteractiveSearchDemo />
-        <EmotionalStorySection />
-        <FeatureBentoSection />
-        <HowItWorksAndMemories />
-        <ProductAndMobileSection apkSizeLabel={apkSizeLabel} />
-        <CommunityAndFormatsSection githubStats={githubStats} />
-      </main>
+        <main id="main-content" className="flex-1">
+          <HeroSection />
+          <InteractiveSearchDemo />
+          <ProductShowcaseSection />
+          <MobileSection apkSizeLabel={apkSizeLabel} />
+          <PrivacySection githubStats={githubStats} />
+          <FinalInvitationSection />
+        </main>
 
-      <FaqAndFooterSection apkSizeLabel={apkSizeLabel} />
-    </div>
+        <FaqAndFooterSection apkSizeLabel={apkSizeLabel} />
+      </div>
+    </SanctuaryMotionConfig>
   )
 }
