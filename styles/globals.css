@@ -1277,4 +1277,136 @@ button:active:not(:disabled) {
   scrollbar-width: none;
 }
 
+/* Editorial light-mode opt-outs so WebGL aura headers & transparent stages breathe cleanly */
+html.light header.vg-transparent-header {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+html.light main.vg-transparent-main {
+  background-color: transparent !important;
+}
+html.light footer.vg-transparent-footer {
+  background-color: transparent !important;
+}
+html.light .photo-overlay .text-emerald-300 {
+  color: #6EE7B7 !important;
+}
+html.light .photo-overlay .text-amber-300 {
+  color: #FCD34D !important;
+}
+html.light .photo-overlay .text-sky-300 {
+  color: #7DD3FC !important;
+}
+
+/* Subtle tactical film grain */
+.vg-grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+html.light .vg-grain {
+  background-image: radial-gradient(rgba(17, 19, 24, 0.05) 1px, transparent 0);
+}
+
+/* Endless smooth exhibition filmstrip */
+@keyframes vgMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.vg-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: vgMarquee 42s linear infinite;
+}
+
+.vg-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SOFT-BLUE EDITORIAL DESIGN TOKENS (.vg-shell)
+   Strict Light (#F5F8FF) & Deep Navy Dark (#090F1C) System
+   ═══════════════════════════════════════════════════════════ */
+.vg-shell {
+  --vg-bg: #F5F8FF;
+  --vg-surface: #FFFFFF;
+  --vg-surface-2: #EDF4FF;
+  --vg-surface-soft: #E0EDFF;
+  --vg-brand: #397BEE;
+  --vg-brand-interactive: #2563EB;
+  --vg-sky: #7DB8FF;
+  --vg-ink: #14233B;
+  --vg-ink-2: #64748B;
+  --vg-ink-muted: #8795AA;
+  --vg-border: #DCE6F3;
+  --vg-shadow-card: 0 20px 50px -18px rgba(20, 35, 59, 0.12), 0 4px 16px -4px rgba(57, 123, 238, 0.08);
+  --vg-shadow-hero: 0 36px 90px -24px rgba(20, 35, 59, 0.18), 0 10px 30px -10px rgba(57, 123, 238, 0.14);
+  background-color: var(--vg-bg);
+  color: var(--vg-ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html.dark .vg-shell {
+  --vg-bg: #090F1C;
+  --vg-surface: #111B2D;
+  --vg-surface-2: #0D1626;
+  --vg-surface-soft: #1C3150;
+  --vg-brand: #60A5FA;
+  --vg-brand-interactive: #397BEE;
+  --vg-sky: #93C5FD;
+  --vg-ink: #F1F5FF;
+  --vg-ink-2: #94A3B8;
+  --vg-ink-muted: #73849E;
+  --vg-border: rgba(148, 163, 184, 0.15);
+  --vg-shadow-card: 0 24px 60px -18px rgba(2, 6, 18, 0.72), 0 0 0 1px rgba(148, 163, 184, 0.08);
+  --vg-shadow-hero: 0 40px 100px -22px rgba(2, 6, 18, 0.86), 0 0 80px -24px rgba(57, 123, 238, 0.25);
+}
+
+html.light .vg-shell main,
+html.light .vg-shell footer,
+html.light .vg-shell header.vg-transparent-header {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+html.light .vg-shell .vg-blue-cta,
+html.light .vg-shell .vg-blue-cta * {
+  color: #FFFFFF !important;
+}
+
+html.light .vg-shell .vg-photo-caption,
+html.light .vg-shell .vg-photo-caption * {
+  color: #FFFFFF !important;
+}
+
+.vg-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 12px;
+  z-index: 100;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  background: #2563EB;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.vg-skip-link:focus {
+  left: 16px;
+  outline: 2px solid #7DB8FF;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vg-marquee-track {
+    animation: none;
+  }
+}
+
+
 

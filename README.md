@@ -419,6 +419,7 @@ VectorGallery/
 
 ## 🧪 Testing & Verification
 
+
 VectorGallery includes automated tests across the backend/intelligence tier, API security routes, and Flutter mobile client:
 
 ```bash
@@ -436,7 +437,6 @@ cd mobile && flutter analyze && flutter test
 ```
 
 ---
-
 ## 🔒 Security & Privacy
 
 1. **Server-Side Authentication:** Requests verify Supabase JWT tokens (`auth.getUser(token)`) with Row Level Security enforced at the database layer.

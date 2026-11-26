@@ -11,12 +11,21 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        display: ['"Manrope"', '"Inter"', 'system-ui', 'sans-serif'],
+        sans: ['"Inter"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+        mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
       colors: {
-        'vm-bg': '#0D0D0F',
-        'vm-card': '#1A1A1F',
-        'vm-card-hover': '#222228',
-        'vm-accent': '#1D9E75',
-        'vm-accent-light': '#2BC48E',
+        'vm-bg': '#090F1C',
+        'vm-card': '#111B2D',
+        'vm-card-hover': '#17243A',
+        'vm-accent': '#397BEE',
+        'vm-accent-light': '#60A5FA',
+        'vg-brand': '#397BEE',
+        'vg-brand-deep': '#2563EB',
+        'vg-sky': '#7DB8FF',
         zinc: {
           ...colors.zinc,
           150: '#eeeff2',
@@ -62,6 +71,7 @@ module.exports = {
       },
       transitionTimingFunction: {
         'bounce-out': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'vg-ease': 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
     },
   },

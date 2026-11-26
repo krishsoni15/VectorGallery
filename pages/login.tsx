@@ -1,8 +1,20 @@
 import React, { useState } from 'react'
+import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Zap, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Key, Cpu, User as UserIcon } from 'lucide-react'
+import { motion, MotionConfig } from 'framer-motion'
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  Smartphone,
+  Zap,
+} from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
+import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -23,7 +35,8 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('vm_user_email')
       localStorage.removeItem('vm_user_name')
-      document.cookie = 'sb-access-token=guest-session-token; path=/; max-age=604800; SameSite=Lax'
+      document.cookie =
+        'sb-access-token=guest-session-token; path=/; max-age=604800; SameSite=Lax'
       window.dispatchEvent(new Event('vectormind_auth_change'))
     }
     safeNavigate('/app')
@@ -40,20 +53,30 @@ export default function LoginPage() {
 
       if (signInError) {
         const errStr = (signInError.message || '').toLowerCase()
-        // If Supabase hits rate limit on login attempts
-        if (errStr.includes('rate limit') || errStr.includes('smtp') || errStr.includes('exceeded')) {
+        if (
+          errStr.includes('rate limit') ||
+          errStr.includes('smtp') ||
+          errStr.includes('exceeded')
+        ) {
           localStorage.setItem('vm_user_email', cleanEmail)
           localStorage.setItem('vm_user_name', cleanEmail.split('@')[0])
-          document.cookie = `sb-access-token=local-user-session; path=/; max-age=604800; SameSite=Lax`
+          document.cookie =
+            'sb-access-token=local-user-session; path=/; max-age=604800; SameSite=Lax'
           window.dispatchEvent(new Event('vectormind_auth_change'))
           const redirect = (router.query.redirect as string) || '/app'
           safeNavigate(redirect)
           return
         }
-        setError(signInError.message || 'Invalid email or password. Please check your credentials.')
+        setError(
+          signInError.message ||
+            'Invalid email or password. Please check your credentials.'
+        )
       } else {
         localStorage.setItem('vm_user_email', cleanEmail)
-        localStorage.setItem('vm_user_name', data?.user?.user_metadata?.full_name || cleanEmail.split('@')[0])
+        localStorage.setItem(
+          'vm_user_name',
+          data?.user?.user_metadata?.full_name || cleanEmail.split('@')[0]
+        )
         if (data?.session?.access_token) {
           document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=604800; SameSite=Lax`
         }
@@ -69,164 +92,206 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050709] text-zinc-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden font-sans selection:bg-emerald-500 selection:text-zinc-950">
-      {/* ── Background Ambient Effects ── */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-emerald-500/[0.04] via-teal-500/[0.02] to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute top-1/4 left-10 w-80 h-80 bg-emerald-600/[0.03] rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-teal-600/[0.02] rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f29370a_1px,transparent_1px),linear-gradient(to_bottom,#1f29370a_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
+    <MotionConfig reducedMotion="user">
+      <Head>
+        <title>Sign in — VectorGallery</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
 
-      {/* Header Brand */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center">
-        <Link href="/" className="inline-flex items-center gap-2.5 group">
-          <img
-            src="/vectorgallery-icon.svg"
-            alt="VectorGallery"
-            className="w-11 h-11 rounded-2xl shadow-[0_0_24px_rgba(16,185,129,0.3)] group-hover:shadow-[0_0_36px_rgba(16,185,129,0.5)] group-hover:scale-105 transition-all duration-300"
-          />
-          <span className="text-2xl font-extrabold bg-gradient-to-r from-white via-zinc-100 to-emerald-400 bg-clip-text text-transparent tracking-tight">
-            VectorGallery
-          </span>
-        </Link>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-white tracking-tight">
-          Welcome back
-        </h2>
-        <p className="mt-2 text-center text-sm text-zinc-400 max-w-sm mx-auto leading-relaxed">
-          Sign in to access your intelligent workspaces and personal LLM API keys
-        </p>
-      </div>
+      <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#397BEE]/20">
+        {/* Left Soft-Blue Atmospheric Photo Panel */}
+        <div className="photo-overlay hidden lg:flex lg:col-span-6 relative overflow-hidden bg-[#090F1C] flex-col justify-between p-12">
+          <div className="absolute inset-0 pointer-events-none">
+            <img
+              src="/landing/photos/valley-reflection.webp"
+              alt="Alpine stream and pine forest"
+              className="w-full h-full object-cover opacity-55"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#090F1C] via-[#090F1C]/45 to-[#090F1C]/80 pointer-events-none" />
 
-      {/* Login Glassmorphism Form Container */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
-        <div className="bg-[#090b0d]/90 backdrop-blur-2xl border border-emerald-500/20 py-8 px-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] shadow-emerald-950/20 rounded-3xl sm:px-10">
-          
-          {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono flex items-start gap-3 animate-in fade-in duration-200">
-              <div className="w-4 h-4 rounded-full bg-rose-500/20 flex items-center justify-center shrink-0 mt-0.5 text-rose-400 font-bold">!</div>
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* Email Field */}
-            <div>
-              <label className="block text-xs font-mono font-medium text-zinc-300 mb-2 uppercase tracking-wider">
-                Email Address
-              </label>
-              <div className="relative rounded-2xl">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#050709]/90 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/80 transition-all text-sm font-mono shadow-inner"
-                />
-              </div>
-            </div>
-
-            {/* Password Field with Show/Hide Eye Toggle */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-mono font-medium text-zinc-300 uppercase tracking-wider">
-                  Password
-                </label>
-              </div>
-              <div className="relative rounded-2xl">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-3 rounded-2xl bg-[#050709]/90 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/80 transition-all text-sm font-mono shadow-inner"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-emerald-400 transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  title={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 hover:from-emerald-400 hover:to-teal-400 text-zinc-950 font-bold font-mono text-sm shadow-[0_0_24px_rgba(16,185,129,0.25)] hover:shadow-[0_0_36px_rgba(16,185,129,0.4)] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 mt-3"
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
-                  <span>Signing in...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-4 flex items-center justify-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-800/80" />
-            </div>
-            <span className="relative bg-[#090b0d] px-3 text-[11px] font-mono text-zinc-500 uppercase tracking-widest">
-              Or
+          <div className="relative z-10 flex items-center justify-between">
+            <Link href="/" className="shrink-0">
+              <VectorGalleryLogo size="sm" variant="monochrome" />
+            </Link>
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#93C5FD]">
+              Vault Access
             </span>
           </div>
 
-          {/* Continue in Local Workspace Preview */}
-          <button
-            type="button"
-            onClick={handleGuestAccess}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-zinc-900 to-teal-950/40 hover:from-emerald-900/70 hover:to-teal-900/50 border border-emerald-500/30 hover:border-emerald-500/60 text-zinc-200 hover:text-white font-mono text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] group"
-          >
-            <Zap className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-            <span>Continue in Local Workspace</span>
-          </button>
-          <p className="text-[11px] text-zinc-500 text-center mt-1.5 font-mono">
-            Preview personal files, Gujarati OCR, photos & AI memory instantly
-          </p>
-
-          {/* Footer Link */}
-          <div className="mt-8 pt-6 border-t border-zinc-800/80 text-center">
-            <p className="text-xs font-mono text-zinc-400">
-              Don&apos;t have an account yet?{' '}
-              <Link href="/signup" className="font-bold text-emerald-400 hover:text-emerald-300 transition-colors underline underline-offset-4">
-                Sign up free
-              </Link>
+          <div className="relative z-10 max-w-md space-y-4">
+            <p className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#F1F5FF]">
+              A{' '}
+              <span className="text-[#7DB8FF]">
+                calm
+              </span>{' '}
+              home for every frame you keep.
+            </p>
+            <p className="text-[15px] text-[#CBD5E1] leading-relaxed">
+              Access your photo timeline, optical OCR screenshot archive, and grounded document search across desktop and Android.
             </p>
           </div>
 
-          {/* Feature Badges */}
-          <div className="mt-6 pt-4 border-t border-zinc-800/40 flex items-center justify-around text-[10px] font-mono text-zinc-500">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" /> Secure Auth
-            </span>
-            <span className="flex items-center gap-1">
-              <Key className="w-3 h-3 text-emerald-400" /> BYOK Keys
-            </span>
-            <span className="flex items-center gap-1">
-              <Cpu className="w-3 h-3 text-emerald-400" /> Hybrid RAG
-            </span>
+          <div className="relative z-10 flex items-center gap-6 text-[12px] font-mono text-[#94A3B8]">
+            <span>AES-256-GCM BYOK KEYS</span>
+            <span>·</span>
+            <span>SHA-256 WI-FI SYNC</span>
+          </div>
+        </div>
+
+        {/* Right Form Canvas */}
+        <div className="lg:col-span-6 flex flex-col justify-between px-6 sm:px-12 lg:px-20 py-8">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="lg:hidden inline-flex items-center">
+              <VectorGalleryLogo size="sm" variant="horizontal" />
+            </Link>
+            <Link
+              href="/"
+              className="hidden lg:inline-flex text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-colors"
+            >
+              ← Back to VectorGallery
+            </Link>
+
+            <div className="flex items-center gap-2.5">
+              <Link
+                href="/install"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[#397BEE]/45 transition-colors"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#60A5FA]" />
+                <span>Get APK</span>
+              </Link>
+              <ThemeToggle />
+            </div>
           </div>
 
+          <motion.div
+            initial={{ opacity: 0.92, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full max-w-[380px] mx-auto py-12"
+          >
+            <div className="space-y-2 mb-9">
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.03em]">
+                Welcome{' '}
+                <span className="text-[#2563EB] dark:text-[#60A5FA]">
+                  back
+                </span>
+              </h1>
+              <p className="text-[14px] text-[var(--vg-ink-2)]">
+                Sign in to unlock your vault, albums, and encrypted BYOK configuration.
+              </p>
+            </div>
+
+            {error && (
+              <div className="mb-6 py-3 px-4 rounded-xl bg-rose-500/10 border-l-2 border-rose-500 text-rose-700 dark:text-rose-300 text-[13px]">
+                {error}
+              </div>
+            )}
+
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              <div>
+                <label
+                  htmlFor="login-email"
+                  className="block text-[12px] font-medium text-[var(--vg-ink-2)] mb-1.5"
+                >
+                  Email address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-[var(--vg-ink-3)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    id="login-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[#397BEE] focus:ring-2 focus:ring-[#397BEE]/25 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="login-password"
+                  className="block text-[12px] font-medium text-[var(--vg-ink-2)] mb-1.5"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-[var(--vg-ink-3)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[#397BEE] focus:ring-2 focus:ring-[#397BEE]/25 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--vg-ink-3)] hover:text-[var(--vg-ink)] transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="vg-blue-cta w-full h-12 px-6 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-[#FFFFFF] font-semibold text-[14px] shadow-[0_10px_28px_-8px_rgba(37,99,235,0.45)] transition-all active:scale-[0.985] disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+              >
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign in</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="my-6 flex items-center gap-4">
+              <div className="flex-1 border-t border-[var(--vg-border)]" />
+              <span className="text-[11px] font-mono uppercase text-[var(--vg-ink-3)]">or</span>
+              <div className="flex-1 border-t border-[var(--vg-border)]" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGuestAccess}
+              className="w-full h-11 px-5 rounded-xl border border-[var(--vg-border)] bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[13px] font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <Zap className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA]" />
+              <span>Continue in Local Workspace</span>
+            </button>
+
+            <p className="mt-7 text-[13px] text-[var(--vg-ink-2)] text-center">
+              New to VectorGallery?{' '}
+              <Link
+                href="/signup"
+                className="font-semibold text-[#2563EB] dark:text-[#60A5FA] hover:underline underline-offset-4"
+              >
+                Create an account
+              </Link>
+            </p>
+          </motion.div>
+
+          <div className="flex items-center justify-between text-[12px] text-[var(--vg-ink-3)]">
+            <span>Local Disk, Supabase or Cloudflare R2</span>
+            <Link href="/install" className="hover:text-[#2563EB] dark:hover:text-[#60A5FA] transition-colors">
+              Android companion →
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </MotionConfig>
   )
 }

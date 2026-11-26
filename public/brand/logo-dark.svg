@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none">
+  <defs>
+    <linearGradient id="vg-dk-1" x1="6" y1="6" x2="26" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#93C5FD" />
+      <stop offset="100%" stop-color="#60A5FA" />
+    </linearGradient>
+    <linearGradient id="vg-dk-2" x1="42" y1="6" x2="22" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="#17243A" stroke="#60A5FA" stroke-opacity="0.25" />
+  <path d="M12.5 14C11.9 12.7 12.8 11.2 14.3 11.2H19.4C20.3 11.2 21.1 11.7 21.4 12.5L26.8 26.2L24.2 33.4C23.5 35 21.4 35 20.7 33.4L12.5 14Z" fill="url(#vg-dk-1)" />
+  <path d="M35.5 14C36.1 12.7 35.2 11.2 33.7 11.2H28.6C27.7 11.2 26.9 11.7 26.6 12.5L20.8 27.6L22.6 33.5C23.2 35.3 25.5 35.3 26.2 33.6L35.5 14Z" fill="url(#vg-dk-2)" />
+  <text x="58" y="31" fill="#F1F5FF" font-family="Manrope, Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">VectorGallery</text>
+</svg>
+

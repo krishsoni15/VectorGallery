@@ -151,7 +151,9 @@ export default function DarkVeil({
           const w = parent.clientWidth, h = parent.clientHeight;
           if (w === 0 || h === 0) return;
           renderer.setSize(w * resolutionScale, h * resolutionScale);
-          program.uniforms.uResolution.value.set(w, h);
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+          program.uniforms.uResolution.value.set(gl.drawingBufferWidth, gl.drawingBufferHeight);
         };
 
         window.addEventListener('resize', resize);

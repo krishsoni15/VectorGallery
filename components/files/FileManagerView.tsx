@@ -117,17 +117,17 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
     if (isToday) label = `Today, ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
     else if (isYesterday) label = `Yesterday, ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
 
-    // Extract location / context tag like Google Photos
+    // Derive general media context label without hardcoding personal locations
     let location: string | undefined = undefined
     const lower = `${file.original_name} ${file.extracted_text || ''} ${file.metadata?.summary || ''}`.toLowerCase()
-    if (lower.includes('ahmedabad') || lower.includes('gujarat') || lower.includes('નૂતન') || lower.includes('દિવાળી') || lower.includes('diwali')) {
-      location = 'Ahmedabad, Gujarat'
-    } else if (file.category === 'screenshots' || lower.includes('screenshot')) {
+    if (file.category === 'screenshots' || lower.includes('screenshot')) {
       location = 'Mobile Screen Capture'
-    } else if (lower.includes('blood') || lower.includes('donation')) {
-      location = 'Community Health Drive'
+    } else if (file.category === 'documents' || /\.(pdf|docx?|txt|csv)$/i.test(file.original_name || '')) {
+      location = 'Document Archive'
     } else if (file.category === 'videos' || file.mime_type?.startsWith('video/')) {
       location = 'Video Memory'
+    } else if (isWishPhoto(file)) {
+      location = 'Celebrations & Cards'
     }
 
     return { key, label, location }
@@ -297,7 +297,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                   : 'bg-white/[0.03] text-zinc-400 hover:text-zinc-200 border border-white/[0.05]'
               }`}
             >
-              <span>🪔 Diwali & New Year Wishes</span>
+              <span>✨ Celebrations &amp; Greetings</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 font-mono">
                 {files.filter(isWishPhoto).length}
               </span>

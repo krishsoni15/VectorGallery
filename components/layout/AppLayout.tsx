@@ -373,7 +373,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <div className="flex items-center gap-2.5 min-w-0">
                 <Search className="w-4 h-4 text-zinc-400 group-hover:text-emerald-400 transition-colors shrink-0" />
                 <span className="truncate text-zinc-400 group-hover:text-zinc-200">
-                  Search your photos, screenshots, documents, Gujarati OCR...
+                  Search photos, screenshots, receipts, and optical OCR...
                 </span>
               </div>
               <kbd className="hidden md:inline-block text-[10px] bg-white/[0.06] border border-white/[0.1] px-2 py-0.5 rounded-full font-mono text-zinc-400 shrink-0">

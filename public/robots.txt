@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /install
+Disallow: /app
+Disallow: /account
+Disallow: /api/
+
+Sitemap: https://github.com/krishsoni15/VectorGallery
+

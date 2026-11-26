@@ -400,37 +400,37 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
     }
   }
 
-  // Curated Google Photos / VectorGallery Starter Prompts
+  // Curated VectorGallery Starter Prompts
   const starterCards = [
     {
-      emoji: '🪔',
-      title: 'Find New Year Wishes',
-      desc: 'Gujarati & English greeting cards to share with friends and family',
-      query: 'can you find me for happy new year wish img i ned to sahe my frind so ya',
+      emoji: '🖼️',
+      title: 'Explore Photo Moments',
+      desc: 'Find photography and albums organized automatically by capture date',
+      query: 'Find my recent high-resolution photos and visual highlights',
     },
     {
       emoji: '📄',
       title: 'Summarize Documents',
-      desc: 'Extract key insights, summaries & notes from uploaded PDFs',
-      query: 'Summarize my uploaded documents and college notes',
+      desc: 'Extract key insights, totals, and summaries from uploaded PDFs',
+      query: 'Summarize my uploaded documents, reports, and receipts',
     },
     {
       emoji: '📱',
       title: 'Recent Screenshots',
       desc: 'Search text, receipts, and phone captures indexed with OCR',
-      query: 'Find my recent screenshots and photos with text',
+      query: 'Find my recent screenshots and photos containing extracted text',
     },
     {
       emoji: '📊',
       title: 'Library Overview',
-      desc: 'Check storage, indexed files, and memory stats',
+      desc: 'Check storage usage, indexed files, and memory stats',
       query: 'What files are stored in my personal cloud memory?',
     },
     {
       emoji: '🔤',
-      title: 'Gujarati OCR Notes',
-      desc: 'Search handwritten & regional text notes or festive banners',
-      query: 'Find files with Gujarati text or notes',
+      title: 'Multilingual OCR Notes',
+      desc: 'Search scanned handwritten notes and multilingual text documents',
+      query: 'Find files containing scanned handwritten notes or multilingual text',
     },
     {
       emoji: '🔒',
@@ -441,9 +441,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
   ]
 
   const quickChips = [
-    { label: '🪔 Happy New Year Wishes', query: 'can you find me for happy new year wish img i ned to sahe my frind so ya' },
-    { label: '📄 Summarize Documents', query: 'Summarize my uploaded documents and college notes' },
-    { label: '📱 Search Screenshots', query: 'Find my recent screenshots and photos with text' },
+    { label: '🖼️ Recent Photos', query: 'Find my recent high-resolution photos and visual highlights' },
+    { label: '📄 Summarize Documents', query: 'Summarize my uploaded documents, reports, and receipts' },
+    { label: '📱 Search Screenshots', query: 'Find my recent screenshots and photos containing extracted text' },
     { label: '📊 Storage Stats', query: 'What files are stored in my personal cloud memory?' },
   ]
 
