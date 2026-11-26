@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { LiveQrCode } from '@/components/LiveQrCode'
+import { VG_COMPONENTS, VG_TYPOGRAPHY } from '@/components/landing/design-system'
 import { APK_EXPECTED_SHA256, RELEASES_URL } from '@/components/landing/tokens'
 import { cn } from '@/lib/utils'
 
@@ -98,13 +99,13 @@ export default function InstallPage() {
         />
       </Head>
 
-      <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] flex flex-col overflow-x-clip selection:bg-[#397BEE]/20">
+      <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] flex flex-col overflow-x-clip selection:bg-[#087F5B]/20 dark:selection:bg-[#53D9A3]/25">
         <SiteHeader />
 
         <main className="relative flex-1 px-5 sm:px-8 py-12 sm:py-20 overflow-hidden">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -top-24 inset-x-0 h-[540px] bg-[radial-gradient(ellipse_75%_55%_at_60%_20%,rgba(57,123,238,0.16),transparent_72%)] dark:bg-[radial-gradient(ellipse_75%_55%_at_60%_20%,rgba(96,165,250,0.2),transparent_72%)]"
+            className="pointer-events-none absolute -top-24 inset-x-0 h-[540px] bg-[radial-gradient(ellipse_75%_55%_at_60%_20%,rgba(8,127,91,0.14),transparent_72%)] dark:bg-[radial-gradient(ellipse_75%_55%_at_60%_20%,rgba(83,217,163,0.16),transparent_72%)]"
           />
 
           <div className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-12 gap-14 items-center">
@@ -114,16 +115,16 @@ export default function InstallPage() {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="lg:col-span-6 space-y-6"
             >
-              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#2563EB] dark:text-[#7DB8FF]">
+              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#087F5B] dark:text-[#53D9A3]">
                 <Smartphone className="w-3.5 h-3.5" />
                 <span>Flutter Companion · v2.0.0+1</span>
               </div>
 
               <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-[-0.03em] leading-[1.02]">
-                VectorGallery{' '}
-                <span className="text-[#397BEE] dark:text-[#60A5FA]">
-                  in your pocket.
-                </span>
+                VectorGallery in your{' '}
+                <em className={VG_TYPOGRAPHY.editorialWordClass}>
+                  pocket.
+                </em>
               </h1>
 
               <p className="text-[16px] text-[var(--vg-ink-2)] leading-relaxed max-w-lg">
@@ -135,7 +136,7 @@ export default function InstallPage() {
                   <button
                     type="button"
                     onClick={triggerDownload}
-                    className="vg-blue-cta inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-[#FFFFFF] font-semibold text-[14px] shadow-[0_10px_28px_-8px_rgba(37,99,235,0.45)] transition-all active:scale-[0.98]"
+                    className={cn(VG_COMPONENTS.buttons.primary, 'px-7')}
                   >
                     <Download className="w-4 h-4" />
                     <span>
@@ -149,7 +150,7 @@ export default function InstallPage() {
                     href={RELEASES_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className="vg-blue-cta inline-flex items-center gap-2.5 h-12 px-7 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-[#FFFFFF] font-semibold text-[14px] shadow-[0_10px_28px_-8px_rgba(37,99,235,0.45)] transition-all"
+                    className={cn(VG_COMPONENTS.buttons.primary, 'px-7')}
                   >
                     <Download className="w-4 h-4" />
                     <span>Download from GitHub Releases</span>
@@ -159,7 +160,7 @@ export default function InstallPage() {
 
                 <Link
                   href="/app"
-                  className="inline-flex items-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[#397BEE]/45 transition-all shadow-sm"
+                  className={VG_COMPONENTS.buttons.secondary}
                 >
                   <span>Open Web Vault</span>
                   <ArrowRight className="w-4 h-4" />
@@ -167,7 +168,7 @@ export default function InstallPage() {
               </div>
 
               {/* Verified Checksum */}
-              <div className="rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] p-4 space-y-2">
+              <div className="rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] p-4 space-y-2 shadow-[var(--vg-shadow-card)]">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[12px] font-semibold text-[var(--vg-ink)]">
                     SHA-256 Checksum Verification
@@ -175,7 +176,7 @@ export default function InstallPage() {
                   <button
                     type="button"
                     onClick={copySha}
-                    className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#2563EB] dark:text-[#60A5FA] hover:underline"
+                    className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#087F5B] dark:text-[#53D9A3] hover:underline"
                   >
                     {copiedSha ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedSha ? 'Copied SHA-256' : 'Copy SHA-256'}</span>
@@ -185,7 +186,7 @@ export default function InstallPage() {
                   {APK_EXPECTED_SHA256}
                 </p>
                 <p className="text-[11.5px] text-[var(--vg-ink-3)]">
-                  Distributed directly via APK & Flutter source build (not listed on Google Play or App Store).
+                  Distributed directly via APK &amp; Flutter source build (not listed on Google Play or App Store).
                 </p>
               </div>
 
@@ -203,7 +204,7 @@ export default function InstallPage() {
                         className={cn(
                           'text-[12px] font-mono pt-0.5 transition-colors',
                           selected
-                            ? 'text-[#2563EB] dark:text-[#60A5FA] font-semibold'
+                            ? 'text-[#087F5B] dark:text-[#53D9A3] font-semibold'
                             : 'text-[var(--vg-ink-3)]'
                         )}
                       >
@@ -226,13 +227,13 @@ export default function InstallPage() {
 
               <div className="flex flex-wrap items-center gap-5 text-[12px] text-[var(--vg-ink-2)]">
                 <span className="inline-flex items-center gap-1.5">
-                  <Wifi className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#60A5FA]" /> Direct Wi-Fi LAN Sync
+                  <Wifi className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#53D9A3]" /> Direct Wi-Fi LAN Sync
                 </span>
                 <a
                   href={RELEASES_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-[#2563EB] dark:hover:text-[#60A5FA] transition-colors"
+                  className="inline-flex items-center gap-1 hover:text-[#087F5B] dark:hover:text-[#53D9A3] transition-colors"
                 >
                   <span>GitHub Releases</span>
                   <ExternalLink className="w-3 h-3" />
@@ -240,38 +241,38 @@ export default function InstallPage() {
               </div>
             </motion.div>
 
-            {/* Right Column: Soft Blue Framed Handset + QR */}
+            {/* Right Column: Forest Sanctuary Framed Handset + QR */}
             <div className="lg:col-span-6 flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center justify-center gap-10">
               <motion.div
                 initial={{ opacity: 0.96, y: 8 }}
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.25 }}
-                className="w-[264px] rounded-[38px] p-2.5 bg-gradient-to-b from-[#17243A] to-[#090F1C] shadow-[var(--vg-shadow-hero)] ring-1 ring-white/15 shrink-0"
+                className="w-[264px] rounded-[38px] p-2.5 bg-gradient-to-b from-[#173328] to-[#080E0C] shadow-[var(--vg-shadow-hero)] ring-1 ring-[#B8E7D4]/15 shrink-0"
               >
-                <div className="rounded-[30px] overflow-hidden bg-[#090F1C] relative h-[460px] flex flex-col justify-between p-4">
+                <div className="rounded-[30px] overflow-hidden bg-[#080E0C] relative h-[460px] flex flex-col justify-between p-4">
                   <div className="relative z-10 flex items-center justify-between pt-1">
                     <div className="flex items-center gap-2">
                       <img src="/vectorgallery-icon.svg" alt="VectorGallery" className="w-5 h-5 rounded-md" />
-                      <span className="text-xs font-semibold text-[#F1F5FF]">VectorGallery</span>
+                      <span className="text-xs font-semibold text-[#EFF7F3]">VectorGallery</span>
                     </div>
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#1C3150] text-[#93C5FD]">
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#1C3329] text-[#53D9A3] border border-[#53D9A3]/20">
                       READY
                     </span>
                   </div>
-                  <div className="relative z-10 rounded-2xl overflow-hidden h-52 shadow-lg">
+                  <div className="relative z-10 rounded-2xl overflow-hidden h-52 shadow-lg border border-[#B8E7D4]/15">
                     <img
                       src="/landing/photos/mountain-pass.webp"
                       alt="Curated mountain photograph synced cleanly"
                       className="w-full h-full object-cover"
                     />
-                    <div className="vg-photo-caption absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-[#090F1C]/88 to-transparent">
-                      <span className="text-[9px] font-mono text-[#93C5FD]">SYNCED · SHA-256</span>
-                      <p className="text-xs font-medium text-[#F1F5FF]">Non-Destructive Backup</p>
+                    <div className="vg-photo-caption absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-[#080E0C]/90 to-transparent">
+                      <span className="text-[9px] font-mono text-[#53D9A3]">SYNCED · SHA-256</span>
+                      <p className="text-xs font-medium text-[#EFF7F3]">Non-Destructive Backup</p>
                     </div>
                   </div>
-                  <div className="relative z-10 rounded-full bg-[#111B2D]/90 border border-white/10 px-4 py-2 flex items-center justify-between text-[11px] text-[#F1F5FF]">
-                    <span className="text-[#93C5FD]">Wi-Fi Guard</span>
-                    <span className="font-mono text-[#94A3B8]">v2.0.0</span>
+                  <div className="relative z-10 rounded-full bg-[#101914]/95 border border-[#B8E7D4]/15 px-4 py-2 flex items-center justify-between text-[11px] text-[#EFF7F3]">
+                    <span className="text-[#53D9A3]">Wi-Fi Guard</span>
+                    <span className="font-mono text-[#9CB6AA]">v2.0.0</span>
                   </div>
                 </div>
               </motion.div>

@@ -1,46 +1,78 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ChevronDown, Download, Github } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
+import { VG_LAYOUT, VG_TYPOGRAPHY } from '@/components/landing/design-system'
 import { cn } from '@/lib/utils'
 import { MotionReveal } from './motion'
 import { ThemeSwitch } from './ThemeSwitch'
 import {
   CONTRIBUTING_URL,
   FAQ_ITEMS,
-  ISSUES_URL,
   LICENSE_URL,
   RELEASES_URL,
   REPO_URL,
   SECURITY_DOC_URL,
 } from './tokens'
-import { Container, PrimaryButton, SecondaryButton, Section, SectionHeading } from './ui'
+import { Container } from './ui'
 
-export function FaqAndFooterSection({ apkSizeLabel = '107.8 MB' }: { apkSizeLabel?: string }) {
+const CORE_FAQ_QUESTIONS = new Set([
+  'What is VectorGallery?',
+  'How does AI search work?',
+  'Is VectorGallery open source?',
+  'Can I run it locally?',
+  'Do I need AI API keys?',
+  'Can I back up my Android phone?',
+])
+
+export function FaqAndFooterSection({ apkSizeLabel }: { apkSizeLabel?: string }) {
+  void apkSizeLabel
   const [openIndex, setOpenIndex] = useState<number | null>(0)
+
+  const filteredFaqs = FAQ_ITEMS.filter((item) => CORE_FAQ_QUESTIONS.has(item.q)).slice(0, 6)
+  const faqList = filteredFaqs.length > 0 ? filteredFaqs : FAQ_ITEMS.slice(0, 6)
 
   return (
     <>
-      {/* SECTION: FAQ Accordion */}
-      <Section id="faq" surface="default" ariaLabel="Frequently asked questions">
+      {/* Compact FAQ Region (outside the 6 <section> landmarks) */}
+      <div
+        id="faq"
+        role="region"
+        aria-labelledby="faq-heading"
+        className={cn(VG_LAYOUT.sectionPadding.compact, 'bg-[var(--vg-bg)]')}
+      >
         <Container>
           <MotionReveal>
-            <SectionHeading
-              align="center"
-              eyebrow="Frequently Asked Questions"
-              title="Straight answers on privacy, search & setup"
-              subtitle="Everything verified against the VectorGallery codebase and deployment documentation."
-            />
+            <div className="text-center mx-auto max-w-2xl space-y-3.5">
+              <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--vg-brand)]">
+                Frequently Asked Questions
+              </p>
+              <h2
+                id="faq-heading"
+                className="font-display font-bold tracking-[-0.03em] leading-[1.08] text-[var(--vg-ink)]"
+                style={{ fontSize: VG_TYPOGRAPHY.scale.h2.fontSize }}
+              >
+                Clear <em className={VG_TYPOGRAPHY.editorialWordClass}>answers</em>, before you start.
+              </h2>
+              <p className="text-[15.5px] sm:text-[17px] leading-[1.65] text-[var(--vg-ink-2)]">
+                Six essentials verified directly against the VectorGallery codebase and documentation.
+              </p>
+            </div>
           </MotionReveal>
 
-          <MotionReveal delay={0.08} className="mt-10 max-w-3xl mx-auto space-y-3">
-            {FAQ_ITEMS.map((item, idx) => {
+          <MotionReveal delay={0.08} className="mt-10 max-w-[780px] mx-auto space-y-3">
+            {faqList.map((item, idx) => {
               const isOpen = openIndex === idx
               const panelId = `faq-panel-${idx}`
               return (
                 <div
                   key={item.q}
-                  className="rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] shadow-sm overflow-hidden"
+                  className={cn(
+                    'rounded-2xl border transition-colors overflow-hidden bg-[var(--vg-surface)]',
+                    isOpen
+                      ? 'border-[var(--vg-brand)]/35 shadow-[var(--vg-shadow-card)]'
+                      : 'border-[var(--vg-border)] shadow-sm'
+                  )}
                 >
                   <button
                     type="button"
@@ -49,7 +81,7 @@ export function FaqAndFooterSection({ apkSizeLabel = '107.8 MB' }: { apkSizeLabe
                     onClick={() => setOpenIndex(isOpen ? null : idx)}
                     className="w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--vg-brand)]"
                   >
-                    <span className="font-display text-[16px] sm:text-[17px] font-semibold text-[var(--vg-ink)]">
+                    <span className="font-display text-[15.5px] sm:text-[16.5px] font-semibold text-[var(--vg-ink)]">
                       {item.q}
                     </span>
                     <ChevronDown
@@ -62,7 +94,7 @@ export function FaqAndFooterSection({ apkSizeLabel = '107.8 MB' }: { apkSizeLabe
                   {isOpen && (
                     <div
                       id={panelId}
-                      className="px-5 sm:px-6 pb-5 pt-0 text-[14px] leading-relaxed text-[var(--vg-ink-2)] border-t border-[var(--vg-border)]/50"
+                      className="px-5 sm:px-6 pb-5 pt-0 text-[14px] leading-relaxed text-[var(--vg-ink-2)] border-t border-[var(--vg-border)]/60"
                     >
                       <p className="pt-3">{item.a}</p>
                     </div>
@@ -72,124 +104,45 @@ export function FaqAndFooterSection({ apkSizeLabel = '107.8 MB' }: { apkSizeLabe
             })}
           </MotionReveal>
         </Container>
-      </Section>
+      </div>
 
-      {/* SECTION: Closing CTA */}
-      <Section id="get-started" surface="soft" ariaLabel="Get started with VectorGallery">
+      {/* Streamlined 3-Column Footer */}
+      <footer className="bg-[var(--vg-surface-2)] border-t border-[var(--vg-border)] pt-14 pb-10 overflow-hidden">
         <Container>
-          <MotionReveal>
-            <div className="rounded-[2rem] border border-[var(--vg-border)] bg-[var(--vg-surface)] p-8 sm:p-12 lg:p-16 shadow-[var(--vg-shadow-hero)] relative overflow-hidden">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full opacity-35 blur-3xl"
-                style={{ background: 'radial-gradient(circle, rgba(57,123,238,0.28), transparent 70%)' }}
-              />
-
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-                <div className="lg:col-span-7 space-y-6">
-                  <VectorGalleryLogo size="md" variant="horizontal" />
-                  <h2
-                    className="font-display font-bold tracking-[-0.03em] leading-[1.06] text-[var(--vg-ink)]"
-                    style={{ fontSize: 'clamp(2rem, 4.4vw, 3.6rem)' }}
-                  >
-                    Everything you remember.{' '}
-                    <span className="text-[var(--vg-brand)] dark:text-[var(--vg-sky)]">
-                      Right where you need it.
-                    </span>
-                  </h2>
-                  <p className="text-[16px] sm:text-[18px] leading-relaxed text-[var(--vg-ink-2)] max-w-xl">
-                    Start locally on your own machine or connect Android mobile sync cleanly over Wi-Fi — open source under Apache-2.0.
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3 pt-1">
-                    <PrimaryButton href="/app" showArrow>
-                      Open Web Workspace
-                    </PrimaryButton>
-                    <a
-                      href="/vectorgallery.apk"
-                      download="VectorGallery.apk"
-                      className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[#EDF4FF] hover:bg-[#E0EDFF] dark:bg-[#1C3150] dark:hover:bg-[#233D63] text-[#1D4ED8] dark:text-[#93C5FD] border border-[#397BEE]/30 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397BEE]"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Android APK ({apkSizeLabel})</span>
-                    </a>
-                    <SecondaryButton href={REPO_URL} external>
-                      <Github className="w-4 h-4" />
-                      <span>GitHub</span>
-                    </SecondaryButton>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-5 grid grid-cols-2 gap-3.5">
-                  <div className="rounded-2xl overflow-hidden border border-[var(--vg-border)] aspect-[4/5] shadow-md">
-                    <img
-                      src="/landing/photos/mountain-pass.webp"
-                      alt="Curated mountain landscape memory"
-                      decoding="async"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="space-y-3.5">
-                    <div className="rounded-2xl overflow-hidden border border-[var(--vg-border)] aspect-[4/3] shadow-md">
-                      <img
-                        src="/landing/photos/lake-morning.webp"
-                        alt="Calm morning lake frame"
-                        decoding="async"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="rounded-2xl overflow-hidden border border-[var(--vg-border)] aspect-[4/3] shadow-md">
-                      <img
-                        src="/landing/photos/coffee-ritual.webp"
-                        alt="Personal daily photography"
-                        decoding="async"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </MotionReveal>
-        </Container>
-      </Section>
-
-      {/* SECTION: Balanced 4-Column Footer */}
-      <footer className="bg-[var(--vg-bg)] border-t border-[var(--vg-border)] pt-16 pb-10 overflow-hidden">
-        <Container>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-14 border-b border-[var(--vg-border)]">
-            <div className="md:col-span-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-[var(--vg-border)]">
+            <div className="md:col-span-5 space-y-4">
               <VectorGalleryLogo size="md" variant="horizontal" />
               <p className="text-[13.5px] leading-relaxed text-[var(--vg-ink-2)] max-w-sm">
-                Open-source Personal AI Cloud & Digital Memory Vault. Your digital memories, beautifully connected.
+                Open-source Personal AI Cloud &amp; Digital Memory Vault. Quietly organized, searchable by meaning, and always yours.
               </p>
               <div className="pt-1">
                 <ThemeSwitch mode="segmented" />
               </div>
             </div>
 
-            <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8 text-[13.5px]">
+            <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8 text-[13.5px]">
               <div className="space-y-3">
                 <p className="font-display font-semibold text-[var(--vg-ink)]">Product</p>
                 <ul className="space-y-2 text-[var(--vg-ink-2)]">
                   <li>
-                    <Link href="/app" className="hover:text-[var(--vg-ink)] transition-colors">
+                    <Link href="/app" className="hover:text-[var(--vg-brand)] transition-colors">
                       Web Workspace
                     </Link>
                   </li>
                   <li>
-                    <a href="#search-demo" className="hover:text-[var(--vg-ink)] transition-colors">
+                    <a href="#search-demo" className="hover:text-[var(--vg-brand)] transition-colors">
                       Search Demo
                     </a>
                   </li>
                   <li>
-                    <a href="#features" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Capabilities
+                    <a href="#showcase" className="hover:text-[var(--vg-brand)] transition-colors">
+                      Product Showcase
                     </a>
                   </li>
                   <li>
-                    <a href="#formats" className="hover:text-[var(--vg-ink)] transition-colors">
-                      File Formats
-                    </a>
+                    <Link href="/install" className="hover:text-[var(--vg-brand)] transition-colors">
+                      Android App
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -198,22 +151,22 @@ export function FaqAndFooterSection({ apkSizeLabel = '107.8 MB' }: { apkSizeLabe
                 <p className="font-display font-semibold text-[var(--vg-ink)]">Resources</p>
                 <ul className="space-y-2 text-[var(--vg-ink-2)]">
                   <li>
-                    <Link href="/install" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Android Install
-                    </Link>
-                  </li>
-                  <li>
-                    <a href="/vectorgallery.apk" download="VectorGallery.apk" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Download APK
+                    <a href={REPO_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-brand)] transition-colors">
+                      GitHub Repository
                     </a>
                   </li>
                   <li>
-                    <a href={SECURITY_DOC_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Security Doc
+                    <a href={RELEASES_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-brand)] transition-colors">
+                      Releases &amp; APK
                     </a>
                   </li>
                   <li>
-                    <a href="#faq" className="hover:text-[var(--vg-ink)] transition-colors">
+                    <a href={CONTRIBUTING_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-brand)] transition-colors">
+                      Contributing
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#faq" className="hover:text-[var(--vg-brand)] transition-colors">
                       FAQ
                     </a>
                   </li>
@@ -221,63 +174,41 @@ export function FaqAndFooterSection({ apkSizeLabel = '107.8 MB' }: { apkSizeLabe
               </div>
 
               <div className="space-y-3">
-                <p className="font-display font-semibold text-[var(--vg-ink)]">Community</p>
+                <p className="font-display font-semibold text-[var(--vg-ink)]">Legal</p>
                 <ul className="space-y-2 text-[var(--vg-ink-2)]">
                   <li>
-                    <a href={REPO_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-ink)] transition-colors">
-                      GitHub Repo
+                    <a href={LICENSE_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-brand)] transition-colors">
+                      Apache-2.0 License
                     </a>
                   </li>
                   <li>
-                    <a href={RELEASES_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Releases
+                    <a href={SECURITY_DOC_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-brand)] transition-colors">
+                      Security Architecture
                     </a>
                   </li>
                   <li>
-                    <a href={ISSUES_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Issues
-                    </a>
-                  </li>
-                  <li>
-                    <a href={CONTRIBUTING_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Contributing
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <p className="font-display font-semibold text-[var(--vg-ink)]">Account & Legal</p>
-                <ul className="space-y-2 text-[var(--vg-ink-2)]">
-                  <li>
-                    <Link href="/login" className="hover:text-[var(--vg-ink)] transition-colors">
+                    <Link href="/login" className="hover:text-[var(--vg-brand)] transition-colors">
                       Sign In
                     </Link>
                   </li>
                   <li>
-                    <Link href="/signup" className="hover:text-[var(--vg-ink)] transition-colors">
+                    <Link href="/signup" className="hover:text-[var(--vg-brand)] transition-colors">
                       Create Account
                     </Link>
-                  </li>
-                  <li>
-                    <a href={LICENSE_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--vg-ink)] transition-colors">
-                      Apache-2.0 License
-                    </a>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px] text-[var(--vg-ink-3)]">
-            <span>VectorGallery · Open Source Personal AI Cloud (Apache-2.0)</span>
-            <span>Curated sample photography attribution documented in public/landing/photos/ATTRIBUTION.md</span>
+          <div className="pt-7 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px] text-[var(--vg-ink-muted)]">
+            <span>© {new Date().getFullYear()} VectorGallery · Open Source Personal AI Cloud (Apache-2.0)</span>
+            <span>Sample photography attribution in public/landing/photos/ATTRIBUTION.md</span>
           </div>
 
-          {/* Architectural restrained oversized wordmark */}
           <div className="mt-8 select-none pointer-events-none text-center overflow-hidden" aria-hidden="true">
             <p
-              className="font-display font-extrabold tracking-[-0.045em] leading-[0.88] text-[#14233B]/[0.055] dark:text-[#93C5FD]/[0.06]"
+              className="font-display font-extrabold tracking-[-0.045em] leading-[0.88] text-[#0F241B]/[0.045] dark:text-[#53D9A3]/[0.055]"
               style={{ fontSize: 'clamp(3rem, 9.5vw, 8.2rem)' }}
             >
               VectorGallery

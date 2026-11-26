@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { VG_COMPONENTS, VG_TYPOGRAPHY } from '@/components/landing/design-system'
 import { cn } from '@/lib/utils'
 
 export function Container({
@@ -16,7 +17,7 @@ export function Container({
     <div
       className={cn(
         'mx-auto w-full px-4 sm:px-6 lg:px-8',
-        wide ? 'max-w-[1380px]' : 'max-w-[1280px]',
+        wide ? 'max-w-[1360px]' : 'max-w-[1240px]',
         className
       )}
     >
@@ -35,20 +36,21 @@ export function Section({
   children: React.ReactNode
   id?: string
   className?: string
-  surface?: 'default' | 'secondary' | 'soft'
+  surface?: 'default' | 'secondary' | 'soft' | 'forest'
   ariaLabel?: string
 }) {
   const bgMap = {
     default: 'bg-[var(--vg-bg)]',
     secondary: 'bg-[var(--vg-surface-2)]',
-    soft: 'bg-[#EDF4FF]/70 dark:bg-[#0D1626]',
+    soft: 'bg-[var(--vg-sage)]/75 dark:bg-[#111C17]',
+    forest: 'bg-[#092219] text-[#EFF7F3]',
   }
 
   return (
     <section
       id={id}
       aria-label={ariaLabel}
-      className={cn('py-16 sm:py-20 lg:py-24 relative', bgMap[surface], className)}
+      className={cn('py-20 sm:py-24 lg:py-28 relative', bgMap[surface], className)}
     >
       {children}
     </section>
@@ -77,13 +79,13 @@ export function SectionHeading({
       )}
     >
       {eyebrow && (
-        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.16em] text-[var(--vg-brand-interactive)] dark:text-[var(--vg-sky)]">
+        <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--vg-brand)]">
           {eyebrow}
         </p>
       )}
       <h2
         className="font-display font-bold tracking-[-0.03em] leading-[1.08] text-[var(--vg-ink)]"
-        style={{ fontSize: 'clamp(1.875rem, 4.1vw, 3.5rem)' }}
+        style={{ fontSize: VG_TYPOGRAPHY.scale.h2.fontSize }}
       >
         {title}
       </h2>
@@ -103,6 +105,7 @@ interface ActionLinkProps {
   external?: boolean
   download?: string
   showArrow?: boolean
+  size?: 'sm' | 'md'
 }
 
 export function PrimaryButton({
@@ -112,9 +115,11 @@ export function PrimaryButton({
   external,
   download,
   showArrow = false,
+  size = 'md',
 }: ActionLinkProps) {
   const baseClass = cn(
-    'vg-blue-cta group inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[#2563EB] hover:bg-[#1D4ED8] text-[#FFFFFF] shadow-[0_10px_28px_-8px_rgba(37,99,235,0.45)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7DB8FF] focus-visible:ring-offset-2',
+    'group',
+    size === 'sm' ? VG_COMPONENTS.buttons.primarySm : VG_COMPONENTS.buttons.primary,
     className
   )
 
@@ -150,9 +155,11 @@ export function SecondaryButton({
   children,
   className,
   external,
+  size = 'md',
 }: ActionLinkProps) {
   const baseClass = cn(
-    'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl text-[14px] font-semibold bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+    size === 'sm' ? VG_COMPONENTS.buttons.secondarySm : VG_COMPONENTS.buttons.secondary,
+    'hover:border-[var(--vg-brand)]/40',
     className
   )
 
@@ -173,7 +180,7 @@ export function SecondaryButton({
 
 export function TextLink({ href, children, className, external }: ActionLinkProps) {
   const baseClass = cn(
-    'inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--vg-brand-interactive)] dark:text-[var(--vg-sky)] hover:underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] rounded',
+    'inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--vg-brand)] hover:underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] rounded',
     className
   )
 
@@ -206,16 +213,16 @@ export function BrowserFrame({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] shadow-[var(--vg-shadow-hero)] overflow-hidden',
+        'rounded-3xl border border-[var(--vg-border)] bg-[var(--vg-surface)] shadow-[var(--vg-shadow-hero)] overflow-hidden',
         className
       )}
     >
       <div className="px-4 sm:px-5 py-3 border-b border-[var(--vg-border)] bg-[var(--vg-surface-2)] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD5E1] dark:bg-[#334155]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD5E1] dark:bg-[#334155]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD5E1] dark:bg-[#334155]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#087F5B]/45 dark:bg-[#53D9A3]/50" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#087F5B]/28 dark:bg-[#53D9A3]/30" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#087F5B]/16 dark:bg-[#53D9A3]/18" />
           </div>
           <span className="text-[12px] font-medium text-[var(--vg-ink-2)]">{title}</span>
         </div>
@@ -225,4 +232,3 @@ export function BrowserFrame({
     </div>
   )
 }
-

@@ -123,13 +123,13 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onOpenSettings }) => {
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="h-9 px-3.5 inline-flex items-center rounded-xl text-[13px] font-medium text-[#14233B] dark:text-[#CBD5E1] hover:bg-[#E0EDFF]/60 dark:hover:bg-[#17243A] transition-colors"
+          className="h-9 px-3.5 inline-flex items-center rounded-xl text-[13px] font-medium text-[#0F241B] dark:text-[#9CB6AA] hover:bg-[#E6EDE4]/70 dark:hover:bg-[#1C3329] hover:text-[#087F5B] dark:hover:text-[#EFF7F3] transition-colors"
         >
           Sign in
         </Link>
         <Link
           href="/app"
-          className="vg-blue-cta h-9 px-4 inline-flex items-center rounded-xl text-[13px] font-semibold bg-[#2563EB] text-[#FFFFFF] hover:bg-[#1D4ED8] shadow-sm transition-all active:scale-[0.98]"
+          className="vg-cta h-9 px-4 inline-flex items-center rounded-xl text-[13px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#53D9A3] dark:hover:bg-[#6EE4B5] dark:text-[#061811] shadow-sm transition-all active:scale-[0.98]"
         >
           Get started
         </Link>
