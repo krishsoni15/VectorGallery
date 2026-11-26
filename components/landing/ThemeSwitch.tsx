@@ -72,7 +72,7 @@ export function ThemeSwitch({ mode = 'compact', className }: ThemeSwitchProps) {
               className={cn(
                 'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
                 active
-                  ? 'bg-[var(--vg-surface-soft)] text-[var(--vg-brand-interactive)] dark:text-[var(--vg-sky)] shadow-sm'
+                  ? 'bg-[var(--vg-surface-soft)] text-[var(--vg-brand)] shadow-sm'
                   : 'text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)]'
               )}
             >
@@ -100,12 +100,11 @@ export function ThemeSwitch({ mode = 'compact', className }: ThemeSwitchProps) {
     >
       <span className="relative w-4 h-4 flex items-center justify-center">
         {isDark ? (
-          <Sun className="w-4 h-4 text-[#93C5FD] transition-transform duration-300 rotate-0" />
+          <Sun className="w-4 h-4 text-[#53D9A3] transition-transform duration-300 rotate-0" />
         ) : (
-          <Moon className="w-4 h-4 text-[#2563EB] transition-transform duration-300 rotate-0" />
+          <Moon className="w-4 h-4 text-[#087F5B] transition-transform duration-300 rotate-0" />
         )}
       </span>
     </button>
   )
 }
-

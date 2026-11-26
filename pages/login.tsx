@@ -14,7 +14,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
+import { VG_COMPONENTS, VG_TYPOGRAPHY } from '@/components/landing/design-system'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { cn } from '@/lib/utils'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -98,9 +100,9 @@ export default function LoginPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#397BEE]/20">
-        {/* Left Soft-Blue Atmospheric Photo Panel */}
-        <div className="photo-overlay hidden lg:flex lg:col-span-6 relative overflow-hidden bg-[#090F1C] flex-col justify-between p-12">
+      <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#087F5B]/20 dark:selection:bg-[#53D9A3]/25">
+        {/* Left Deep Forest Green Photo Panel */}
+        <div className="photo-overlay hidden lg:flex lg:col-span-6 relative overflow-hidden bg-[#092219] flex-col justify-between p-12">
           <div className="absolute inset-0 pointer-events-none">
             <img
               src="/landing/photos/valley-reflection.webp"
@@ -108,31 +110,31 @@ export default function LoginPage() {
               className="w-full h-full object-cover opacity-55"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#090F1C] via-[#090F1C]/45 to-[#090F1C]/80 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#071A13] via-[#092219]/55 to-[#092219]/85 pointer-events-none" />
 
           <div className="relative z-10 flex items-center justify-between">
             <Link href="/" className="shrink-0">
-              <VectorGalleryLogo size="sm" variant="monochrome" />
+              <VectorGalleryLogo size="sm" variant="on-dark" />
             </Link>
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#93C5FD]">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#B8E7D4]">
               Vault Access
             </span>
           </div>
 
           <div className="relative z-10 max-w-md space-y-4">
-            <p className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#F1F5FF]">
+            <p className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#EFF7F3]">
               A{' '}
-              <span className="text-[#7DB8FF]">
+              <em className={VG_TYPOGRAPHY.editorialWordOnForestClass}>
                 calm
-              </span>{' '}
+              </em>{' '}
               home for every frame you keep.
             </p>
-            <p className="text-[15px] text-[#CBD5E1] leading-relaxed">
+            <p className="text-[15px] text-[#9CB6AA] leading-relaxed">
               Access your photo timeline, optical OCR screenshot archive, and grounded document search across desktop and Android.
             </p>
           </div>
 
-          <div className="relative z-10 flex items-center gap-6 text-[12px] font-mono text-[#94A3B8]">
+          <div className="relative z-10 flex items-center gap-6 text-[12px] font-mono text-[#749184]">
             <span>AES-256-GCM BYOK KEYS</span>
             <span>·</span>
             <span>SHA-256 WI-FI SYNC</span>
@@ -155,9 +157,9 @@ export default function LoginPage() {
             <div className="flex items-center gap-2.5">
               <Link
                 href="/install"
-                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[#397BEE]/45 transition-colors"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[var(--vg-brand)]/45 transition-colors"
               >
-                <Smartphone className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#60A5FA]" />
+                <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#53D9A3]" />
                 <span>Get APK</span>
               </Link>
               <ThemeToggle />
@@ -173,9 +175,9 @@ export default function LoginPage() {
             <div className="space-y-2 mb-9">
               <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.03em]">
                 Welcome{' '}
-                <span className="text-[#2563EB] dark:text-[#60A5FA]">
+                <em className={VG_TYPOGRAPHY.editorialWordClass}>
                   back
-                </span>
+                </em>
               </h1>
               <p className="text-[14px] text-[var(--vg-ink-2)]">
                 Sign in to unlock your vault, albums, and encrypted BYOK configuration.
@@ -205,7 +207,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[#397BEE] focus:ring-2 focus:ring-[#397BEE]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[var(--vg-brand)]/25 transition-all"
                   />
                 </div>
               </div>
@@ -226,7 +228,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[#397BEE] focus:ring-2 focus:ring-[#397BEE]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[var(--vg-brand)]/25 transition-all"
                   />
                   <button
                     type="button"
@@ -242,7 +244,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="vg-blue-cta w-full h-12 px-6 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-[#FFFFFF] font-semibold text-[14px] shadow-[0_10px_28px_-8px_rgba(37,99,235,0.45)] transition-all active:scale-[0.985] disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                className={cn(VG_COMPONENTS.buttons.primary, 'w-full disabled:opacity-50 mt-2')}
               >
                 {loading ? (
                   <>
@@ -267,9 +269,9 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleGuestAccess}
-              className="w-full h-11 px-5 rounded-xl border border-[var(--vg-border)] bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[13px] font-medium flex items-center justify-center gap-2 transition-colors"
+              className="w-full h-11 px-5 rounded-xl border border-[var(--vg-border)] bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] hover:border-[var(--vg-border-strong)] text-[13px] font-medium flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
             >
-              <Zap className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA]" />
+              <Zap className="w-4 h-4 text-[#087F5B] dark:text-[#53D9A3]" />
               <span>Continue in Local Workspace</span>
             </button>
 
@@ -277,7 +279,7 @@ export default function LoginPage() {
               New to VectorGallery?{' '}
               <Link
                 href="/signup"
-                className="font-semibold text-[#2563EB] dark:text-[#60A5FA] hover:underline underline-offset-4"
+                className="font-semibold text-[#087F5B] dark:text-[#53D9A3] hover:underline underline-offset-4"
               >
                 Create an account
               </Link>
@@ -286,7 +288,7 @@ export default function LoginPage() {
 
           <div className="flex items-center justify-between text-[12px] text-[var(--vg-ink-3)]">
             <span>Local Disk, Supabase or Cloudflare R2</span>
-            <Link href="/install" className="hover:text-[#2563EB] dark:hover:text-[#60A5FA] transition-colors">
+            <Link href="/install" className="hover:text-[#087F5B] dark:hover:text-[#53D9A3] transition-colors">
               Android companion →
             </Link>
           </div>

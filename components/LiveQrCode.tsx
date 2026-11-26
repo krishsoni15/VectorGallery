@@ -35,7 +35,7 @@ export function LiveQrCode({
           width: size * 2,
           margin: 1,
           color: {
-            dark: '#0B0F17',
+            dark: '#092219',
             light: '#FFFFFF',
           },
         })
@@ -66,7 +66,7 @@ export function LiveQrCode({
   return (
     <div className={cn('inline-flex flex-col items-start gap-2.5', className)}>
       <div
-        className="p-2.5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-sm inline-flex items-center justify-center"
+        className="p-2.5 rounded-2xl bg-[#FFFFFF] border border-[#DCE5DD] shadow-sm inline-flex items-center justify-center"
         style={{ width: size + 20, height: size + 20 }}
       >
         {dataUrl ? (
@@ -92,16 +92,16 @@ export function LiveQrCode({
         <button
           type="button"
           onClick={copyLink}
-          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#525660] dark:text-[#9CA3AF] hover:text-[#111318] dark:hover:text-[#F4F5F7] transition-colors"
+          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#465B51] dark:text-[#9CB6AA] hover:text-[#0F241B] dark:hover:text-[#EFF7F3] transition-colors"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#60A5FA]" />
-              <span className="text-[#2563EB] dark:text-[#93C5FD]">Copied install link</span>
+              <Check className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#53D9A3]" />
+              <span className="text-[#087F5B] dark:text-[#53D9A3]">Copied install link</span>
             </>
           ) : (
             <>
-              <QrCode className="w-3.5 h-3.5 text-[#397BEE] dark:text-[#60A5FA]" />
+              <QrCode className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#53D9A3]" />
               <span className="truncate max-w-[180px]">{targetUrl.replace(/^https?:\/\//, '')}</span>
               <Copy className="w-3 h-3 opacity-60" />
             </>
@@ -111,4 +111,3 @@ export function LiveQrCode({
     </div>
   )
 }
-
