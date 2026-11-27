@@ -74,7 +74,7 @@ export function HeroLivingMatter() {
     <section
       id="overview"
       aria-labelledby="hero-monument-heading"
-      className="relative overflow-hidden bg-[#F4F5F2] dark:bg-[#090B0D] lg:min-h-[calc(100vh-74px)] flex flex-col justify-between border-b border-[var(--vg-border)] scroll-mt-20"
+      className="relative overflow-hidden bg-[#F4F5F2] dark:bg-[#090B0D] min-h-screen flex flex-col justify-between pt-14 sm:pt-16 border-b border-[var(--vg-border)]"
     >
       {/* Unified Studio Atmospheric Shader Canvas */}
       <LivingAuraCanvas
@@ -190,7 +190,7 @@ export function HeroLivingMatter() {
                 </Link>
                 <a
                   href="#scroll-story"
-                  className="inline-flex items-center gap-1.5 h-12 px-4 rounded-full text-[13.5px] font-medium text-[#101211] dark:text-[#F4F6F2] hover:bg-[#FFFFFF]/70 dark:hover:bg-white/[0.08] border border-[var(--vg-border)] transition-colors"
+                  className="inline-flex items-center gap-1.5 h-12 px-4 rounded-full text-[13.5px] font-medium text-[var(--vg-ink)] hover:bg-[#FFFFFF]/70 dark:hover:bg-white/[0.08] border border-[var(--vg-border)] transition-[background-color,border-color]"
                 >
                   <span>Explore the experience</span>
                 </a>

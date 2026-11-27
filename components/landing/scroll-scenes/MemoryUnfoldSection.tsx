@@ -14,10 +14,10 @@ interface StoryArtifact {
   id: string
   src: string
   alt: string
-  filename: string
+  title: string
   category: string
   isCoastalMatch: boolean
-  /** Normalized coordinates [-1..+1] across Discover, Connect, and Workspace Left Library */
+  /** Panoramic orbital halo positions explicitly outside the central sphere core radius, gliding into Connect & Workspace grid */
   discoverPos: [number, number, number] // nx, ny, rotateDeg
   connectPos: [number, number, number]
   workspacePos: [number, number]
@@ -28,89 +28,89 @@ const STORY_ARTIFACTS: StoryArtifact[] = [
     id: 'art-harbor',
     src: '/landing/photos/aura-personal-travel.webp',
     alt: 'Summer harbor walk beside moored coastal boats',
-    filename: 'harbor_promenade_august.webp',
+    title: 'Harbor Walk',
     category: 'Photos',
     isCoastalMatch: true,
-    discoverPos: [-0.82, -0.58, -6],
-    connectPos: [-0.74, -0.52, 0],
-    workspacePos: [-0.66, -0.46],
+    discoverPos: [-0.90, -0.44, -4],
+    connectPos: [-0.74, -0.50, 0],
+    workspacePos: [-0.66, -0.45],
   },
   {
     id: 'art-pass',
     src: '/landing/photos/aura-ticket-coastal.webp',
     alt: 'Coastal Line Seat 14A boarding pass to Nice Ville',
-    filename: 'coastal_line_seat_14a.jpg',
-    category: 'OCR Pass',
+    title: 'Train Pass · Nice',
+    category: 'Pass',
     isCoastalMatch: true,
-    discoverPos: [-0.26, -0.68, 3],
-    connectPos: [-0.25, -0.52, 0],
-    workspacePos: [-0.24, -0.46],
+    discoverPos: [-0.60, -0.74, 3],
+    connectPos: [-0.25, -0.50, 0],
+    workspacePos: [-0.24, -0.45],
   },
   {
     id: 'art-rail',
     src: '/landing/photos/aura-train-journey.webp',
     alt: 'Coastal train window view with rail ticket and journal',
-    filename: 'coastal_rail_aug19.webp',
+    title: 'Coastal Rail',
     category: 'Travel',
     isCoastalMatch: true,
-    discoverPos: [0.30, -0.66, -4],
-    connectPos: [0.25, -0.52, 0],
-    workspacePos: [-0.66, 0.46],
+    discoverPos: [0.60, -0.74, -3],
+    connectPos: [0.25, -0.50, 0],
+    workspacePos: [-0.66, 0.45],
   },
   {
     id: 'art-cliff',
     src: '/landing/photos/aura-coastal-path.webp',
     alt: 'Coastal footpath along sunlit white cliffs',
-    filename: 'chalk_cliff_walk.webp',
+    title: 'Cliff Trail',
     category: 'Photos',
     isCoastalMatch: true,
-    discoverPos: [0.84, -0.52, 7],
-    connectPos: [0.74, -0.52, 0],
-    workspacePos: [-0.24, 0.46],
+    discoverPos: [0.90, -0.44, 4],
+    connectPos: [0.74, -0.50, 0],
+    workspacePos: [-0.24, 0.45],
   },
   {
     id: 'art-celebration',
     src: '/landing/photos/aura-celebration-toast.webp',
     alt: 'Friends raising glasses in golden-hour terrace celebration',
-    filename: 'terrace_toast_sep19.webp',
-    category: 'Celebration',
+    title: 'Terrace Toast',
+    category: 'Moment',
     isCoastalMatch: false,
-    discoverPos: [-0.84, 0.44, 5],
-    connectPos: [-0.74, 0.54, 0],
-    workspacePos: [-0.66, 0.88],
+    discoverPos: [-0.90, 0.44, 4],
+    connectPos: [-0.74, 0.52, 0],
+    workspacePos: [-0.66, 0.90],
   },
   {
     id: 'art-receipt',
     src: '/landing/photos/aura-receipt-studio.webp',
     alt: 'Studio Equip Co headphones receipt totaling $153.36',
-    filename: 'studio_receipt_10482.png',
+    title: 'Studio Receipt',
     category: 'Receipt',
     isCoastalMatch: false,
-    discoverPos: [-0.28, 0.64, -3],
-    connectPos: [-0.25, 0.54, 0],
-    workspacePos: [-0.24, 0.88],
+    discoverPos: [-0.60, 0.74, -3],
+    connectPos: [-0.25, 0.52, 0],
+    workspacePos: [-0.24, 0.90],
   },
   {
     id: 'art-deadlines',
     src: '/landing/photos/aura-deadline-notes.webp',
     alt: 'Handwritten project deadline notes in grid notebook',
-    filename: 'project_deadlines_oct.webp',
+    title: 'Deadline Notes',
     category: 'Notes',
     isCoastalMatch: false,
-    discoverPos: [0.28, 0.62, 4],
-    connectPos: [0.25, 0.54, 0],
-    workspacePos: [-0.66, 0.94],
+    discoverPos: [0.60, 0.74, 3],
+    connectPos: [0.25, 0.52, 0],
+    workspacePos: [-0.66, 0.95],
   },
   {
     id: 'art-university',
     src: '/landing/photos/aura-university-letter.webp',
     alt: 'Northridge University Autumn project registration letter',
-    filename: 'northridge_registration.pdf',
+    title: 'Project Record',
     category: 'Document',
     isCoastalMatch: false,
-    discoverPos: [0.82, 0.46, -6],
-    connectPos: [0.74, 0.54, 0],
-    workspacePos: [-0.24, 0.94],
+    discoverPos: [0.90, 0.44, -4],
+    connectPos: [0.74, 0.52, 0],
+    workspacePos: [-0.24, 0.95],
   },
 ]
 
@@ -126,7 +126,7 @@ export function MemoryUnfoldSection() {
   const [isDark, setIsDark] = useState(false)
   const [progress, setProgress] = useState(0)
   const [manualSceneIdx, setManualSceneIdx] = useState<number | null>(null)
-  const [stageDims, setStageDims] = useState({ w: 1200, h: 520 })
+  const [stageDims, setStageDims] = useState({ w: 1200, h: 560 })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -143,7 +143,7 @@ export function MemoryUnfoldSection() {
     const updateDims = () => {
       setStageDims({
         w: Math.max(300, el.clientWidth),
-        h: Math.max(320, el.clientHeight),
+        h: Math.max(340, el.clientHeight),
       })
     }
     updateDims()
@@ -176,7 +176,7 @@ export function MemoryUnfoldSection() {
         mm.add('(min-width: 768px)', () => {
           const st = ScrollTrigger.create({
             trigger: wrap,
-            start: 'top 74px',
+            start: 'top top',
             end: '+=2400',
             pin: true,
             scrub: 0.65,
@@ -237,9 +237,10 @@ export function MemoryUnfoldSection() {
     }
   }
 
-  const maxSpreadX = Math.min(stageDims.w * 0.42, 620)
-  const isCompactH = stageDims.h < 430
-  const maxSpreadY = Math.min(stageDims.h * (isCompactH ? 0.34 : 0.37), 225)
+  // Spread cards generously outward across horizontal stage so central sphere stays unobstructed in Discover!
+  const maxSpreadX = Math.min(stageDims.w * 0.45, 655)
+  const isCompactH = stageDims.h < 460
+  const maxSpreadY = Math.min(stageDims.h * (isCompactH ? 0.35 : 0.37), 240)
   const useCssGlide = manualSceneIdx !== null || stageDims.w < 768
 
   const typedChars = Math.round(TYPED_QUERY_TEXT.length * k.typedQueryRatio)
@@ -252,13 +253,13 @@ export function MemoryUnfoldSection() {
       aria-labelledby="scroll-story-heading"
       data-story-progress={effectiveProgress.toFixed(3)}
       data-story-scene={activeScene.numeral}
-      className="relative bg-[#F4F5F2] dark:bg-[#090B0D] border-b border-[var(--vg-border)] scroll-mt-20"
+      className="relative bg-[#F4F5F2] dark:bg-[#090B0D] border-b border-[var(--vg-border)]"
     >
       <div
         ref={triggerWrapRef}
-        className="relative w-full min-h-[580px] md:min-h-0 md:h-[calc(100vh-74px)] md:max-h-[920px] flex flex-col justify-between py-3 sm:py-4 lg:py-5 overflow-hidden"
+        className="relative w-full min-h-[600px] md:min-h-0 md:h-screen md:max-h-[960px] flex flex-col justify-between pt-14 sm:pt-16 lg:pt-[68px] pb-4 lg:pb-5 overflow-hidden"
       >
-        {/* Studio Metallic Radial Field tracking expansion continuously */}
+        {/* Soft Titanium & Volt-Lime Core Illumination Field */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
@@ -272,8 +273,8 @@ export function MemoryUnfoldSection() {
         <div
           className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 min-h-0 flex flex-col justify-between gap-2.5 sm:gap-3`}
         >
-          {/* TOP NARRATIVE HEADER WITH ACCESSIBLE SKIP STORY CONTROL */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-2.5 border-b border-[var(--vg-border)] pb-2.5 sm:pb-3 shrink-0">
+          {/* TOP NARRATIVE HEADER WITH ACCESSIBLE SKIP ACTION */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-2.5 border-b border-[var(--vg-border)] pb-3 shrink-0">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 mb-1">
                 <span className="inline-block w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#CDFF45]" />
@@ -313,12 +314,12 @@ export function MemoryUnfoldSection() {
             </div>
           </div>
 
-          {/* CHOREOGRAPHED CONTINUOUS VIEWPORT STAGE */}
+          {/* CHOREOGRAPHED CONTINUOUS STAGE */}
           <div
             ref={stageRef}
-            className="relative flex-1 min-h-[290px] sm:min-h-[340px] flex items-center justify-center"
+            className="relative flex-1 min-h-[320px] sm:min-h-[380px] flex items-center justify-center"
           >
-            {/* SCENE 06 EXPANDING WORKSPACE SHELL (Seamless continuity from aligned fragments!) */}
+            {/* SCENE 06 EXPANDING WORKSPACE SHELL */}
             <div
               aria-hidden={k.workspaceShellOpacity < 0.08}
               style={{
@@ -384,7 +385,7 @@ export function MemoryUnfoldSection() {
               </div>
             </div>
 
-            {/* SCENE 05 DYNAMIC TYPING NATURAL-LANGUAGE SEARCH COMMAND BAR */}
+            {/* SCENE 05 DYNAMIC TYPING SEARCH COMMAND BAR */}
             <div
               style={{
                 opacity: k.searchBarOpacity,
@@ -406,55 +407,36 @@ export function MemoryUnfoldSection() {
               </div>
             </div>
 
-            {/* PARTING SCULPTURAL METALLIC CALIPER ARCS & CONNECTION FILAMENTS */}
+            {/* SOFT TITANIUM STUDIO APERTURE RING & CONNECTION FILAMENTS */}
             <svg
               aria-hidden="true"
               viewBox="-560 -260 1120 520"
               className="pointer-events-none absolute inset-0 w-full h-full z-10"
             >
-              {/* Left Parting Titanium Caliper Wing */}
+              {/* Soft expanding concentric glass lens halo rather than harsh bare bracket lines */}
               <g
-                transform={`translate(${(-k.wingSplitPx * 130).toFixed(1)}, 0) scale(${k.apertureScale.toFixed(3)})`}
-                style={{ opacity: Math.max(0.12, 0.88 - k.productW * 0.78) }}
+                transform={`scale(${k.apertureScale.toFixed(3)})`}
+                style={{ opacity: Math.max(0.08, 0.55 - k.productW * 0.52) }}
               >
-                <path
-                  d="M -60 -150 C -210 -95, -210 95, -60 150"
+                <ellipse
+                  rx="235"
+                  ry="152"
                   fill="none"
                   stroke={isDark ? '#B8C5CC' : '#8D989C'}
-                  strokeWidth="2.4"
-                  strokeOpacity="0.65"
+                  strokeWidth="1"
+                  strokeOpacity="0.34"
                 />
-                <path
-                  d="M -30 -180 C -250 -115, -250 115, -30 180"
-                  fill="none"
-                  stroke={isDark ? '#46D6A4' : '#087F5B'}
-                  strokeWidth="1.25"
-                  strokeOpacity="0.42"
-                />
-              </g>
-
-              {/* Right Parting Titanium Caliper Wing */}
-              <g
-                transform={`translate(${(k.wingSplitPx * 130).toFixed(1)}, 0) scale(${k.apertureScale.toFixed(3)})`}
-                style={{ opacity: Math.max(0.12, 0.88 - k.productW * 0.78) }}
-              >
-                <path
-                  d="M 60 -150 C 210 -95, 210 95, 60 150"
-                  fill="none"
-                  stroke={isDark ? '#B8C5CC' : '#8D989C'}
-                  strokeWidth="2.4"
-                  strokeOpacity="0.65"
-                />
-                <path
-                  d="M 30 -180 C 250 -115, 250 115, 30 180"
+                <ellipse
+                  rx="330"
+                  ry="195"
                   fill="none"
                   stroke={isDark ? '#CDFF45' : '#087F5B'}
-                  strokeWidth="1.25"
-                  strokeOpacity="0.48"
+                  strokeWidth="0.9"
+                  strokeOpacity="0.22"
                 />
               </g>
 
-              {/* Scene 04 Dynamic Memory Connection Filaments */}
+              {/* Scene 04 Dynamic Connection Filaments linking clusters cleanly */}
               {k.connectLineProgress > 0.02 && (
                 <g
                   style={{ opacity: k.connectLineProgress }}
@@ -464,60 +446,55 @@ export function MemoryUnfoldSection() {
                   fill="none"
                 >
                   <path
-                    d="M -340 -95 Q 0 -145 340 -95"
-                    strokeDasharray="720"
-                    strokeDashoffset={(1 - k.connectLineProgress) * 720}
+                    d="M -360 -105 Q 0 -150 360 -105"
+                    strokeDasharray="760"
+                    strokeDashoffset={(1 - k.connectLineProgress) * 760}
                   />
                   <path
-                    d="M -340 100 Q 0 148 340 100"
-                    strokeDasharray="720"
-                    strokeDashoffset={(1 - k.connectLineProgress) * 720}
-                  />
-                  <path
-                    d="M -120 -95 L -120 100 M 120 -95 L 120 100"
-                    strokeDasharray="240"
-                    strokeDashoffset={(1 - k.connectLineProgress) * 240}
-                    strokeOpacity="0.28"
+                    d="M -360 110 Q 0 155 360 110"
+                    strokeDasharray="760"
+                    strokeDashoffset={(1 - k.connectLineProgress) * 760}
                   />
                 </g>
               )}
             </svg>
 
-            {/* CENTRAL DILATING GLASS PRISM GLOW BEHIND SPHERE OPENING */}
+            {/* CENTRAL DILATING VOLT-LIME GLASS GLOW */}
             <div
               aria-hidden="true"
               style={{
-                opacity: k.unfoldW * (1 - k.productW) * 0.72,
-                transform: `scale(${lerp(0.65, 1.55, k.unfoldW)})`,
+                opacity: k.unfoldW * (1 - k.productW) * 0.68,
+                transform: `scale(${lerp(0.65, 1.5, k.unfoldW)})`,
               }}
-              className="pointer-events-none absolute w-[240px] h-[240px] sm:w-[320px] sm:h-[320px] rounded-full blur-3xl z-10 bg-[radial-gradient(circle,rgba(205,255,69,0.28)_0%,rgba(70,214,164,0.14)_48%,transparent_72%)]"
+              className="pointer-events-none absolute w-[250px] h-[250px] sm:w-[320px] sm:h-[320px] rounded-full blur-3xl z-10 bg-[radial-gradient(circle,rgba(205,255,69,0.24)_0%,rgba(70,214,164,0.12)_48%,transparent_72%)]"
             />
 
-            {/* CENTRAL SIGNATURE MEMORY SPHERE (Maintains dominant presence before parting) */}
+            {/* CENTRAL MEMORY SPHERE CORE (Always clear of orbiting Discover cards!) */}
             <div
               style={{
                 opacity: k.sphereOpacity,
-                transform: `scale(${k.sphereScale.toFixed(3)}) rotate(${(effectiveProgress * 18).toFixed(2)}deg)`,
+                transform: `scale(${k.sphereScale.toFixed(3)}) rotate(${(effectiveProgress * 16).toFixed(2)}deg)`,
               }}
               className={cn(
-                'pointer-events-none relative z-20 w-[260px] h-[260px] sm:w-[330px] sm:h-[330px] lg:w-[390px] lg:h-[390px] xl:w-[440px] xl:h-[440px] 2xl:w-[480px] 2xl:h-[480px] flex items-center justify-center will-change-[transform,opacity]',
+                'pointer-events-none relative z-20 w-[230px] h-[230px] sm:w-[290px] sm:h-[290px] lg:w-[320px] lg:h-[320px] xl:w-[360px] xl:h-[360px] flex items-center justify-center will-change-[transform,opacity]',
                 useCssGlide && 'transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
               )}
             >
               <img
                 src={VG_SPHERE_THEME_SPEC.heroAnimWebp}
                 alt="Unfolding Memory Sphere core"
-                className="w-full h-full object-contain scale-[1.08]"
+                className="w-full h-full object-contain scale-[1.06]"
               />
             </div>
 
-            {/* 8 CONTINUOUSLY CHOREOGRAPHED MEMORY & DOCUMENT ARTIFACTS */}
+            {/* 8 PANORAMIC CHOREOGRAPHED MEMORY & DOCUMENT ARTIFACTS */}
             <div className="pointer-events-none absolute inset-0 z-20">
               {STORY_ARTIFACTS.map((art) => {
-                // Smoothly blend Discover -> Connect -> Left Workspace Column without jumps
-                const nxCon = lerp(0, art.discoverPos[0], k.discoverW)
-                const nyCon = lerp(0, art.discoverPos[1], k.discoverW)
-                const rCon = lerp(0, art.discoverPos[2], k.discoverW)
+                // Materialize cards directly along the outer orbital halo so they never cross over the sphere core
+                const radialIntro = lerp(0.86, 1.0, k.discoverW)
+                const nxCon = art.discoverPos[0] * radialIntro
+                const nyCon = art.discoverPos[1] * radialIntro
+                const rCon = lerp(art.discoverPos[2] * 1.4, art.discoverPos[2], k.discoverW)
 
                 const nxGrid = lerp(nxCon, art.connectPos[0], k.connectW)
                 const nyGrid = lerp(nyCon, art.connectPos[1], k.connectW)
@@ -530,13 +507,11 @@ export function MemoryUnfoldSection() {
                 const xPx = nxFinal * maxSpreadX
                 const yPx = nyFinal * maxSpreadY
 
-                // Hide non-matching cards smoothly once they settle beyond the Workspace top 4 results
                 const nonMatchRememberFade = !art.isCoastalMatch
                   ? lerp(1, 0.24, k.rememberW) * (1 - k.productW)
                   : 1
 
-                // Gentle emergence straight out of the opening sphere starting at unfoldW > 0.35
-                const revealScale = lerp(0.18, 0.98, Math.max(k.unfoldW * 0.25, k.discoverW))
+                const revealScale = lerp(0.74, 1.0, k.discoverW)
                 const matchBoost =
                   art.isCoastalMatch && k.rememberW > 0
                     ? lerp(1, 1.07, k.rememberW * (1 - k.productW * 0.85))
@@ -563,8 +538,8 @@ export function MemoryUnfoldSection() {
                         ? 'transition-[transform,opacity,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
                         : 'transition-shadow duration-200',
                       isCompactH
-                        ? 'w-[96px] sm:w-[116px] lg:w-[130px]'
-                        : 'w-[104px] sm:w-[138px] lg:w-[164px] xl:w-[184px] 2xl:w-[204px]',
+                        ? 'w-[92px] sm:w-[114px] lg:w-[132px]'
+                        : 'w-[100px] sm:w-[132px] lg:w-[152px] xl:w-[168px] 2xl:w-[184px]',
                       isHighlighted
                         ? 'border-[#087F5B] dark:border-[#CDFF45] shadow-[0_24px_54px_-14px_rgba(205,255,69,0.42),0_12px_28px_-10px_rgba(16,18,17,0.22)] ring-2 ring-[#CDFF45]/75 z-30'
                         : 'border-[var(--vg-border-strong)] shadow-[var(--vg-shadow-card)] z-20'
@@ -573,17 +548,17 @@ export function MemoryUnfoldSection() {
                     <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--vg-surface-2)]">
                       <img src={art.src} alt={art.alt} className="w-full h-full object-cover" />
                       {isHighlighted && (
-                        <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-[#CDFF45] text-[#101211]">
+                        <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[#CDFF45] text-[#101211]">
                           <CheckCircle2 className="w-2.5 h-2.5" />
                           <span>Match</span>
                         </span>
                       )}
                     </div>
                     <div className="px-2.5 py-1.5 bg-[var(--vg-surface)] flex items-center justify-between gap-1.5">
-                      <span className="font-mono text-[9px] sm:text-[10px] text-[#101211] dark:text-[#F4F6F2] truncate">
-                        {art.filename}
+                      <span className="text-[10.5px] font-semibold text-[#101211] dark:text-[#F4F6F2] truncate">
+                        {art.title}
                       </span>
-                      <span className="hidden sm:inline text-[9px] text-[var(--vg-ink-2)] shrink-0">
+                      <span className="hidden sm:inline text-[9.5px] font-medium text-[var(--vg-ink-2)] shrink-0">
                         {art.category}
                       </span>
                     </div>

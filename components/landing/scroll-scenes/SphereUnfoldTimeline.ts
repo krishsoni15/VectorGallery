@@ -110,14 +110,14 @@ export interface StageKinematics {
  * Keeps forward and reverse scrubbing mathematically reversible without state drift.
  */
 export function computeStageKinematics(p: number): StageKinematics {
-  const unfoldW = smoothstep(0.08, 0.25, p)
-  const discoverW = smoothstep(0.21, 0.40, p)
+  const unfoldW = smoothstep(0.06, 0.22, p)
+  const discoverW = smoothstep(0.14, 0.30, p)
   const connectW = smoothstep(0.44, 0.60, p)
   const rememberW = smoothstep(0.61, 0.78, p)
   const productW = smoothstep(0.79, 0.94, p)
 
-  // Maintain strong focal scale cleanly through Scene 02, then fade core out before Workspace expansion
-  const sphereScale = 1.0 + unfoldW * 0.26 - smoothstep(0.36, 0.62, p) * 0.46
+  // Maintain balanced monumental presence through Scene 02–03 while keeping outer Discover orbit unobstructed
+  const sphereScale = 1.0 + unfoldW * 0.14 - smoothstep(0.36, 0.62, p) * 0.38
   const sphereOpacity = 1.0 - smoothstep(0.42, 0.74, p)
   const apertureScale = 0.78 + unfoldW * 0.56 + discoverW * 0.22 - productW * 0.40
   const wingSplitPx = unfoldW * 1.05 + discoverW * 0.55

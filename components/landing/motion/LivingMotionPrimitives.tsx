@@ -156,7 +156,7 @@ export function SplitTextReveal({
   return (
     <Component className={className} style={style}>
       {words.map((word, idx) => (
-        <span key={`${word}-${idx}`} className="inline-block overflow-hidden align-top mr-[0.26em] last:mr-0">
+        <span key={`${word}-${idx}`} className="inline-block overflow-hidden align-top pb-[0.14em] -mb-[0.14em] mr-[0.26em] last:mr-0">
           <motion.span
             className="inline-block"
             initial={{ y: '22%', opacity: 0.92 }}
@@ -248,7 +248,7 @@ export function InteractiveTriadIndex({
             onClick={() => onSelect?.(idx)}
             onMouseEnter={() => onSelect?.(idx)}
             className={cn(
-              'group inline-flex items-baseline justify-between lg:justify-end gap-4 sm:gap-5 py-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45] rounded-md px-1',
+              'group inline-flex items-baseline justify-between lg:justify-end gap-4 sm:gap-5 py-0.5 transition-[transform,opacity] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45] rounded-md px-1',
               isActive
                 ? 'text-[#101211] dark:text-[#F4F6F2]'
                 : 'text-[#606961] hover:text-[#101211] dark:text-[#A4AEA9] dark:hover:text-[#F4F6F2]'
