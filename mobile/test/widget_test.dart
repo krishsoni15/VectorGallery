@@ -10,6 +10,11 @@ import 'package:vectorgallery_mobile/main.dart';
 
 void main() {
   final Map<String, String> secureStoreMemory = <String, String>{};
+  final Map<String, int> requestCounts = <String, int>{};
+
+  void countRequest(String path) {
+    requestCounts[path] = (requestCounts[path] ?? 0) + 1;
+  }
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +45,7 @@ void main() {
       0,
       InterceptorsWrapper(
         onRequest: (options, handler) {
+          countRequest(options.path);
           if (options.path.contains('/dashboard/stats')) {
             return handler.resolve(
               Response(
@@ -149,5 +155,63 @@ void main() {
     final loggedIn = await notifier.signIn('krish@example.com', 'Secret123!');
     expect(loggedIn, isTrue);
     expect(notifier.state.email, equals('krish@example.com'));
+  });
+
+  testWidgets('VectorGalleryApp does not loop API requests or leave infinite tickers spinning at rest',
+      (WidgetTester tester) async {
+    secureStoreMemory.clear();
+    requestCounts.clear();
+
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: VectorGalleryApp(),
+      ),
+    );
+
+    // Proves no continuous ..repeat() ticker is left active while idle.
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+
+    // When unauthenticated on initial launch, protected cloud tabs stay silent instead of spamming 401s.
+    expect(requestCounts['/api/v2/dashboard/stats'] ?? 0, equals(0));
+    expect(requestCounts['/api/v2/files'] ?? 0, equals(0));
+    expect(requestCounts['/api/v2/auth/profile'] ?? 0, equals(0));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Authenticated VectorGalleryApp fetches each endpoint once and settles without loops',
+      (WidgetTester tester) async {
+    secureStoreMemory
+      ..clear()
+      ..[ApiClient.accessTokenKey] = 'vg_local_verified_token.sig'
+      ..[ApiClient.userEmailKey] = 'test@example.com'
+      ..[ApiClient.userNameKey] = 'Mobile Test User';
+    requestCounts.clear();
+
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: VectorGalleryApp(),
+      ),
+    );
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+
+    expect(requestCounts['/api/auth/session'] ?? 0, equals(1));
+    expect(requestCounts['/api/v2/dashboard/stats'] ?? 0, equals(1));
+    expect(requestCounts['/api/v2/files'] ?? 0, equals(1));
+    expect(requestCounts['/api/v2/auth/profile'] ?? 0, equals(1));
+    expect(tester.takeException(), isNull);
   });
 }

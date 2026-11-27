@@ -28,21 +28,21 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onOpenSettings }) => {
   useEffect(() => {
     const syncUser = () => {
       if (typeof window !== 'undefined') {
-        setLocalEmail(localStorage.getItem('vm_user_email'))
-        setLocalName(localStorage.getItem('vm_user_name'))
+        const nextEmail = localStorage.getItem('vm_user_email')
+        const nextName = localStorage.getItem('vm_user_name')
+        setLocalEmail((prev) => (prev === nextEmail ? prev : nextEmail))
+        setLocalName((prev) => (prev === nextName ? prev : nextName))
       }
     }
     syncUser()
 
     window.addEventListener('storage', syncUser)
     window.addEventListener('vectormind_auth_change', syncUser)
-    const interval = setInterval(syncUser, 1500)
     return () => {
       window.removeEventListener('storage', syncUser)
       window.removeEventListener('vectormind_auth_change', syncUser)
-      clearInterval(interval)
     }
-  }, [router.pathname, user])
+  }, [router.pathname, user?.id])
 
   if (loading) {
     return (

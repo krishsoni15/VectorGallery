@@ -103,7 +103,7 @@ export default function AccountPage() {
       setFetching(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading])
+  }, [user?.id, authLoading])
 
   const handleSaveKey = async (e: React.FormEvent) => {
     e.preventDefault()

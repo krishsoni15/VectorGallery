@@ -310,9 +310,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                 if (sortBy === 'date') setSortAsc(!sortAsc)
                 else { setSortBy('date'); setSortAsc(false) }
               }}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                sortBy === 'date' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49] font-semibold' : 'hover:text-[#101211] dark:hover:text-[#F3F5F1]'
-              }`}
+              className={`px-3 py-1 rounded-full transition-colors ${sortBy === 'date' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49] font-semibold' : 'hover:text-[#101211] dark:hover:text-[#F3F5F1]'
+                }`}
             >
               Date
             </button>
@@ -321,9 +320,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                 if (sortBy === 'name') setSortAsc(!sortAsc)
                 else { setSortBy('name'); setSortAsc(true) }
               }}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                sortBy === 'name' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49] font-semibold' : 'hover:text-[#101211] dark:hover:text-[#F3F5F1]'
-              }`}
+              className={`px-3 py-1 rounded-full transition-colors ${sortBy === 'name' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49] font-semibold' : 'hover:text-[#101211] dark:hover:text-[#F3F5F1]'
+                }`}
             >
               Name
             </button>
@@ -332,9 +330,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                 if (sortBy === 'size') setSortAsc(!sortAsc)
                 else { setSortBy('size'); setSortAsc(false) }
               }}
-              className={`px-3 py-1 rounded-full transition-colors ${
-                sortBy === 'size' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49] font-semibold' : 'hover:text-[#101211] dark:hover:text-[#F3F5F1]'
-              }`}
+              className={`px-3 py-1 rounded-full transition-colors ${sortBy === 'size' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49] font-semibold' : 'hover:text-[#101211] dark:hover:text-[#F3F5F1]'
+                }`}
             >
               Size
             </button>
@@ -345,18 +342,16 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
             <button
               onClick={() => setViewMode('grid')}
               aria-label="Grid view"
-              className={`p-1.5 rounded-full transition-colors ${
-                viewMode === 'grid' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1]'
-              }`}
+              className={`p-1.5 rounded-full transition-colors ${viewMode === 'grid' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1]'
+                }`}
             >
               <Grid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
               aria-label="List view"
-              className={`p-1.5 rounded-full transition-colors ${
-                viewMode === 'list' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1]'
-              }`}
+              className={`p-1.5 rounded-full transition-colors ${viewMode === 'list' ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1]'
+                }`}
             >
               <List className="w-3.5 h-3.5" />
             </button>
@@ -396,19 +391,17 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                 <button
                   key={pill.id}
                   onClick={() => setPhotoAlbum(pill.id)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-2 shrink-0 border ${
-                    active
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-2 shrink-0 border ${active
                       ? 'bg-[#101211] text-[#F3F5F1] border-[#101211] dark:bg-[#CFFF49] dark:text-[#101211] dark:border-[#CFFF49] font-semibold'
                       : 'bg-[#FFFFFF] dark:bg-[#131715] text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] border-[#DDE2DC] dark:border-white/[0.10]'
-                  }`}
+                    }`}
                 >
                   <span>{pill.label}</span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
-                      active
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${active
                         ? 'bg-white/15 text-[#D4FF54] dark:bg-[#101211]/15 dark:text-[#101211]'
                         : 'bg-[#F2F3F0] dark:bg-white/[0.08] text-[#626B64] dark:text-[#9AA69E]'
-                    }`}
+                      }`}
                   >
                     {pill.count}
                   </span>
@@ -540,11 +533,10 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                       <button
                         onClick={toggleSelectDay}
                         title={allDaySelected ? 'Deselect day' : 'Select all photos from this day'}
-                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                          allDaySelected
+                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${allDaySelected
                             ? 'bg-[#101211] dark:bg-[#CFFF49] text-[#F3F5F1] dark:text-[#101211] shadow-sm scale-105'
                             : 'bg-[#FFFFFF] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.14] border border-[#DDE2DC] dark:border-white/20 text-transparent hover:text-[#101211] dark:hover:text-white/80 opacity-0 group-hover/header:opacity-100'
-                        }`}
+                          }`}
                       >
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       </button>
@@ -572,11 +564,10 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                         <div
                           key={file.id}
                           onClick={() => onSelectFile(file)}
-                          className={`group relative rounded-xl overflow-hidden aspect-square bg-[#E9EDE8] dark:bg-[#191D20] transition-all cursor-pointer select-none ${
-                            isSelected
+                          className={`group relative rounded-xl overflow-hidden aspect-square bg-[#E9EDE8] dark:bg-[#191D20] transition-all cursor-pointer select-none ${isSelected
                               ? 'ring-2 ring-[#087F5B] dark:ring-[#CDFF45] ring-offset-2 ring-offset-[#F4F5F2] dark:ring-offset-[#090B0D] scale-[0.96] shadow-md'
                               : 'hover:brightness-[0.98]'
-                          }`}
+                            }`}
                         >
                           {(() => {
                             const thumbKey = String(file.thumbnail_url || file.id)
@@ -588,6 +579,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                                   alt={file.original_name}
                                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
                                   loading="lazy"
+                                  decoding="async"
                                   onError={() =>
                                     setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
                                   }
@@ -604,9 +596,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
 
                           {/* Whisper-quiet Vignette Gradients (Hidden at rest so photos stay pure & bright) */}
                           <div
-                            className={`photo-overlay pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/35 transition-opacity duration-200 ${
-                              isSelected ? 'opacity-65' : 'opacity-0 group-hover:opacity-100'
-                            }`}
+                            className={`photo-overlay pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/35 transition-opacity duration-200 ${isSelected ? 'opacity-65' : 'opacity-0 group-hover:opacity-100'
+                              }`}
                           />
 
                           {/* Top Actions: Select Checkmark & Video/Star Badges */}
@@ -615,11 +606,10 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                               onClick={(e) => toggleSelect(file.id, e)}
                               title={isSelected ? 'Deselect' : 'Select'}
                               aria-label={isSelected ? 'Deselect photo' : 'Select photo'}
-                              className={`w-6 h-6 rounded-full flex items-center justify-center transition-all backdrop-blur-md ${
-                                isSelected
+                              className={`w-6 h-6 rounded-full flex items-center justify-center transition-all backdrop-blur-md ${isSelected
                                   ? 'bg-[#CDFF45] text-[#101211] shadow-md scale-105'
                                   : 'bg-black/45 border border-white/80 text-transparent hover:text-white opacity-0 group-hover:opacity-100'
-                              }`}
+                                }`}
                             >
                               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                             </button>
@@ -639,16 +629,14 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                                     onToggleFavorite(file.id, file.is_favorite)
                                   }}
                                   aria-label={file.is_favorite ? 'Remove favorite' : 'Favorite'}
-                                  className={`photo-overlay-pill p-1.5 rounded-full transition-opacity backdrop-blur-md ${
-                                    file.is_favorite
+                                  className={`photo-overlay-pill p-1.5 rounded-full transition-opacity backdrop-blur-md ${file.is_favorite
                                       ? 'bg-black/55 text-amber-400 opacity-100'
                                       : 'bg-black/45 text-white/85 hover:text-amber-400 opacity-0 group-hover:opacity-100'
-                                  }`}
+                                    }`}
                                 >
                                   <Star
-                                    className={`w-3.5 h-3.5 ${
-                                      file.is_favorite ? 'fill-amber-400' : ''
-                                    }`}
+                                    className={`w-3.5 h-3.5 ${file.is_favorite ? 'fill-amber-400' : ''
+                                      }`}
                                   />
                                 </button>
                               )}
@@ -674,7 +662,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                                     navigator.share({
                                       title: file.original_name,
                                       url: file.thumbnail_url,
-                                    }).catch(() => {})
+                                    }).catch(() => { })
                                   } else {
                                     onDownloadFile(file)
                                   }
@@ -717,11 +705,10 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                 <div
                   key={file.id}
                   onClick={() => onSelectFile(file)}
-                  className={`group relative rounded-2xl p-3 bg-[#FFFFFF] dark:bg-[#131715] border transition-all cursor-pointer space-y-2.5 select-none shadow-sm ${
-                    isSelected
+                  className={`group relative rounded-2xl p-3 bg-[#FFFFFF] dark:bg-[#131715] border transition-all cursor-pointer space-y-2.5 select-none shadow-sm ${isSelected
                       ? 'border-[#087F5B] dark:border-[#CFFF49] ring-2 ring-[#087F5B]/30 dark:ring-[#CFFF49]/35'
                       : 'border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/40 dark:hover:border-[#CFFF49]/45'
-                  }`}
+                    }`}
                 >
                   {/* Thumbnail Preview Area */}
                   <div className="relative h-32 rounded-xl bg-[#F2F3F0] dark:bg-[#090B0A] overflow-hidden flex items-center justify-center border border-[#DDE2DC] dark:border-white/[0.05]">
@@ -733,6 +720,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                           src={file.thumbnail_url}
                           alt={file.original_name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                          decoding="async"
                           onError={() =>
                             setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
                           }
@@ -860,9 +849,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
               <div
                 key={file.id}
                 onClick={() => onSelectFile(file)}
-                className={`flex items-center justify-between px-4 py-3 hover:bg-[#F2F3F0] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-xs select-none ${
-                  isSelected ? 'bg-[#087F5B]/[0.06] dark:bg-[#CFFF49]/[0.08]' : ''
-                }`}
+                className={`flex items-center justify-between px-4 py-3 hover:bg-[#F2F3F0] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-xs select-none ${isSelected ? 'bg-[#087F5B]/[0.06] dark:bg-[#CFFF49]/[0.08]' : ''
+                  }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <button onClick={(e) => toggleSelect(file.id, e)} className="text-[#626B64] dark:text-[#9AA69E]">

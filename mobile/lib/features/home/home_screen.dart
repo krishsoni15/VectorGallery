@@ -28,6 +28,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   bool _isLoading = false;
   String? _statsError;
   late AnimationController _spinController;
+  BackupStatus _lastEngineStatus = BackupStatus.idle;
+  int _lastUploadedCount = -1;
+
+  void _syncSpinController() {
+    final active = _backupEngine.status == BackupStatus.scanning ||
+        _backupEngine.status == BackupStatus.uploading;
+    if (active) {
+      if (!_spinController.isAnimating) {
+        _spinController.repeat();
+      }
+    } else if (_spinController.isAnimating) {
+      _spinController.stop();
+      _spinController.reset();
+    }
+  }
 
   @override
   void initState() {
@@ -35,9 +50,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     _spinController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..repeat();
+    );
+    _lastEngineStatus = _backupEngine.status;
+    _lastUploadedCount = _backupEngine.uploadedCount;
+    _syncSpinController();
 
-    _fetchStats();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final auth = ref.read(authProvider);
+      if (!auth.isCheckingSession && auth.isAuthenticated) {
+        _fetchStats();
+      }
+    });
     _backupEngine.addListener(_onBackupEngineUpdate);
   }
 
@@ -50,15 +74,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
   void _onBackupEngineUpdate() {
     if (!mounted) return;
+    _syncSpinController();
+    final nextStatus = _backupEngine.status;
+    final nextUploaded = _backupEngine.uploadedCount;
+    final becameCompleted = nextStatus == BackupStatus.completed &&
+        (_lastEngineStatus != BackupStatus.completed || _lastUploadedCount != nextUploaded);
+    _lastEngineStatus = nextStatus;
+    _lastUploadedCount = nextUploaded;
     setState(() {});
-    if (_backupEngine.status == BackupStatus.completed) {
-      _fetchStats();
+    if (becameCompleted) {
       ref.read(authProvider.notifier).bumpSyncVersion();
     }
   }
 
   Future<void> _fetchStats() async {
-    if (!mounted) return;
+    if (!mounted || _isLoading) return;
+    final auth = ref.read(authProvider);
+    if (!auth.isAuthenticated) {
+      if (_stats != null || _statsError != null || _isLoading) {
+        setState(() {
+          _stats = null;
+          _statsError = null;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
     setState(() {
       _isLoading = true;
       _statsError = null;
@@ -344,7 +385,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     ref.listen<AuthState>(authProvider, (prev, next) {
-      if (prev?.syncVersion != next.syncVersion || prev?.isAuthenticated != next.isAuthenticated) {
+      final authChanged = prev?.isAuthenticated != next.isAuthenticated;
+      final syncChanged = prev?.syncVersion != next.syncVersion;
+      final sessionReady = (prev?.isCheckingSession ?? true) && !next.isCheckingSession;
+      if (authChanged || syncChanged || (sessionReady && next.isAuthenticated)) {
         _fetchStats();
       }
     });
@@ -821,9 +865,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Recent Memories',
-                  style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: primaryText, letterSpacing: -0.2),
+                Expanded(
+                  child: Text(
+                    'Recent Memories',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: primaryText, letterSpacing: -0.2),
+                  ),
                 ),
                 TextButton(
                   onPressed: () => widget.onOpenCategory?.call('all'),
@@ -889,7 +937,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     file: f,
                     api: _api,
                     onChanged: () {
-                      _fetchStats();
                       ref.read(authProvider.notifier).bumpSyncVersion();
                     },
                   ),
@@ -914,6 +961,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                                 ? Image.network(
                                     fullUrl,
                                     fit: BoxFit.cover,
+                                    cacheWidth: 240,
+                                    filterQuality: FilterQuality.low,
+                                    gaplessPlayback: true,
                                     errorBuilder: (_, __, ___) => Icon(categoryIconFor(cat), color: brand, size: 20),
                                   )
                                 : Icon(categoryIconFor(cat), color: brand, size: 20),

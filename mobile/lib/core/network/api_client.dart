@@ -21,6 +21,7 @@ class ApiClient {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   Future<void> Function()? _onUnauthorized;
   Future<bool>? _inFlightRefresh;
+  Future<void>? _inFlightUnauthorized;
 
   void setUnauthorizedHandler(Future<void> Function() handler) {
     _onUnauthorized = handler;
@@ -48,8 +49,10 @@ class ApiClient {
         final status = error.response?.statusCode;
         final reqPath = error.requestOptions.path;
         final alreadyRetried = error.requestOptions.extra['_retriedAfterRefresh'] == true;
+        final hadAuthHeader = error.requestOptions.headers['Authorization'] != null;
 
         if (status == 401 &&
+            hadAuthHeader &&
             !alreadyRetried &&
             !reqPath.contains('/api/auth/login') &&
             !reqPath.contains('/api/auth/signup') &&
@@ -70,8 +73,11 @@ class ApiClient {
           }
 
           await clearStoredTokens();
-          if (_onUnauthorized != null) {
-            unawaited(_onUnauthorized!());
+          if (_onUnauthorized != null && _inFlightUnauthorized == null) {
+            _inFlightUnauthorized = _onUnauthorized!().whenComplete(() {
+              _inFlightUnauthorized = null;
+            });
+            unawaited(_inFlightUnauthorized!);
           }
         }
         return handler.next(error);

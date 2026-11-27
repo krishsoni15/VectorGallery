@@ -35,9 +35,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     _wifiOnly = _backupEngine.wifiOnly;
-    _fetchProfile();
-    _fetchDevices();
     _loadApiKey();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final auth = ref.read(authProvider);
+      if (!auth.isCheckingSession && auth.isAuthenticated) {
+        _fetchProfile();
+        _fetchDevices();
+      }
+    });
   }
 
   Future<void> _loadApiKey() async {
@@ -213,7 +219,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     ref.listen<AuthState>(authProvider, (prev, next) {
-      if (prev?.syncVersion != next.syncVersion || prev?.isAuthenticated != next.isAuthenticated) {
+      final authChanged = prev?.isAuthenticated != next.isAuthenticated;
+      final syncChanged = prev?.syncVersion != next.syncVersion;
+      final sessionReady = (prev?.isCheckingSession ?? true) && !next.isCheckingSession;
+      if (authChanged || syncChanged || (sessionReady && next.isAuthenticated)) {
         _fetchProfile();
         _fetchDevices();
       }

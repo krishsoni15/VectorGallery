@@ -25,12 +25,22 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   String? _loadError;
   late String _selectedCategory;
   bool _isGridMode = true;
+  BackupStatus _lastEngineStatus = BackupStatus.idle;
+  int _lastUploadedCount = -1;
 
   @override
   void initState() {
     super.initState();
     _selectedCategory = widget.initialCategory;
-    _fetchFiles();
+    _lastEngineStatus = _backupEngine.status;
+    _lastUploadedCount = _backupEngine.uploadedCount;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final auth = ref.read(authProvider);
+      if (!auth.isCheckingSession && auth.isAuthenticated) {
+        _fetchFiles();
+      }
+    });
     _backupEngine.addListener(_onBackupEngineUpdate);
   }
 
@@ -40,7 +50,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
     if (oldWidget.initialCategory != widget.initialCategory &&
         widget.initialCategory != _selectedCategory) {
       setState(() => _selectedCategory = widget.initialCategory);
-      _fetchFiles();
+      _fetchFiles(force: true);
     }
   }
 
@@ -51,13 +61,32 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   }
 
   void _onBackupEngineUpdate() {
-    if (mounted && _backupEngine.status == BackupStatus.completed) {
-      _fetchFiles();
+    if (!mounted) return;
+    final nextStatus = _backupEngine.status;
+    final nextUploaded = _backupEngine.uploadedCount;
+    final becameCompleted = nextStatus == BackupStatus.completed &&
+        (_lastEngineStatus != BackupStatus.completed || _lastUploadedCount != nextUploaded);
+    _lastEngineStatus = nextStatus;
+    _lastUploadedCount = nextUploaded;
+    if (becameCompleted) {
+      _fetchFiles(force: true);
     }
   }
 
-  Future<void> _fetchFiles() async {
+  Future<void> _fetchFiles({bool force = false}) async {
     if (!mounted) return;
+    if (_isLoading && !force) return;
+    final auth = ref.read(authProvider);
+    if (!auth.isAuthenticated) {
+      if (_files.isNotEmpty || _loadError != null || _isLoading) {
+        setState(() {
+          _files = [];
+          _loadError = null;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
     setState(() {
       _isLoading = true;
       _loadError = null;
@@ -104,7 +133,6 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(!currentFavorite ? 'Starred "$fileName"' : 'Unstarred "$fileName"')),
         );
-        _fetchFiles();
         ref.read(authProvider.notifier).bumpSyncVersion();
       }
     } catch (e) {
@@ -183,7 +211,10 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     ref.listen<AuthState>(authProvider, (prev, next) {
-      if (prev?.syncVersion != next.syncVersion || prev?.isAuthenticated != next.isAuthenticated) {
+      final authChanged = prev?.isAuthenticated != next.isAuthenticated;
+      final syncChanged = prev?.syncVersion != next.syncVersion;
+      final sessionReady = (prev?.isCheckingSession ?? true) && !next.isCheckingSession;
+      if (authChanged || syncChanged || (sessionReady && next.isAuthenticated)) {
         _fetchFiles();
       }
     });
@@ -363,7 +394,6 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                                     api: _api,
                                     isTrashItem: _selectedCategory == 'trash',
                                     onChanged: () {
-                                      _fetchFiles();
                                       ref.read(authProvider.notifier).bumpSyncVersion();
                                     },
                                   ),
@@ -376,6 +406,9 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                                           Image.network(
                                             fullUrl,
                                             fit: BoxFit.cover,
+                                            cacheWidth: 320,
+                                            filterQuality: FilterQuality.low,
+                                            gaplessPlayback: true,
                                             errorBuilder: (_, __, ___) => Container(
                                               color: elevated,
                                               child: Icon(categoryIconFor(cat), color: brand),
@@ -439,26 +472,28 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                                     file: f,
                                     api: _api,
                                     isTrashItem: _selectedCategory == 'trash',
-                                    onChanged: () {
-                                      _fetchFiles();
-                                      ref.read(authProvider.notifier).bumpSyncVersion();
-                                    },
-                                  ),
-                                  tileColor: surface,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    side: BorderSide(color: border),
-                                  ),
-                                  leading: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Container(
-                                      width: 42,
-                                      height: 42,
-                                      color: elevated,
-                                      child: isImg
-                                          ? Image.network(
-                                              fullUrl,
-                                              fit: BoxFit.cover,
+                                      onChanged: () {
+                                        ref.read(authProvider.notifier).bumpSyncVersion();
+                                      },
+                                    ),
+                                    tileColor: surface,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      side: BorderSide(color: border),
+                                    ),
+                                    leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Container(
+                                        width: 42,
+                                        height: 42,
+                                        color: elevated,
+                                        child: isImg
+                                            ? Image.network(
+                                                fullUrl,
+                                                fit: BoxFit.cover,
+                                                cacheWidth: 160,
+                                                filterQuality: FilterQuality.low,
+                                                gaplessPlayback: true,
                                               errorBuilder: (_, __, ___) => Icon(categoryIconFor(cat), color: brand, size: 20),
                                             )
                                           : Icon(categoryIconFor(cat), color: brand, size: 20),

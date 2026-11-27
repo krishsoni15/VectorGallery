@@ -296,6 +296,9 @@ void showVaultFileDetailSheet({
                     child: Image.network(
                       fullImageUrl,
                       fit: BoxFit.contain,
+                      cacheWidth: 1080,
+                      filterQuality: FilterQuality.medium,
+                      gaplessPlayback: true,
                       loadingBuilder: (_, child, progress) {
                         if (progress == null) return child;
                         return Center(child: CircularProgressIndicator(strokeWidth: 2, color: brand));

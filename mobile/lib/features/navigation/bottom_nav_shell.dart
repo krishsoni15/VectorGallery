@@ -29,9 +29,11 @@ class _BottomNavShellState extends ConsumerState<BottomNavShell> {
 
   @override
   Widget build(BuildContext context) {
-    // Keep BackupEngine user-context scoped to the currently authenticated user
+    // Keep BackupEngine user-context scoped only when authenticated identity changes.
     ref.listen<AuthState>(authProvider, (prev, next) {
-      BackupEngine().setUserContext(next.email);
+      if (prev?.email != next.email) {
+        BackupEngine().setUserContext(next.email);
+      }
     });
 
     final border = AppTheme.borderOf(context);

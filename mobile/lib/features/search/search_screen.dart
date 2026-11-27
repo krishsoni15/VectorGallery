@@ -19,6 +19,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<dynamic> _results = [];
   List<String> _history = [];
   bool _isLoading = false;
+  bool _isFetchingHistory = false;
   bool _hasSearched = false;
   String? _searchError;
   String _selectedCategory = 'all';
@@ -26,14 +27,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchHistory();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (ref.read(authProvider).isAuthenticated) {
+        _fetchHistory();
+      }
+    });
   }
 
   Future<void> _fetchHistory() async {
+    if (!mounted || _isFetchingHistory) return;
     if (!ref.read(authProvider).isAuthenticated) {
-      if (mounted) setState(() => _history = []);
+      if (_history.isNotEmpty) setState(() => _history = []);
       return;
     }
+    _isFetchingHistory = true;
     try {
       final res = await _api.dio.get('/api/v2/search/history');
       if (res.statusCode == 200 && res.data is Map && mounted) {
@@ -47,7 +55,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               .toList();
         });
       }
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      _isFetchingHistory = false;
+    }
   }
 
   Future<void> _search(String query) async {
@@ -100,7 +111,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     ref.listen<AuthState>(authProvider, (prev, next) {
-      if (prev?.syncVersion != next.syncVersion) {
+      final authChanged = prev?.isAuthenticated != next.isAuthenticated;
+      final syncChanged = prev?.syncVersion != next.syncVersion;
+      final sessionReady = (prev?.isCheckingSession ?? true) && !next.isCheckingSession;
+      if (authChanged || syncChanged || (sessionReady && next.isAuthenticated)) {
         if (!next.isAuthenticated) {
           setState(() {
             _results = [];
@@ -110,7 +124,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           });
         } else {
           _fetchHistory();
-          if (_controller.text.trim().isNotEmpty) {
+          if (_controller.text.trim().isNotEmpty && syncChanged) {
             _search(_controller.text);
           }
         }
@@ -324,6 +338,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                       ? Image.network(
                                           fullUrl,
                                           fit: BoxFit.cover,
+                                          cacheWidth: 180,
+                                          filterQuality: FilterQuality.low,
+                                          gaplessPlayback: true,
                                           errorBuilder: (_, __, ___) => Icon(categoryIconFor(cat), color: brand, size: 22),
                                         )
                                       : Icon(categoryIconFor(cat), color: brand, size: 22),

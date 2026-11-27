@@ -54,6 +54,7 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _api = ApiClient();
+  bool _isCheckingInitialSession = false;
 
   AuthNotifier() : super(AuthState()) {
     _api.setUnauthorizedHandler(() => signOut(notifyServer: false));
@@ -110,19 +111,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> checkInitialSession() async {
+    if (_isCheckingInitialSession) return;
+    _isCheckingInitialSession = true;
     try {
       final token = await _api.secureStorage.read(key: ApiClient.accessTokenKey);
       final email = await _api.secureStorage.read(key: ApiClient.userEmailKey);
       final name = await _api.secureStorage.read(key: ApiClient.userNameKey);
 
       if (token != null && token.isNotEmpty) {
-        state = state.copyWith(
-          isAuthenticated: true,
-          isCheckingSession: true,
-          token: token,
-          email: email,
-          displayName: name,
-        );
         try {
           final res = await _api.dio.get('/api/auth/session');
           final userMap = res.data is Map ? res.data['user'] : null;
@@ -136,7 +132,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
               email: userMap['email']?.toString() ?? email,
               displayName: userMap['name']?.toString() ?? meta?['full_name']?.toString() ?? name,
               token: latestToken,
-              syncVersion: state.syncVersion + 1,
             );
             await registerDevice();
             return;
@@ -149,9 +144,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
             await signOut(notifyServer: false);
             return;
           }
+          // Transient offline/network error: restore cached identity once cleanly.
+          state = state.copyWith(
+            isAuthenticated: true,
+            isCheckingSession: false,
+            token: token,
+            email: email,
+            displayName: name,
+          );
+          return;
         }
       }
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      _isCheckingInitialSession = false;
+    }
 
     if (mounted) {
       state = state.copyWith(isCheckingSession: false);
@@ -258,7 +265,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> signOut({bool notifyServer = true}) async {
-    if (notifyServer) {
+    final wasAuthenticated = state.isAuthenticated;
+    if (notifyServer && wasAuthenticated) {
       try {
         await _api.dio.post('/api/auth/logout');
       } catch (_) {}
@@ -269,7 +277,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState(
       isAuthenticated: false,
       isCheckingSession: false,
-      syncVersion: state.syncVersion + 1,
+      syncVersion: wasAuthenticated ? state.syncVersion + 1 : state.syncVersion,
     );
   }
 }

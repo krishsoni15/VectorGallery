@@ -24,6 +24,18 @@ class _MemoriesScreenState extends ConsumerState<MemoriesScreen> {
   }
 
   Future<void> _fetchCollections() async {
+    if (!mounted || _isLoading) return;
+    final defaultSmart = [
+      {'id': 'smart-diwali', 'name': 'Diwali & New Year Wishes', 'description': 'Festive greeting cards, diyas & blessings', 'type': 'diwali', 'is_smart': true},
+      {'id': 'smart-screenshots', 'name': 'Recent Screenshots', 'description': 'Receipts, code snippets & UI captures', 'type': 'screenshots', 'is_smart': true},
+      {'id': 'smart-important', 'name': 'Important Documents', 'description': 'Starred contracts, IDs & certificates', 'type': 'important', 'is_smart': true},
+      {'id': 'smart-bills', 'name': 'Bills & Invoices', 'description': 'Payment receipts & financial records', 'type': 'bills', 'is_smart': true},
+      {'id': 'smart-large-files', 'name': 'Large Files (>20MB)', 'description': 'High-resolution videos & archives', 'type': 'large_files', 'is_smart': true},
+    ];
+    if (!ref.read(authProvider).isAuthenticated) {
+      setState(() => _collections = defaultSmart);
+      return;
+    }
     setState(() => _isLoading = true);
     try {
       final res = await _api.dio.get('/api/v2/collections');
@@ -34,15 +46,7 @@ class _MemoriesScreenState extends ConsumerState<MemoriesScreen> {
       }
     } catch (_) {
       if (mounted) {
-        setState(() {
-          _collections = [
-            {'id': 'smart-diwali', 'name': 'Diwali & New Year Wishes', 'description': 'Festive greeting cards, diyas & blessings', 'type': 'diwali', 'is_smart': true},
-            {'id': 'smart-screenshots', 'name': 'Recent Screenshots', 'description': 'Receipts, code snippets & UI captures', 'type': 'screenshots', 'is_smart': true},
-            {'id': 'smart-important', 'name': 'Important Documents', 'description': 'Starred contracts, IDs & certificates', 'type': 'important', 'is_smart': true},
-            {'id': 'smart-bills', 'name': 'Bills & Invoices', 'description': 'Payment receipts & financial records', 'type': 'bills', 'is_smart': true},
-            {'id': 'smart-large-files', 'name': 'Large Files (>20MB)', 'description': 'High-resolution videos & archives', 'type': 'large_files', 'is_smart': true},
-          ];
-        });
+        setState(() => _collections = defaultSmart);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -192,6 +196,9 @@ class _MemoriesScreenState extends ConsumerState<MemoriesScreen> {
                                     ? Image.network(
                                         fullUrl,
                                         fit: BoxFit.cover,
+                                        cacheWidth: 160,
+                                        filterQuality: FilterQuality.low,
+                                        gaplessPlayback: true,
                                         errorBuilder: (_, __, ___) => Icon(categoryIconFor(cat), color: brand, size: 20),
                                       )
                                     : Icon(categoryIconFor(cat), color: brand, size: 20),
@@ -293,7 +300,7 @@ class _MemoriesScreenState extends ConsumerState<MemoriesScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authProvider, (prev, next) {
-      if (prev?.syncVersion != next.syncVersion) {
+      if (prev?.syncVersion != next.syncVersion || prev?.isAuthenticated != next.isAuthenticated) {
         _fetchCollections();
       }
     });
