@@ -56,7 +56,7 @@ export function ThemeSwitch({ mode = 'compact', className }: ThemeSwitchProps) {
         role="group"
         aria-label="Theme preference"
         className={cn(
-          'inline-flex items-center p-1 rounded-xl border border-[var(--vg-border)] bg-[var(--vg-surface)]',
+          'inline-flex items-center p-1 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)]',
           className
         )}
       >
@@ -70,9 +70,9 @@ export function ThemeSwitch({ mode = 'compact', className }: ThemeSwitchProps) {
               onClick={() => applyPref(item.id)}
               aria-pressed={active}
               className={cn(
-                'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
                 active
-                  ? 'bg-[var(--vg-surface-soft)] text-[var(--vg-brand)] shadow-sm'
+                  ? 'bg-[#E9EBE5] dark:bg-[#252A26] text-[#087F5B] dark:text-[#58D6A8] shadow-sm'
                   : 'text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)]'
               )}
             >
@@ -94,13 +94,13 @@ export function ThemeSwitch({ mode = 'compact', className }: ThemeSwitchProps) {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={cn(
-        'relative inline-flex items-center justify-center w-9 h-9 rounded-xl border border-[var(--vg-border)] bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+        'relative inline-flex items-center justify-center w-9 h-9 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
         className
       )}
     >
       <span className="relative w-4 h-4 flex items-center justify-center">
         {isDark ? (
-          <Sun className="w-4 h-4 text-[#53D9A3] transition-transform duration-300 rotate-0" />
+          <Sun className="w-4 h-4 text-[#58D6A8] transition-transform duration-300 rotate-0" />
         ) : (
           <Moon className="w-4 h-4 text-[#087F5B] transition-transform duration-300 rotate-0" />
         )}

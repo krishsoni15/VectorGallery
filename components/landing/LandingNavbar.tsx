@@ -15,7 +15,6 @@ interface LandingNavbarProps {
 
 const NAV_LINKS = [
   { href: '#showcase', label: 'Product' },
-  { href: '#search-demo', label: 'How it works' },
   { href: '#mobile', label: 'Mobile' },
   { href: '#privacy', label: 'Open Source' },
 ]
@@ -43,12 +42,14 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  const showStars = typeof stars === 'number' && stars > 0
+
   return (
     <header
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
         scrolled
-          ? 'bg-[#FFFFFF]/88 dark:bg-[#101914]/88 backdrop-blur-2xl border-b border-[var(--vg-border)] shadow-[0_4px_24px_-8px_rgba(15,36,27,0.08)]'
+          ? 'bg-[#FAFAF7]/85 dark:bg-[#0B0D0C]/85 backdrop-blur-xl border-b border-[var(--vg-border)] shadow-[0_4px_24px_-12px_rgba(24,28,25,0.08)]'
           : 'vg-transparent-header bg-transparent border-b border-transparent'
       )}
     >
@@ -56,16 +57,16 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
         Skip to main content
       </a>
 
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-[1340px] mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
         <Link
           href="/"
           aria-label="VectorGallery Home"
-          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] rounded-xl"
+          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] rounded-full"
         >
           <VectorGalleryLogo variant="animated" size="md" />
         </Link>
 
-        {/* Center Navigation */}
+        {/* Center Navigation — Strictly 3 links */}
         <nav
           aria-label="Primary navigation"
           className="hidden lg:flex items-center gap-1 text-[14px] font-medium text-[var(--vg-ink-2)]"
@@ -89,12 +90,13 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#E6EDE4]/80 dark:hover:bg-[#1C3329]/75 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+            aria-label="VectorGallery on GitHub"
+            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#F0F1EC]/90 dark:hover:bg-[#171A18] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
           >
             <Github className="w-4 h-4" />
             <span>GitHub</span>
-            {typeof stars === 'number' && stars > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[var(--vg-surface-soft)] text-[var(--vg-brand)]">
+            {showStars && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[var(--vg-surface-2)] text-[var(--vg-brand)]">
                 <Star className="w-3 h-3 fill-current" />
                 {stars}
               </span>
@@ -103,7 +105,7 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
 
           <Link
             href="/login"
-            className="hidden sm:inline-flex items-center h-9 px-3 rounded-xl text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#E6EDE4]/80 dark:hover:bg-[#1C3329]/75 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+            className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-full text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#F0F1EC]/90 dark:hover:bg-[#171A18] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
           >
             Sign in
           </Link>
@@ -116,7 +118,7 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
           <button
             type="button"
             onClick={() => setMobileOpen((prev) => !prev)}
-            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-xl border border-[var(--vg-border)] bg-[var(--vg-surface)] text-[var(--vg-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)] text-[var(--vg-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
             aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileOpen}
           >
@@ -133,7 +135,7 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
             animate={reduced ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
             transition={{ duration: 0.22 }}
-            className="lg:hidden overflow-hidden border-t border-[var(--vg-border)] bg-[#FFFFFF]/95 dark:bg-[#101914]/95 backdrop-blur-2xl"
+            className="lg:hidden overflow-hidden border-t border-[var(--vg-border)] bg-[#FAFAF7]/96 dark:bg-[#0B0D0C]/96 backdrop-blur-2xl"
           >
             <div className="px-5 py-5 space-y-1.5">
               {[
@@ -161,8 +163,8 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
                   <Github className="w-4 h-4" />
                   <span>GitHub</span>
                 </span>
-                {typeof stars === 'number' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[var(--vg-surface-soft)] text-[var(--vg-brand)]">
+                {showStars && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[var(--vg-surface-2)] text-[var(--vg-brand)]">
                     <Star className="w-3 h-3 fill-current" />
                     {stars}
                   </span>

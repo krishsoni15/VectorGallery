@@ -52,15 +52,15 @@ export function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) 
       aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
       title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl border border-[#DCE5DD] dark:border-[#B8E7D4]/15 bg-[#FFFFFF] dark:bg-[#101914] hover:bg-[#EEF3EC] dark:hover:bg-[#1C3329] text-[#0F241B] dark:text-[#EFF7F3] transition-all active:scale-95 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#53D9A3]',
-        showLabel ? 'h-9 px-3 text-xs font-medium' : 'h-9 w-9',
+        'inline-flex items-center justify-center gap-2 rounded-full border border-[#E0E4DD] dark:border-white/[0.09] bg-[#FFFFFF] dark:bg-[#131614] hover:bg-[#F0F1EC] dark:hover:bg-[#171A18] text-[#181C19] dark:text-[#F2F3EF] transition-all active:scale-95 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#58D6A8]',
+        showLabel ? 'h-9 px-3.5 text-xs font-medium' : 'h-9 w-9',
         className
       )}
     >
       {isLight ? (
         <Moon className="w-4 h-4 text-[#087F5B]" />
       ) : (
-        <Sun className="w-4 h-4 text-[#53D9A3]" />
+        <Sun className="w-4 h-4 text-[#58D6A8]" />
       )}
       {showLabel && <span>{isLight ? 'Dark' : 'Light'}</span>}
     </button>

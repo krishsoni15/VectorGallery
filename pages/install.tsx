@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { LiveQrCode } from '@/components/LiveQrCode'
-import { VG_COMPONENTS, VG_TYPOGRAPHY } from '@/components/landing/design-system'
+import { VG_COMPONENTS } from '@/components/landing/design-system'
 import { APK_EXPECTED_SHA256, RELEASES_URL } from '@/components/landing/tokens'
 import { cn } from '@/lib/utils'
 
@@ -22,19 +22,19 @@ const INSTALL_STEPS = [
     step: '01',
     title: 'Download the Android APK',
     description:
-      'Tap "Download anyway" if your Android browser shows a standard prompt for direct package downloads.',
+      'Tap "Download anyway" if your Android browser shows a standard confirmation prompt for direct app downloads.',
   },
   {
     step: '02',
     title: 'Allow install & launch',
     description:
-      'Open the downloaded APK file cleanly and allow package installation from your browser source.',
+      'Open the downloaded APK file and allow package installation from your browser source.',
   },
   {
     step: '03',
-    title: 'Sync camera roll over Wi-Fi or Cloud',
+    title: 'Back up gently over Wi-Fi',
     description:
-      'Background sync hashes files with SHA-256 before transfer and queues offline via SQLite with non-destructive reads.',
+      'Photos and screenshots sync automatically without duplicates and never touch the originals on your phone.',
   },
 ]
 
@@ -95,17 +95,17 @@ export default function InstallPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
           name="description"
-          content="Download the VectorGallery Flutter Android companion app via verified direct APK or live Wi-Fi QR scan."
+          content="Download the VectorGallery Android companion app via verified direct APK or QR scan."
         />
       </Head>
 
-      <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] flex flex-col overflow-x-clip selection:bg-[#087F5B]/20 dark:selection:bg-[#53D9A3]/25">
+      <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] flex flex-col overflow-x-clip selection:bg-[#087F5B]/20 dark:selection:bg-[#58D6A8]/25">
         <SiteHeader />
 
         <main className="relative flex-1 px-5 sm:px-8 py-12 sm:py-20 overflow-hidden">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -top-24 inset-x-0 h-[540px] bg-[radial-gradient(ellipse_75%_55%_at_60%_20%,rgba(8,127,91,0.14),transparent_72%)] dark:bg-[radial-gradient(ellipse_75%_55%_at_60%_20%,rgba(83,217,163,0.16),transparent_72%)]"
+            className="pointer-events-none absolute -top-24 inset-x-0 h-[520px] bg-[radial-gradient(ellipse_75%_55%_at_62%_22%,rgba(166,217,208,0.22),transparent_72%)] dark:bg-[radial-gradient(ellipse_75%_55%_at_62%_22%,rgba(88,214,168,0.12),transparent_72%)]"
           />
 
           <div className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-12 gap-14 items-center">
@@ -115,20 +115,20 @@ export default function InstallPage() {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="lg:col-span-6 space-y-6"
             >
-              <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#087F5B] dark:text-[#53D9A3]">
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>Flutter Companion · v2.0.0+1</span>
+              <div className="inline-flex items-center gap-2 text-[13px] font-medium text-[#087F5B] dark:text-[#58D6A8]">
+                <Smartphone className="w-4 h-4" />
+                <span>Android Companion · v2.0.0</span>
               </div>
 
-              <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-[-0.03em] leading-[1.02]">
-                VectorGallery in your{' '}
-                <em className={VG_TYPOGRAPHY.editorialWordClass}>
-                  pocket.
-                </em>
+              <h1
+                className="font-display text-4xl sm:text-6xl font-bold tracking-[-0.036em] leading-[1.02] text-[var(--vg-ink)]"
+                style={{ textWrap: 'balance' }}
+              >
+                VectorGallery in your{'\u00A0'}pocket.
               </h1>
 
               <p className="text-[16px] text-[var(--vg-ink-2)] leading-relaxed max-w-lg">
-                Automatic non-destructive mobile backup, SHA-256 deduplication, SQLite offline queueing, Wi-Fi-only gating, and instant memory search across your vault.
+                Automatic Wi-Fi backup that skips duplicates, keeps originals safe on your phone, and brings every memory straight to your desktop library.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -162,7 +162,7 @@ export default function InstallPage() {
                   href="/app"
                   className={VG_COMPONENTS.buttons.secondary}
                 >
-                  <span>Open Web Vault</span>
+                  <span>Open Web Workspace</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -176,7 +176,7 @@ export default function InstallPage() {
                   <button
                     type="button"
                     onClick={copySha}
-                    className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#087F5B] dark:text-[#53D9A3] hover:underline"
+                    className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#087F5B] dark:text-[#58D6A8] hover:underline"
                   >
                     {copiedSha ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedSha ? 'Copied SHA-256' : 'Copy SHA-256'}</span>
@@ -186,7 +186,7 @@ export default function InstallPage() {
                   {APK_EXPECTED_SHA256}
                 </p>
                 <p className="text-[11.5px] text-[var(--vg-ink-3)]">
-                  Distributed directly via APK &amp; Flutter source build (not listed on Google Play or App Store).
+                  Distributed directly via signed APK &amp; open-source Flutter build (not listed on Google Play or App Store).
                 </p>
               </div>
 
@@ -204,7 +204,7 @@ export default function InstallPage() {
                         className={cn(
                           'text-[12px] font-mono pt-0.5 transition-colors',
                           selected
-                            ? 'text-[#087F5B] dark:text-[#53D9A3] font-semibold'
+                            ? 'text-[#087F5B] dark:text-[#58D6A8] font-semibold'
                             : 'text-[var(--vg-ink-3)]'
                         )}
                       >
@@ -227,13 +227,13 @@ export default function InstallPage() {
 
               <div className="flex flex-wrap items-center gap-5 text-[12px] text-[var(--vg-ink-2)]">
                 <span className="inline-flex items-center gap-1.5">
-                  <Wifi className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#53D9A3]" /> Direct Wi-Fi LAN Sync
+                  <Wifi className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#58D6A8]" /> Wi-Fi only backup supported
                 </span>
                 <a
                   href={RELEASES_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-[#087F5B] dark:hover:text-[#53D9A3] transition-colors"
+                  className="inline-flex items-center gap-1 hover:text-[#087F5B] dark:hover:text-[#58D6A8] transition-colors"
                 >
                   <span>GitHub Releases</span>
                   <ExternalLink className="w-3 h-3" />
@@ -241,49 +241,49 @@ export default function InstallPage() {
               </div>
             </motion.div>
 
-            {/* Right Column: Forest Sanctuary Framed Handset + QR */}
+            {/* Right Column: Obsidian Hardware Handset + Smart QR */}
             <div className="lg:col-span-6 flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center justify-center gap-10">
               <motion.div
                 initial={{ opacity: 0.96, y: 8 }}
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.25 }}
-                className="w-[264px] rounded-[38px] p-2.5 bg-gradient-to-b from-[#173328] to-[#080E0C] shadow-[var(--vg-shadow-hero)] ring-1 ring-[#B8E7D4]/15 shrink-0"
+                className="w-[264px] rounded-[38px] p-2.5 bg-gradient-to-b from-[#252A26] to-[#0B0D0C] shadow-[var(--vg-shadow-hero)] ring-1 ring-white/15 shrink-0"
               >
-                <div className="rounded-[30px] overflow-hidden bg-[#080E0C] relative h-[460px] flex flex-col justify-between p-4">
+                <div className="rounded-[30px] overflow-hidden bg-[#0B0D0C] relative h-[460px] flex flex-col justify-between p-4">
                   <div className="relative z-10 flex items-center justify-between pt-1">
                     <div className="flex items-center gap-2">
                       <img src="/vectorgallery-icon.svg" alt="VectorGallery" className="w-5 h-5 rounded-md" />
-                      <span className="text-xs font-semibold text-[#EFF7F3]">VectorGallery</span>
+                      <span className="text-xs font-semibold text-[#F2F3EF]">VectorGallery</span>
                     </div>
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#1C3329] text-[#53D9A3] border border-[#53D9A3]/20">
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#171A18] text-[#58D6A8] border border-[#58D6A8]/25">
                       READY
                     </span>
                   </div>
-                  <div className="relative z-10 rounded-2xl overflow-hidden h-52 shadow-lg border border-[#B8E7D4]/15">
+                  <div className="relative z-10 rounded-2xl overflow-hidden h-52 shadow-lg border border-white/10">
                     <img
-                      src="/landing/photos/mountain-pass.webp"
-                      alt="Curated mountain photograph synced cleanly"
+                      src="/landing/photos/aura-personal-travel.webp"
+                      alt="Personal travel film photograph synced from Android"
                       className="w-full h-full object-cover"
                     />
-                    <div className="vg-photo-caption absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-[#080E0C]/90 to-transparent">
-                      <span className="text-[9px] font-mono text-[#53D9A3]">SYNCED · SHA-256</span>
-                      <p className="text-xs font-medium text-[#EFF7F3]">Non-Destructive Backup</p>
+                    <div className="vg-photo-caption absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-[#0B0D0C]/90 to-transparent">
+                      <span className="text-[9px] font-mono text-[#58D6A8]">SYNCED · SHA-256</span>
+                      <p className="text-xs font-medium text-[#F2F3EF]">Originals Stay Safe</p>
                     </div>
                   </div>
-                  <div className="relative z-10 rounded-full bg-[#101914]/95 border border-[#B8E7D4]/15 px-4 py-2 flex items-center justify-between text-[11px] text-[#EFF7F3]">
-                    <span className="text-[#53D9A3]">Wi-Fi Guard</span>
-                    <span className="font-mono text-[#9CB6AA]">v2.0.0</span>
+                  <div className="relative z-10 rounded-full bg-[#131614]/95 border border-white/10 px-4 py-2 flex items-center justify-between text-[11px] text-[#F2F3EF]">
+                    <span className="text-[#58D6A8]">Wi-Fi Guard</span>
+                    <span className="font-mono text-[#A3ADA5]">v2.0.0</span>
                   </div>
                 </div>
               </motion.div>
 
               <div className="space-y-3 text-center sm:text-left">
-                <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[var(--vg-ink-2)] block">
+                <span className="text-[12px] font-medium text-[var(--vg-ink-2)] block">
                   Scan on phone
                 </span>
                 <LiveQrCode path="/install" size={140} />
-                <p className="text-[12px] text-[var(--vg-ink-2)] max-w-[200px]">
-                  Open Android camera on the same Wi-Fi to open this page and download directly.
+                <p className="text-[12px] text-[var(--vg-ink-2)] max-w-[230px]">
+                  Scan with your Android camera to open the installer on your phone.
                 </p>
               </div>
             </div>

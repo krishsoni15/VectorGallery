@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
-import { VG_COMPONENTS, VG_TYPOGRAPHY } from '@/components/landing/design-system'
+import { VG_COMPONENTS } from '@/components/landing/design-system'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { cn } from '@/lib/utils'
 
@@ -100,47 +100,43 @@ export default function LoginPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#087F5B]/20 dark:selection:bg-[#53D9A3]/25">
-        {/* Left Deep Forest Green Photo Panel */}
-        <div className="photo-overlay hidden lg:flex lg:col-span-6 relative overflow-hidden bg-[#092219] flex-col justify-between p-12">
+      <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#087F5B]/20 dark:selection:bg-[#58D6A8]/25">
+        {/* Left Studio Photo Panel */}
+        <div className="photo-overlay hidden lg:flex lg:col-span-6 relative overflow-hidden bg-[#0B0D0C] flex-col justify-between p-12">
           <div className="absolute inset-0 pointer-events-none">
             <img
-              src="/landing/photos/valley-reflection.webp"
-              alt="Alpine stream and pine forest"
-              className="w-full h-full object-cover opacity-55"
+              src="/landing/photos/aura-sunlit-interior.webp"
+              alt="Sunlit modern interior workspace with framed photography"
+              className="w-full h-full object-cover opacity-60"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#071A13] via-[#092219]/55 to-[#092219]/85 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D0C] via-[#0B0D0C]/45 to-[#0B0D0C]/75 pointer-events-none" />
 
           <div className="relative z-10 flex items-center justify-between">
             <Link href="/" className="shrink-0">
               <VectorGalleryLogo size="sm" variant="on-dark" />
             </Link>
-            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#B8E7D4]">
-              Vault Access
+            <span className="text-[12px] font-medium text-[#C4EDE1]">
+              Personal Cloud Access
             </span>
           </div>
 
           <div className="relative z-10 max-w-md space-y-4">
             <p
-              className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#EFF7F3]"
+              className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#F2F3EF]"
               style={{ textWrap: 'balance' }}
             >
-              A{' '}
-              <em className={VG_TYPOGRAPHY.editorialWordOnForestClass}>
-                calm
-              </em>{' '}
-              home for every frame you{'\u00A0'}keep.
+              A calm home for everything you{'\u00A0'}keep.
             </p>
-            <p className="text-[15px] text-[#B8E7D4]/80 leading-relaxed">
-              Access your photo timeline, optical OCR screenshot archive, and grounded document search across desktop and Android.
+            <p className="text-[15.5px] text-[#F2F3EF]/80 leading-relaxed">
+              Return to your photo library, scanned pages, and personal notes across desktop and Android.
             </p>
           </div>
 
-          <div className="relative z-10 flex items-center gap-6 text-[12px] font-mono text-[#9CB6AA]">
-            <span>AES-256-GCM BYOK KEYS</span>
+          <div className="relative z-10 flex items-center gap-4 text-[12px] text-[#A3ADA5]">
+            <span>Private workspace</span>
             <span>·</span>
-            <span>SHA-256 WI-FI SYNC</span>
+            <span>Automatic Android backup</span>
           </div>
         </div>
 
@@ -160,10 +156,10 @@ export default function LoginPage() {
             <div className="flex items-center gap-2.5">
               <Link
                 href="/install"
-                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45 transition-colors"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[#087F5B]/45 dark:hover:border-[#58D6A8]/45 transition-colors"
               >
-                <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#53D9A3]" />
-                <span>Get APK</span>
+                <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#58D6A8]" />
+                <span>Android App</span>
               </Link>
               <ThemeToggle />
             </div>
@@ -176,14 +172,11 @@ export default function LoginPage() {
             className="w-full max-w-[380px] mx-auto py-12"
           >
             <div className="space-y-2 mb-9">
-              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.03em]">
-                Welcome{' '}
-                <em className={VG_TYPOGRAPHY.editorialWordClass}>
-                  back
-                </em>
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.03em] text-[var(--vg-ink)]">
+                Welcome back
               </h1>
-              <p className="text-[14px] text-[var(--vg-ink-2)]">
-                Sign in to unlock your vault, albums, and encrypted BYOK configuration.
+              <p className="text-[14.5px] text-[var(--vg-ink-2)]">
+                Sign in to open your library, collections, and personal AI settings.
               </p>
             </div>
 
@@ -210,7 +203,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 transition-all"
                   />
                 </div>
               </div>
@@ -231,7 +224,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/25 dark:focus:ring-[#53D9A3]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 transition-all"
                   />
                   <button
                     type="button"
@@ -265,24 +258,27 @@ export default function LoginPage() {
 
             <div className="my-6 flex items-center gap-4">
               <div className="flex-1 border-t border-[var(--vg-border)]" />
-              <span className="text-[11px] font-mono uppercase text-[var(--vg-ink-3)]">or</span>
+              <span className="text-[11px] uppercase tracking-wider text-[var(--vg-ink-3)]">or</span>
               <div className="flex-1 border-t border-[var(--vg-border)]" />
             </div>
 
             <button
               type="button"
               onClick={handleGuestAccess}
-              className="w-full h-11 px-5 rounded-xl border border-[var(--vg-border)] bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] hover:border-[var(--vg-border-strong)] text-[13px] font-medium flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+              className="w-full h-11 px-5 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface-2)] hover:bg-[#E9EBE5] dark:hover:bg-[#252A26] hover:border-[var(--vg-border-strong)] text-[13.5px] font-medium flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
             >
-              <Zap className="w-4 h-4 text-[#087F5B] dark:text-[#53D9A3]" />
-              <span>Continue in Local Workspace</span>
+              <Zap className="w-4 h-4 text-[#087F5B] dark:text-[#58D6A8]" />
+              <span>Continue in Local Sandbox</span>
             </button>
+            <p className="mt-2 text-[11.5px] text-center text-[var(--vg-ink-muted)]">
+              Explore locally on this device without creating an account.
+            </p>
 
-            <p className="mt-7 text-[13px] text-[var(--vg-ink-2)] text-center">
+            <p className="mt-7 text-[13.5px] text-[var(--vg-ink-2)] text-center">
               New to VectorGallery?{' '}
               <Link
                 href="/signup"
-                className="font-semibold text-[#087F5B] dark:text-[#53D9A3] hover:underline underline-offset-4"
+                className="font-semibold text-[#087F5B] dark:text-[#58D6A8] hover:underline underline-offset-4"
               >
                 Create an account
               </Link>
@@ -290,8 +286,8 @@ export default function LoginPage() {
           </motion.div>
 
           <div className="flex items-center justify-between text-[12px] text-[var(--vg-ink-3)]">
-            <span>Local Disk, Supabase or Cloudflare R2</span>
-            <Link href="/install" className="hover:text-[#087F5B] dark:hover:text-[#53D9A3] transition-colors">
+            <span>Your files, your storage choice</span>
+            <Link href="/install" className="hover:text-[#087F5B] dark:hover:text-[#58D6A8] transition-colors">
               Android companion →
             </Link>
           </div>

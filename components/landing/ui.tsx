@@ -16,8 +16,8 @@ export function Container({
   return (
     <div
       className={cn(
-        'mx-auto w-full px-4 sm:px-6 lg:px-8',
-        wide ? 'max-w-[1360px]' : 'max-w-[1240px]',
+        'mx-auto w-full px-5 sm:px-8',
+        wide ? 'max-w-[1340px]' : 'max-w-[1260px]',
         className
       )}
     >
@@ -42,15 +42,15 @@ export function Section({
   const bgMap = {
     default: 'bg-[var(--vg-bg)]',
     secondary: 'bg-[var(--vg-surface-2)]',
-    soft: 'bg-[#E6EDE4]/75 dark:bg-[#111C17]',
-    forest: 'bg-[#092219] text-[#EFF7F3]',
+    soft: 'bg-[#E9EBE5]/75 dark:bg-[#171A18]',
+    forest: 'bg-[#092219] text-[#F2F3EF]',
   }
 
   return (
     <section
       id={id}
       aria-label={ariaLabel}
-      className={cn('py-20 sm:py-24 lg:py-28 relative', bgMap[surface], className)}
+      className={cn('py-24 sm:py-28 lg:py-32 relative', bgMap[surface], className)}
     >
       {children}
     </section>
@@ -74,17 +74,17 @@ export function SectionHeading({
     <div
       className={cn(
         'space-y-4',
-        align === 'center' ? 'text-center mx-auto max-w-[860px]' : 'max-w-2xl',
+        align === 'center' ? 'text-center mx-auto max-w-[880px]' : 'max-w-2xl',
         className
       )}
     >
       {eyebrow && (
-        <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--vg-brand)]">
+        <p className="text-[13px] font-medium tracking-[-0.01em] text-[var(--vg-brand)]">
           {eyebrow}
         </p>
       )}
       <h2
-        className="font-display font-bold tracking-[-0.03em] leading-[1.08] text-[var(--vg-ink)]"
+        className="font-display font-bold tracking-[-0.036em] leading-[1.03] text-[var(--vg-ink)]"
         style={{
           fontSize: VG_TYPOGRAPHY.scale.h2.fontSize,
           textWrap: 'balance',
@@ -167,7 +167,7 @@ export function SecondaryButton({
 }: ActionLinkProps) {
   const baseClass = cn(
     size === 'sm' ? VG_COMPONENTS.buttons.secondarySm : VG_COMPONENTS.buttons.secondary,
-    'hover:border-[#087F5B]/45 dark:hover:border-[#53D9A3]/45',
+    'hover:border-[#087F5B]/40 dark:hover:border-[#58D6A8]/40',
     className
   )
 
@@ -228,9 +228,9 @@ export function BrowserFrame({
       <div className="px-4 sm:px-5 py-3 border-b border-[var(--vg-border)] bg-[var(--vg-surface-2)] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#087F5B]/45 dark:bg-[#53D9A3]/50" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#087F5B]/28 dark:bg-[#53D9A3]/30" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#087F5B]/16 dark:bg-[#53D9A3]/18" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD2C7] dark:bg-white/20" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD2C7]/75 dark:bg-white/14" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD2C7]/55 dark:bg-white/10" />
           </div>
           <span className="text-[12px] font-medium text-[var(--vg-ink-2)]">{title}</span>
         </div>
