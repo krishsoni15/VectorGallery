@@ -23,7 +23,7 @@ const STRUCTURED_DATA = {
   license: 'https://opensource.org/licenses/Apache-2.0',
   codeRepository: REPO_URL,
   description:
-    'Open-source Personal AI Cloud and Digital Memory Platform uniting private photo and file storage, optical OCR, document parsing, hybrid natural-language search, grounded AI citations, and non-destructive Android backup.',
+    'Open-source Personal AI Cloud for your photographs, handwritten notes, receipts, and documents. Find what you remember, without remembering where you saved it.',
 }
 
 export default function HomePage() {
@@ -82,25 +82,25 @@ export default function HomePage() {
 
   return (
     <SanctuaryMotionConfig>
-      <div className="vg-shell min-h-screen flex flex-col selection:bg-[#087F5B]/20 dark:selection:bg-[#53D9A3]/25 selection:text-[#0F241B] dark:selection:text-[#EFF7F3]">
+      <div className="vg-shell min-h-screen flex flex-col selection:bg-[#087F5B]/20 dark:selection:bg-[#58D6A8]/25 selection:text-[#181C19] dark:selection:text-[#F2F3EF]">
         <Head>
-          <title>VectorGallery — Personal AI Cloud &amp; Digital Memory Vault</title>
+          <title>VectorGallery — Everything you keep. Right where you need it.</title>
           <meta
             name="description"
-            content="Your digital life, beautifully connected. Open-source Personal AI Cloud combining private photo and document storage, OCR search, grounded AI answers, and non-destructive Android backup."
+            content="Find what you remember, without remembering where you saved it. An open-source personal cloud for your photos, notes, receipts, and Android camera roll."
           />
-          <meta property="og:title" content="VectorGallery — Personal AI Cloud & Digital Memory Vault" />
+          <meta property="og:title" content="VectorGallery — Everything you keep. Right where you need it." />
           <meta
             property="og:description"
-            content="Open-source personal cloud storage, photo timeline, OCR screenshot intelligence, document indexing, and Flutter Android backup."
+            content="Find what you remember, without remembering where you saved it. Private personal cloud storage with natural-language search and non-destructive Android backup."
           />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/brand/social-preview.png" />
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="VectorGallery — Your Digital Memories, Beautifully Connected" />
+          <meta name="twitter:title" content="VectorGallery — Personal AI Cloud & Digital Memory Vault" />
           <meta
             name="twitter:description"
-            content="Store photos, PDFs, screenshots & notes with natural-language search, grounded AI citations, and non-destructive Android Wi-Fi backup."
+            content="Find what you remember, without remembering where you saved it. Photos, notes, documents, and Android backup in one quiet place."
           />
           <meta name="twitter:image" content="/brand/social-preview.png" />
           <script
@@ -123,7 +123,7 @@ export default function HomePage() {
           <FinalInvitationSection />
         </main>
 
-        <FaqAndFooterSection apkSizeLabel={apkSizeLabel} />
+        <FaqAndFooterSection />
       </div>
     </SanctuaryMotionConfig>
   )
