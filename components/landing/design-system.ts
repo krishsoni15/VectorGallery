@@ -1,76 +1,89 @@
 /**
- * VectorGallery — Project Aura Design System
- * Neutral-First Studio Palette (70% neutral canvas / 20% editorial media / 10% emerald-jade accent).
- * Single source of truth for CSS tokens, fluid architectural typography, motion, and component contracts.
+ * VectorGallery — Project Living Matter Design System
+ * Liquid Silver (#F2F3F0 / #D1D5D2) & Liquid Carbon (#090B0A / #202522)
+ * Accent Architecture: Acid-Lime Glass (#D4FF54 / #CFFF49) paired with Titanium Silver & Accessible Emerald (#087F5B / #39D9A0).
+ * Single source of truth for CSS variables, typography, motion, WebGL sphere lighting, and UI contracts.
  */
 
 export const VG_PALETTE = {
   light: {
-    bg: '#FAFAF7',
+    bg: '#F2F3F0',
     surface: '#FFFFFF',
-    secondary: '#F0F1EC',
-    stone: '#E9EBE5',
-    sage: '#CEDBCD',
+    secondary: '#E7E9E5',
+    stone: '#E7E9E5',
+    silver: '#D1D5D2',
+    titanium: '#A8B3B2',
+    sage: '#D1D5D2',
+    lime: '#D4FF54',
+    limeHover: '#C8F73E',
+    limeInk: '#101211',
     primary: '#087F5B',
     primaryHover: '#066649',
     primaryDeep: '#05543C',
     mint: '#C4EDE1',
-    teal: '#A6D9D0',
-    ink: '#181C19',
-    inkSecondary: '#626B64',
-    inkMuted: '#737D75',
+    teal: '#39D9A0',
+    ink: '#101211',
+    inkSecondary: '#555E58',
+    inkMuted: '#626B64',
     badgeInkOnSage: '#066649',
-    border: '#E0E4DD',
-    borderStrong: '#CBD2C7',
+    border: '#DDE2DC',
+    borderStrong: '#C7CEC6',
     forest: '#092219',
     forestSurface: '#0E2E22',
   },
   dark: {
-    bg: '#0B0D0C',
-    surface: '#131614',
-    secondary: '#171A18',
-    elevated: '#252A26',
-    primary: '#58D6A8',
-    primaryInteractive: '#40C495',
-    primaryHover: '#70DFB7',
+    bg: '#090B0A',
+    surface: '#131715',
+    secondary: '#202522',
+    elevated: '#202522',
+    graphite: '#303633',
+    titanium: '#B9C5C5',
+    lime: '#CFFF49',
+    limeHover: '#DCFF73',
+    limeInk: '#090B0A',
+    primary: '#39D9A0',
+    primaryInteractive: '#39D9A0',
+    primaryHover: '#5BE3B2',
     mint: '#C4EDE1',
-    teal: '#75BDB3',
-    ink: '#F2F3EF',
-    inkSecondary: '#A3ADA5',
-    inkMuted: '#7F8A82',
+    teal: '#39D9A0',
+    ink: '#F3F5F1',
+    inkSecondary: '#9AA69E',
+    inkMuted: '#828E86',
     ctaInkOnJade: '#071912',
-    border: 'rgba(255, 255, 255, 0.09)',
-    borderStrong: 'rgba(255, 255, 255, 0.16)',
-    forest: '#081812',
+    border: 'rgba(255, 255, 255, 0.10)',
+    borderStrong: 'rgba(255, 255, 255, 0.18)',
+    forest: '#071711',
     forestSurface: '#0D261D',
   },
   app: {
-    darkBg: '#0B0D0C',
-    darkSurface: '#131614',
-    darkSurface2: '#171A18',
-    darkInput: '#1B1F1C',
+    darkBg: '#090B0A',
+    darkSurface: '#131715',
+    darkSurface2: '#202522',
+    darkInput: '#171B19',
     accent: '#087F5B',
-    accentLight: '#58D6A8',
-    accentGlow: 'rgba(88, 214, 168, 0.15)',
+    accentLight: '#39D9A0',
+    accentGlow: 'rgba(57, 217, 160, 0.16)',
   },
 } as const
 
-/**
- * CSS custom properties aligned identically with styles/globals.css (.vg-shell & html.dark .vg-shell).
- */
 export const VG_CSS_VARS_LIGHT: Record<string, string> = {
   '--vg-bg': VG_PALETTE.light.bg,
   '--vg-surface': VG_PALETTE.light.surface,
   '--vg-surface-2': VG_PALETTE.light.secondary,
-  '--vg-surface-soft': VG_PALETTE.light.stone,
+  '--vg-surface-soft': VG_PALETTE.light.secondary,
+  '--vg-silver': VG_PALETTE.light.silver,
+  '--vg-titanium': VG_PALETTE.light.titanium,
   '--vg-stone': VG_PALETTE.light.stone,
-  '--vg-sage': VG_PALETTE.light.sage,
+  '--vg-sage': VG_PALETTE.light.silver,
   '--vg-mint': VG_PALETTE.light.mint,
   '--vg-teal': VG_PALETTE.light.teal,
+  '--vg-lime': VG_PALETTE.light.lime,
+  '--vg-lime-hover': VG_PALETTE.light.limeHover,
+  '--vg-lime-ink': VG_PALETTE.light.limeInk,
   '--vg-brand': VG_PALETTE.light.primary,
   '--vg-brand-interactive': VG_PALETTE.light.primary,
   '--vg-brand-hover': VG_PALETTE.light.primaryHover,
-  '--vg-accent-light': VG_PALETTE.light.mint,
+  '--vg-accent-light': VG_PALETTE.light.lime,
   '--vg-forest': VG_PALETTE.light.forest,
   '--vg-ink': VG_PALETTE.light.ink,
   '--vg-ink-2': VG_PALETTE.light.inkSecondary,
@@ -79,9 +92,9 @@ export const VG_CSS_VARS_LIGHT: Record<string, string> = {
   '--vg-border': VG_PALETTE.light.border,
   '--vg-border-strong': VG_PALETTE.light.borderStrong,
   '--vg-shadow-card':
-    '0 18px 46px -22px rgba(24, 28, 25, 0.10), 0 2px 10px -2px rgba(24, 28, 25, 0.04)',
+    '0 22px 52px -24px rgba(16, 18, 17, 0.12), 0 2px 10px -2px rgba(16, 18, 17, 0.04)',
   '--vg-shadow-hero':
-    '0 36px 90px -28px rgba(24, 28, 25, 0.14), 0 8px 24px -10px rgba(8, 127, 91, 0.08)',
+    '0 40px 96px -28px rgba(16, 18, 17, 0.16), 0 10px 28px -12px rgba(8, 127, 91, 0.08)',
 }
 
 export const VG_CSS_VARS_DARK: Record<string, string> = {
@@ -89,14 +102,19 @@ export const VG_CSS_VARS_DARK: Record<string, string> = {
   '--vg-surface': VG_PALETTE.dark.surface,
   '--vg-surface-2': VG_PALETTE.dark.secondary,
   '--vg-surface-soft': VG_PALETTE.dark.elevated,
+  '--vg-silver': VG_PALETTE.dark.graphite,
+  '--vg-titanium': VG_PALETTE.dark.titanium,
   '--vg-stone': VG_PALETTE.dark.elevated,
   '--vg-sage': VG_PALETTE.dark.elevated,
   '--vg-mint': VG_PALETTE.dark.mint,
   '--vg-teal': VG_PALETTE.dark.teal,
+  '--vg-lime': VG_PALETTE.dark.lime,
+  '--vg-lime-hover': VG_PALETTE.dark.limeHover,
+  '--vg-lime-ink': VG_PALETTE.dark.limeInk,
   '--vg-brand': VG_PALETTE.dark.primary,
   '--vg-brand-interactive': VG_PALETTE.dark.primaryInteractive,
   '--vg-brand-hover': VG_PALETTE.dark.primaryHover,
-  '--vg-accent-light': VG_PALETTE.dark.mint,
+  '--vg-accent-light': VG_PALETTE.dark.lime,
   '--vg-forest': VG_PALETTE.dark.forest,
   '--vg-ink': VG_PALETTE.dark.ink,
   '--vg-ink-2': VG_PALETTE.dark.inkSecondary,
@@ -105,14 +123,11 @@ export const VG_CSS_VARS_DARK: Record<string, string> = {
   '--vg-border': VG_PALETTE.dark.border,
   '--vg-border-strong': VG_PALETTE.dark.borderStrong,
   '--vg-shadow-card':
-    '0 24px 60px -20px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.06)',
+    '0 28px 64px -22px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(255, 255, 255, 0.06)',
   '--vg-shadow-hero':
-    '0 42px 100px -24px rgba(0, 0, 0, 0.88), 0 0 70px -30px rgba(88, 214, 168, 0.12)',
+    '0 46px 104px -26px rgba(0, 0, 0, 0.90), 0 0 76px -30px rgba(207, 255, 73, 0.12)',
 }
 
-/**
- * Tailwind-compatible color tokens mirrored into tailwind.config.js.
- */
 export const VG_TAILWIND_COLORS = {
   'vm-bg': VG_PALETTE.app.darkBg,
   'vm-card': VG_PALETTE.app.darkSurface,
@@ -122,10 +137,11 @@ export const VG_TAILWIND_COLORS = {
   'vg-bg': VG_PALETTE.light.bg,
   'vg-surface': VG_PALETTE.light.surface,
   'vg-secondary': VG_PALETTE.light.secondary,
-  'vg-stone': VG_PALETTE.light.stone,
-  'vg-sage': VG_PALETTE.light.sage,
-  'vg-mint': VG_PALETTE.light.mint,
-  'vg-teal': VG_PALETTE.light.teal,
+  'vg-silver': VG_PALETTE.light.silver,
+  'vg-titanium': VG_PALETTE.light.titanium,
+  'vg-lime': VG_PALETTE.light.lime,
+  'vg-lime-dark': VG_PALETTE.dark.lime,
+  'vg-lime-ink': VG_PALETTE.light.limeInk,
   'vg-border': VG_PALETTE.light.border,
   'vg-brand': VG_PALETTE.light.primary,
   'vg-brand-deep': VG_PALETTE.light.primaryHover,
@@ -135,40 +151,50 @@ export const VG_TAILWIND_COLORS = {
   'vg-dark-surface': VG_PALETTE.dark.surface,
   'vg-dark-secondary': VG_PALETTE.dark.secondary,
   'vg-dark-elevated': VG_PALETTE.dark.elevated,
+  'vg-graphite': VG_PALETTE.dark.graphite,
   'vg-ink': VG_PALETTE.light.ink,
   'vg-ink-muted': VG_PALETTE.light.inkSecondary,
 } as const
 
 /**
- * Project Aura Fluid Typography Scale.
- * Serif Restraint Rule:
- * - Instrument Serif italic is reserved ONLY for 1 subtle editorial word in Hero (`keep`)
- *   and 1 closing word in Final Invitation (`life`).
- * - All 5 Chapter headings (Chapters 01–05) stay crisp modern architectural grotesk (Manrope).
- * - Geist Mono is strictly for filenames, terminal code, and checksums (never section eyebrow badges).
+ * Project Living Matter Fluid Typography System.
+ * Monumental geometric grotesk (`Space Grotesk` + `Manrope`) for sculptural depth,
+ * crisp neutral sans (`Inter`), and `Geist Mono` exclusively for metadata/filenames/triads/checksums.
  */
 export const VG_TYPOGRAPHY = {
   fonts: {
-    display: '"Manrope", "Inter", system-ui, sans-serif',
+    display: '"Space Grotesk", "Manrope", "Inter", system-ui, sans-serif',
     body: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     editorialSerif: '"Instrument Serif", Georgia, serif',
     mono: '"Geist Mono", ui-monospace, SFMono-Regular, monospace',
   },
   scale: {
+    monumentalWordmark: {
+      fontSize: 'clamp(2.3rem, 8.6vw, 8.2rem)',
+      lineHeight: '0.88',
+      letterSpacing: '-0.05em',
+      fontWeight: 700,
+    },
+    closingMonument: {
+      fontSize: 'clamp(2.4rem, 7.6vw, 7rem)',
+      lineHeight: '0.92',
+      letterSpacing: '-0.048em',
+      fontWeight: 700,
+    },
     h1: {
-      fontSize: 'clamp(2.65rem, 6.4vw, 6.75rem)',
-      lineHeight: '0.96',
+      fontSize: 'clamp(2.5rem, 6.2vw, 6.25rem)',
+      lineHeight: '0.95',
       letterSpacing: '-0.045em',
       fontWeight: 700,
     },
     h2: {
-      fontSize: 'clamp(2rem, 4.4vw, 4.5rem)',
-      lineHeight: '1.03',
-      letterSpacing: '-0.036em',
+      fontSize: 'clamp(2rem, 4.3vw, 4.25rem)',
+      lineHeight: '1.02',
+      letterSpacing: '-0.038em',
       fontWeight: 700,
     },
     h3: {
-      fontSize: 'clamp(1.25rem, 2.1vw, 1.75rem)',
+      fontSize: 'clamp(1.25rem, 2.0vw, 1.75rem)',
       lineHeight: '1.2',
       letterSpacing: '-0.022em',
       fontWeight: 600,
@@ -180,13 +206,13 @@ export const VG_TYPOGRAPHY = {
       fontWeight: 600,
     },
     lead: {
-      fontSize: 'clamp(1rem, 1.2vw, 1.1875rem)',
-      lineHeight: '1.62',
+      fontSize: 'clamp(1rem, 1.22vw, 1.25rem)',
+      lineHeight: '1.58',
       fontWeight: 400,
     },
     body: {
-      fontSize: 'clamp(1rem, 1.15vw, 1.1875rem)',
-      lineHeight: '1.65',
+      fontSize: 'clamp(0.975rem, 1.12vw, 1.125rem)',
+      lineHeight: '1.62',
       fontWeight: 400,
     },
     small: {
@@ -195,29 +221,23 @@ export const VG_TYPOGRAPHY = {
       fontWeight: 400,
     },
     kicker: {
-      fontSize: '0.8125rem',
+      fontSize: '0.75rem',
       lineHeight: '1.25',
-      letterSpacing: '-0.01em',
-      fontWeight: 500,
+      letterSpacing: '0.14em',
+      fontWeight: 600,
     },
   },
-  editorialWordClass:
-    'font-serif italic font-normal text-[var(--vg-brand)] tracking-[-0.015em]',
-  editorialWordOnForestClass:
-    'font-serif italic font-normal text-[#C4EDE1] tracking-[-0.015em]',
 } as const
 
-/**
- * Spacious studio container widths (`85-92%` of 1440px canvas), section padding, radii & shadows.
- */
 export const VG_LAYOUT = {
   containers: {
     narrow: 'max-w-[840px] mx-auto px-5 sm:px-6',
     standard: 'max-w-[1260px] mx-auto px-5 sm:px-8',
-    wide: 'max-w-[1340px] mx-auto px-5 sm:px-8',
+    wide: 'max-w-[1380px] mx-auto px-5 sm:px-8',
+    heroStage: 'max-w-[1440px] mx-auto px-4 sm:px-7 lg:px-10',
   },
   sectionPadding: {
-    hero: 'pt-8 sm:pt-12 pb-16 sm:pb-24',
+    hero: 'pt-2 sm:pt-4 pb-12 sm:pb-16',
     standard: 'py-24 sm:py-28 lg:py-32',
     compact: 'py-16 sm:py-20',
     finalInvitation: 'py-28 sm:py-36',
@@ -233,24 +253,22 @@ export const VG_LAYOUT = {
   shadows: {
     card: 'shadow-[var(--vg-shadow-card)]',
     hero: 'shadow-[var(--vg-shadow-hero)]',
-    ctaLight: 'shadow-[0_14px_32px_-12px_rgba(8,127,91,0.36)]',
-    ctaDark: 'shadow-[0_14px_32px_-12px_rgba(88,214,168,0.24)]',
+    limeGlowLight: 'shadow-[0_20px_50px_-14px_rgba(212,255,84,0.65),0_6px_18px_-6px_rgba(16,18,17,0.14)]',
+    limeGlowDark: 'shadow-[0_20px_54px_-12px_rgba(207,255,73,0.34),0_6px_22px_-6px_rgba(0,0,0,0.6)]',
   },
 } as const
 
-/**
- * Motion standards & reduced-motion policy.
- */
 export const VG_MOTION = {
   ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
   springSnappy: { type: 'spring' as const, stiffness: 320, damping: 28 },
+  springMagnetic: { stiffness: 220, damping: 18, mass: 0.5 },
   springParallax: { stiffness: 90, damping: 24 },
   durations: {
     micro: 0.18,
     standard: 0.5,
     editorial: 0.65,
-    stage: 0.8,
-    ambientSeconds: 11,
+    stage: 0.85,
+    ambientSeconds: 12,
   },
   stagger: {
     tight: 0.045,
@@ -259,32 +277,33 @@ export const VG_MOTION = {
   },
   viewport: { once: true, amount: 'some' as const },
   reducedMotionPolicy:
-    'When prefers-reduced-motion is active, omit transform/blur animations, disable parallax & ambient loops, and render DarkVeil via static neutral-silk CSS fallback.',
+    'When prefers-reduced-motion is active, omit transform/blur loops, pause Three.js continuous orbit rotation, disable GSAP scrub timelines in favor of clean static scene state toggles, and render static CSS fallback for LivingAuraCanvas.',
 } as const
 
-/**
- * Component style contracts in Project Aura Neutral-First system.
- */
 export const VG_COMPONENTS = {
   buttons: {
+    limeCircle:
+      'vg-cta-lime inline-flex flex-col items-center justify-center text-center rounded-full bg-[#D4FF54] hover:bg-[#C8F73E] dark:bg-[#CFFF49] dark:hover:bg-[#DCFF73] text-[#101211] font-semibold tracking-[-0.015em] shadow-[0_20px_50px_-14px_rgba(212,255,84,0.65),0_6px_18px_-6px_rgba(16,18,17,0.14)] dark:shadow-[0_20px_54px_-12px_rgba(207,255,73,0.34),0_6px_22px_-6px_rgba(0,0,0,0.6)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101211] dark:focus-visible:ring-[#F3F5F1] focus-visible:ring-offset-4',
+    limePill:
+      'vg-cta-lime inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#D4FF54] hover:bg-[#C8F73E] dark:bg-[#CFFF49] dark:hover:bg-[#DCFF73] text-[#101211] shadow-[0_14px_34px_-12px_rgba(212,255,84,0.55)] dark:shadow-[0_14px_34px_-12px_rgba(207,255,73,0.28)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101211] dark:focus-visible:ring-[#F3F5F1] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
     primary:
-      'vg-cta inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#58D6A8] dark:hover:bg-[#70DFB7] dark:text-[#071912] shadow-[0_14px_32px_-12px_rgba(8,127,91,0.36)] dark:shadow-[0_14px_32px_-12px_rgba(88,214,168,0.24)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
+      'vg-cta inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F3F5F1] dark:bg-[#F3F5F1] dark:hover:bg-[#FFFFFF] dark:text-[#090B0A] shadow-[0_16px_36px_-14px_rgba(16,18,17,0.35)] dark:shadow-[0_16px_36px_-14px_rgba(255,255,255,0.18)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
     primarySm:
-      'vg-cta inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#58D6A8] dark:hover:bg-[#70DFB7] dark:text-[#071912] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-semibold bg-[#E7E9E5] hover:bg-[#DDE0DA] text-[#101211] dark:bg-[#202522] dark:hover:bg-[#2B322E] dark:text-[#F3F5F1] border border-[#DDE2DC] dark:border-white/[0.12] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
     secondary:
-      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
     secondarySm:
-      'inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
     ghost:
-      'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#F0F1EC]/90 dark:hover:bg-[#171A18] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+      'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#FFFFFF]/80 dark:hover:bg-[#202522] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
     forestPrimary:
-      'inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full text-[14.5px] font-semibold bg-[#58D6A8] hover:bg-[#70DFB7] text-[#071912] shadow-[0_14px_34px_-10px_rgba(88,214,168,0.34)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4EDE1]',
+      'vg-cta-lime inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full text-[14.5px] font-semibold bg-[#CFFF49] hover:bg-[#DCFF73] text-[#090B0A] shadow-[0_14px_34px_-10px_rgba(207,255,73,0.34)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CFFF49]',
     forestSecondary:
-      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-white/[0.08] hover:bg-white/[0.14] text-[#F2F3EF] border border-white/[0.18] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4EDE1]',
+      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-white/[0.08] hover:bg-white/[0.14] text-[#F3F5F1] border border-white/[0.18] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39D9A0]',
     tabActive:
-      'vg-cta bg-[#087F5B] text-[#FFFFFF] border-[#087F5B] dark:bg-[#58D6A8] dark:text-[#071912] dark:border-[#58D6A8] shadow-sm',
+      'bg-[#101211] text-[#F3F5F1] border-[#101211] dark:bg-[#CFFF49] dark:text-[#090B0A] dark:border-[#CFFF49] shadow-sm',
     tabIdle:
-      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[#087F5B]/35 dark:hover:border-[#58D6A8]/35',
+      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[#101211]/25 dark:hover:border-[#CFFF49]/35',
   },
   cards: {
     surface:
@@ -292,62 +311,83 @@ export const VG_COMPONENTS = {
     secondary:
       'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface-2)]',
     elevated:
-      'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] dark:bg-[#171A18] shadow-sm',
+      'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] dark:bg-[#202522] shadow-sm',
     glass:
-      'rounded-2xl border border-[#E0E4DD] dark:border-white/[0.09] bg-[#FFFFFF]/86 dark:bg-[#131614]/84 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
+      'rounded-2xl border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF]/88 dark:bg-[#131715]/86 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
     photoFrame:
       'rounded-2xl overflow-hidden border border-[var(--vg-border)] bg-[var(--vg-surface)] shadow-[var(--vg-shadow-card)]',
     forest:
-      'bg-[#092219] text-[#F2F3EF] border border-[#C4EDE1]/15',
+      'bg-[#0D1411] text-[#F3F5F1] border border-white/[0.10]',
   },
   badges: {
     sage:
-      'inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-medium bg-[#F0F1EC] text-[#181C19] border border-[#E0E4DD] dark:bg-[#171A18] dark:text-[#F2F3EF] dark:border-white/[0.09]',
+      'inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-medium bg-[#E7E9E5] text-[#101211] border border-[#DDE2DC] dark:bg-[#202522] dark:text-[#F3F5F1] dark:border-white/[0.10]',
     mint:
-      'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#C4EDE1]/65 text-[#066649] border border-[#087F5B]/15 dark:bg-[#252A26] dark:text-[#58D6A8] dark:border-[#58D6A8]/25',
+      'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#C4EDE1]/70 text-[#066649] border border-[#087F5B]/15 dark:bg-[#202522] dark:text-[#39D9A0] dark:border-[#39D9A0]/25',
     outline:
       'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border border-[var(--vg-border)]',
     monoTag:
       'font-mono text-[11px] px-2.5 py-0.5 rounded-md bg-[var(--vg-surface-2)] text-[var(--vg-ink-2)] border border-[var(--vg-border)]',
     photoScrim:
-      'vg-photo-caption px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#0B0D0C]/75 text-[#F2F3EF] backdrop-blur-md border border-white/[0.12]',
+      'vg-photo-caption px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#090B0A]/78 text-[#F3F5F1] backdrop-blur-md border border-white/[0.14]',
   },
   inputs: {
     search:
-      'w-full h-12 sm:h-13 pl-12 pr-4 rounded-2xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[15px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 focus:border-[var(--vg-brand)] transition-all',
+      'w-full h-12 sm:h-13 pl-12 pr-4 rounded-2xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[15px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#CFFF49]/25 focus:border-[var(--vg-brand)] transition-all',
     field:
-      'w-full h-11 px-3.5 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 focus:border-[var(--vg-brand)] transition-all',
+      'w-full h-11 px-3.5 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#CFFF49]/25 focus:border-[var(--vg-brand)] transition-all',
     codeBlock:
-      'p-5 rounded-2xl bg-[#0B0D0C] text-[#E6ECE7] font-mono text-[12.5px] leading-relaxed overflow-x-auto border border-white/[0.09]',
+      'p-5 rounded-2xl bg-[#090B0A] text-[#E6ECE7] font-mono text-[12.5px] leading-relaxed overflow-x-auto border border-white/[0.10]',
   },
   media: {
     sculptureMask:
-      'radial-gradient(ellipse 58% 58% at 56% 49%, #000 32%, rgba(0,0,0,0.62) 54%, transparent 75%)',
+      'radial-gradient(ellipse 68% 68% at 50% 50%, #000 60%, transparent 98%)',
   },
 } as const
 
 /**
- * Neutral-First Silk Atmospheric Shader Specification (DarkVeil.tsx).
- * Keeps 70%+ canvas strictly neutral (#FAFAF7 / #0B0D0C) with a quiet silk botanical shimmer.
+ * Liquid Silver / Liquid Carbon Atmospheric Shader Specification.
+ * Matches the organic silver waves & subtle acid-lime light caustics behind the Hero sculpture.
  */
 export const VG_AURA_SHADER_SPEC = {
   lightStops: {
-    base: '#FAFAF7',
-    mid: '#F0F1EC',
-    highlight: '#C4EDE1',
-    tealAccent: '#A6D9D0',
-    opacityRange: [0.18, 0.28] as const,
+    base: '#F2F3F0',
+    mid: '#E7E9E5',
+    highlight: '#D1D5D2',
+    limeCaustic: '#D4FF54',
+    opacityRange: [0.34, 0.56] as const,
   },
   darkStops: {
-    base: '#0B0D0C',
-    mid: '#131614',
-    highlight: '#1D2923',
-    glowAccent: '#58D6A8',
-    tealAccent: '#75BDB3',
-    opacityRange: [0.22, 0.34] as const,
+    base: '#090B0A',
+    mid: '#131715',
+    highlight: '#202522',
+    limeCaustic: '#CFFF49',
+    jadeCaustic: '#39D9A0',
+    opacityRange: [0.32, 0.52] as const,
   },
   cssFallbackLight:
-    'radial-gradient(ellipse 58% 60% at 70% 44%, rgba(166, 217, 208, 0.24), rgba(196, 237, 225, 0.16) 44%, transparent 74%)',
+    'radial-gradient(ellipse 64% 58% at 22% 72%, rgba(212, 255, 84, 0.14), transparent 58%), radial-gradient(ellipse 62% 58% at 78% 72%, rgba(209, 213, 210, 0.55), rgba(242, 243, 240, 0.92) 64%)',
   cssFallbackDark:
-    'radial-gradient(ellipse 58% 60% at 70% 44%, rgba(88, 214, 168, 0.11), rgba(117, 189, 179, 0.06) 44%, transparent 74%)',
+    'radial-gradient(ellipse 62% 56% at 24% 74%, rgba(207, 255, 73, 0.08), transparent 58%), radial-gradient(ellipse 60% 56% at 78% 70%, rgba(57, 217, 160, 0.07), rgba(19, 23, 21, 0.94) 64%)',
+} as const
+
+export const VG_SPHERE_THEME_SPEC = {
+  light: {
+    cutoutSrc: '/landing/artwork/memory-sphere-light-cutout.webp',
+    studioSrc: '/landing/artwork/memory-sphere-light.webp',
+    coreColor: '#D4FF54',
+    coreAttenuation: '#A5E816',
+    chromeColor: '#EBEEF0',
+    ringColor: '#C5CCC9',
+    ambientIntensity: 0.9,
+  },
+  dark: {
+    cutoutSrc: '/landing/artwork/memory-sphere-dark-cutout.webp',
+    studioSrc: '/landing/artwork/memory-sphere-dark.webp',
+    coreColor: '#CFFF49',
+    coreAttenuation: '#39D9A0',
+    chromeColor: '#BAC3C1',
+    ringColor: '#98A4A0',
+    ambientIntensity: 0.72,
+  },
 } as const

@@ -2,59 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
 
 :root {
-  /* App & Workspace Tokens (Neutral Obsidian Sanctuary Default) */
-  --vm-bg: #0B0D0C;
-  --vm-surface-input: #171A18;
-  --vm-surface: #131614;
-  --vm-surface-2: #171A18;
-  --vm-border: rgba(255, 255, 255, 0.09);
-  --vm-border-light: rgba(255, 255, 255, 0.16);
-  --vm-text: #F2F3EF;
-  --vm-text-muted: #A3ADA5;
-  --vm-text-dim: #7F8A82;
+  /* App & Workspace Tokens (Liquid Carbon Default) */
+  --vm-bg: #090B0A;
+  --vm-surface-input: #171B19;
+  --vm-surface: #131715;
+  --vm-surface-2: #202522;
+  --vm-border: rgba(255, 255, 255, 0.10);
+  --vm-border-light: rgba(255, 255, 255, 0.18);
+  --vm-text: #F3F5F1;
+  --vm-text-muted: #9AA69E;
+  --vm-text-dim: #7B867F;
   --vm-accent: #087F5B;
-  --vm-accent-light: #58D6A8;
-  --vm-accent-glow: rgba(88, 214, 168, 0.15);
+  --vm-accent-light: #39D9A0;
+  --vm-accent-glow: rgba(57, 217, 160, 0.16);
   --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Mono', 'Fira Code', monospace;
 
-  /* Project Aura Neutral-First Tokens (Light Baseline Fallback) */
-  --vg-bg: #FAFAF7;
+  /* Project Living Matter Tokens (Liquid Silver Light Fallback) */
+  --vg-bg: #F2F3F0;
   --vg-surface: #FFFFFF;
-  --vg-surface-2: #F0F1EC;
-  --vg-surface-soft: #E9EBE5;
-  --vg-stone: #E9EBE5;
-  --vg-sage: #CEDBCD;
+  --vg-surface-2: #E7E9E5;
+  --vg-surface-soft: #E7E9E5;
+  --vg-silver: #D1D5D2;
+  --vg-titanium: #A8B3B2;
+  --vg-stone: #E7E9E5;
+  --vg-sage: #D1D5D2;
   --vg-mint: #C4EDE1;
-  --vg-teal: #A6D9D0;
+  --vg-teal: #39D9A0;
+  --vg-lime: #D4FF54;
+  --vg-lime-hover: #C8F73E;
+  --vg-lime-ink: #101211;
   --vg-brand: #087F5B;
   --vg-brand-interactive: #087F5B;
   --vg-brand-hover: #066649;
-  --vg-accent-light: #C4EDE1;
+  --vg-accent-light: #D4FF54;
   --vg-forest: #092219;
-  --vg-ink: #181C19;
-  --vg-ink-2: #626B64;
-  --vg-ink-muted: #737D75;
-  --vg-ink-3: #737D75;
-  --vg-border: #E0E4DD;
-  --vg-border-strong: #CBD2C7;
-  --vg-shadow-card: 0 18px 46px -22px rgba(24, 28, 25, 0.10), 0 2px 10px -2px rgba(24, 28, 25, 0.04);
-  --vg-shadow-hero: 0 36px 90px -28px rgba(24, 28, 25, 0.14), 0 8px 24px -10px rgba(8, 127, 91, 0.08);
+  --vg-ink: #101211;
+  --vg-ink-2: #555E58;
+  --vg-ink-muted: #626B64;
+  --vg-ink-3: #626B64;
+  --vg-border: #DDE2DC;
+  --vg-border-strong: #C7CEC6;
+  --vg-shadow-card: 0 22px 52px -24px rgba(16, 18, 17, 0.12), 0 2px 10px -2px rgba(16, 18, 17, 0.04);
+  --vg-shadow-hero: 0 40px 96px -28px rgba(16, 18, 17, 0.16), 0 10px 28px -12px rgba(8, 127, 91, 0.08);
 }
 
-/* ─── Light Mode Project Aura Tokens ─── */
+/* ─── Light Mode Liquid Silver Tokens ─── */
 html.light {
-  --vm-bg: #FAFAF7;
+  --vm-bg: #F2F3F0;
   --vm-surface-input: #FFFFFF;
   --vm-surface: #FFFFFF;
-  --vm-surface-2: #F0F1EC;
-  --vm-border: #E0E4DD;
-  --vm-border-light: #CBD2C7;
-  --vm-text: #181C19;
-  --vm-text-muted: #626B64;
-  --vm-text-dim: #737D75;
+  --vm-surface-2: #E7E9E5;
+  --vm-border: #DDE2DC;
+  --vm-border-light: #C7CEC6;
+  --vm-text: #101211;
+  --vm-text-muted: #555E58;
+  --vm-text-dim: #626B64;
   --vm-accent: #087F5B;
   --vm-accent-light: #10A375;
   --vm-accent-glow: rgba(8, 127, 91, 0.14);
@@ -97,61 +102,77 @@ a {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PROJECT AURA EDITORIAL SHELL (.vg-shell)
-   70% Neutral Alabaster (#FAFAF7) / Obsidian (#0B0D0C) · 10% Emerald/Jade
+   PROJECT LIVING MATTER SHELL (.vg-shell)
+   Liquid Silver (#F2F3F0 / #D1D5D2) & Liquid Carbon (#090B0A / #202522)
+   Acid-Lime Sculpture Reflection (#D4FF54 / #CFFF49) + Emerald AA (#087F5B / #39D9A0)
    ═══════════════════════════════════════════════════════════ */
 .vg-shell {
-  --vg-bg: #FAFAF7;
+  --vg-bg: #F2F3F0;
   --vg-surface: #FFFFFF;
-  --vg-surface-2: #F0F1EC;
-  --vg-surface-soft: #E9EBE5;
-  --vg-stone: #E9EBE5;
-  --vg-sage: #CEDBCD;
+  --vg-surface-2: #E7E9E5;
+  --vg-surface-soft: #E7E9E5;
+  --vg-silver: #D1D5D2;
+  --vg-titanium: #A8B3B2;
+  --vg-stone: #E7E9E5;
+  --vg-sage: #D1D5D2;
   --vg-mint: #C4EDE1;
-  --vg-teal: #A6D9D0;
+  --vg-teal: #39D9A0;
+  --vg-lime: #D4FF54;
+  --vg-lime-hover: #C8F73E;
+  --vg-lime-ink: #101211;
   --vg-brand: #087F5B;
   --vg-brand-interactive: #087F5B;
   --vg-brand-hover: #066649;
-  --vg-accent-light: #C4EDE1;
+  --vg-accent-light: #D4FF54;
   --vg-forest: #092219;
-  --vg-ink: #181C19;
-  --vg-ink-2: #626B64;
-  --vg-ink-muted: #737D75;
-  --vg-ink-3: #737D75;
-  --vg-border: #E0E4DD;
-  --vg-border-strong: #CBD2C7;
-  --vg-shadow-card: 0 18px 46px -22px rgba(24, 28, 25, 0.10), 0 2px 10px -2px rgba(24, 28, 25, 0.04);
-  --vg-shadow-hero: 0 36px 90px -28px rgba(24, 28, 25, 0.14), 0 8px 24px -10px rgba(8, 127, 91, 0.08);
+  --vg-ink: #101211;
+  --vg-ink-2: #555E58;
+  --vg-ink-muted: #626B64;
+  --vg-ink-3: #626B64;
+  --vg-border: #DDE2DC;
+  --vg-border-strong: #C7CEC6;
+  --vg-shadow-card: 0 22px 52px -24px rgba(16, 18, 17, 0.12), 0 2px 10px -2px rgba(16, 18, 17, 0.04);
+  --vg-shadow-hero: 0 40px 96px -28px rgba(16, 18, 17, 0.16), 0 10px 28px -12px rgba(8, 127, 91, 0.08);
   background-color: var(--vg-bg);
   color: var(--vg-ink);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 html.dark .vg-shell {
-  --vg-bg: #0B0D0C;
-  --vg-surface: #131614;
-  --vg-surface-2: #171A18;
-  --vg-surface-soft: #252A26;
-  --vg-stone: #252A26;
-  --vg-sage: #252A26;
+  --vg-bg: #090B0A;
+  --vg-surface: #131715;
+  --vg-surface-2: #202522;
+  --vg-surface-soft: #202522;
+  --vg-silver: #303633;
+  --vg-titanium: #B9C5C5;
+  --vg-stone: #202522;
+  --vg-sage: #202522;
   --vg-mint: #C4EDE1;
-  --vg-teal: #75BDB3;
-  --vg-brand: #58D6A8;
-  --vg-brand-interactive: #40C495;
-  --vg-brand-hover: #70DFB7;
-  --vg-accent-light: #C4EDE1;
-  --vg-forest: #081812;
-  --vg-ink: #F2F3EF;
-  --vg-ink-2: #A3ADA5;
-  --vg-ink-muted: #7F8A82;
-  --vg-ink-3: #7F8A82;
-  --vg-border: rgba(255, 255, 255, 0.09);
-  --vg-border-strong: rgba(255, 255, 255, 0.16);
-  --vg-shadow-card: 0 24px 60px -20px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --vg-shadow-hero: 0 42px 100px -24px rgba(0, 0, 0, 0.88), 0 0 70px -30px rgba(88, 214, 168, 0.12);
+  --vg-teal: #39D9A0;
+  --vg-lime: #CFFF49;
+  --vg-lime-hover: #DCFF73;
+  --vg-lime-ink: #090B0A;
+  --vg-brand: #39D9A0;
+  --vg-brand-interactive: #39D9A0;
+  --vg-brand-hover: #5BE3B2;
+  --vg-accent-light: #CFFF49;
+  --vg-forest: #071711;
+  --vg-ink: #F3F5F1;
+  --vg-ink-2: #9AA69E;
+  --vg-ink-muted: #828E86;
+  --vg-ink-3: #828E86;
+  --vg-border: rgba(255, 255, 255, 0.10);
+  --vg-border-strong: rgba(255, 255, 255, 0.18);
+  --vg-shadow-card: 0 28px 64px -22px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --vg-shadow-hero: 0 46px 104px -26px rgba(0, 0, 0, 0.90), 0 0 76px -30px rgba(207, 255, 73, 0.12);
 }
 
-/* Primary sanctuary CTA text contrast guard */
+/* Acid-lime CTA ink guard (high contrast across light & dark) */
+.vg-cta-lime {
+  color: #101211 !important;
+}
+
+/* Primary emerald/jade CTA text contrast guard */
 .vg-cta {
   color: #FFFFFF;
 }

@@ -11,24 +11,22 @@ interface LogoProps {
 
 const SIZE_MAP = {
   sm: { box: 28, text: 'text-[15px]', gap: 'gap-2' },
-  md: { box: 34, text: 'text-[17px]', gap: 'gap-2.5' },
-  lg: { box: 42, text: 'text-[21px]', gap: 'gap-3' },
+  md: { box: 34, text: 'text-[16.5px]', gap: 'gap-2.5' },
+  lg: { box: 42, text: 'text-[20px]', gap: 'gap-3' },
 }
 
-/* Precision geometric planes echoing the physical ceramic & frosted-emerald Memory Fold V */
-const LEFT_FOLD_PLANE =
-  'M15.4 16.8 L23.0 14.2 Q26.4 13.0 27.8 16.4 L36.6 40.4 Q38.0 44.2 34.4 45.6 L28.2 48.0 Q24.4 49.4 23.0 45.8 L13.4 22.0 Q12.0 18.2 15.4 16.8 Z'
+/* Precision geometric planes echoing Liquid Silver folds & Acid-Lime Memory Core */
+const LEFT_SILVER_FOLD =
+  'M16.2 17.6 L23.4 15.0 Q26.4 14.0 27.6 17.2 L35.8 39.8 Q37.0 43.2 33.8 44.6 L28.0 46.8 Q24.6 48.0 23.4 44.8 L14.4 22.4 Q13.0 18.8 16.2 17.6 Z'
 
-const RIGHT_FOLD_PLANE =
-  'M41.0 14.2 L48.6 16.8 Q52.0 18.2 50.6 22.0 L41.0 45.8 Q39.6 49.4 35.8 48.0 L29.6 45.6 Q26.0 44.2 27.4 40.4 L36.2 16.4 Q37.6 13.0 41.0 14.2 Z'
+const RIGHT_LIME_FOLD =
+  'M40.6 15.0 L47.8 17.6 Q51.0 18.8 49.6 22.4 L40.6 44.8 Q39.4 48.0 36.0 46.8 L30.2 44.6 Q27.0 43.2 28.2 39.8 L36.4 17.2 Q37.6 14.0 40.6 15.0 Z'
 
-const BACK_CERAMIC_WEDGE = 'M25.4 15.5 L38.6 15.5 L32.0 34.5 Z'
-
-const APEX_PRISM_FACET = 'M32.0 34.2 L35.2 40.0 L32.0 45.4 L28.8 40.0 Z'
+const APEX_CORE_PRISM = 'M32.0 33.8 L35.4 39.8 L32.0 45.4 L28.6 39.8 Z'
 
 /**
- * VectorGallery "Memory Fold" Connected Frames Logo.
- * Ceramic neutral wedge + frosted glass left plane + satin emerald/jade right acrylic fold.
+ * VectorGallery "Living Matter" Fold & Orbit Brand Mark.
+ * Combines sculpted liquid titanium geometry with translucent acid-lime/emerald refraction.
  */
 export function VectorGalleryLogo({
   variant = 'horizontal',
@@ -43,7 +41,9 @@ export function VectorGalleryLogo({
   const isOnDark = variant === 'on-dark'
   const isAnimated = variant === 'animated' && !prefersReduced
 
-  const darkGradId = `vg-fold-dark-${rawId}`
+  const darkGradId = `vg-lm-dark-${rawId}`
+  const limeGradId = `vg-lm-lime-${rawId}`
+  const silverGradId = `vg-lm-silver-${rawId}`
 
   return (
     <span className={cn('inline-flex items-center select-none', dims.gap, className)}>
@@ -57,19 +57,28 @@ export function VectorGalleryLogo({
       >
         <defs>
           <linearGradient id={darkGradId} x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#131614" />
-            <stop offset="100%" stopColor="#252A26" />
+            <stop offset="0%" stopColor="#131715" />
+            <stop offset="100%" stopColor="#202522" />
+          </linearGradient>
+          <linearGradient id={silverGradId} x1="12" y1="14" x2="36" y2="48" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#E7E9E5" />
+            <stop offset="100%" stopColor="#A8B3B2" />
+          </linearGradient>
+          <linearGradient id={limeGradId} x1="28" y1="14" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#D4FF54" />
+            <stop offset="55%" stopColor="#8DE838" />
+            <stop offset="100%" stopColor="#087F5B" />
           </linearGradient>
         </defs>
 
-        {/* Studio Beveled Tile */}
+        {/* Precision Titanium Bevel Container */}
         {isMono ? (
           <rect
             x="1"
             y="1"
             width="62"
             height="62"
-            rx="15"
+            rx="16"
             fill="currentColor"
             fillOpacity="0.12"
             stroke="currentColor"
@@ -82,10 +91,10 @@ export function VectorGalleryLogo({
             y="1"
             width="62"
             height="62"
-            rx="15"
+            rx="16"
             fill={`url(#${darkGradId})`}
-            stroke="#58D6A8"
-            strokeOpacity="0.26"
+            stroke="#CFFF49"
+            strokeOpacity="0.24"
             strokeWidth="1.5"
           />
         ) : (
@@ -95,8 +104,8 @@ export function VectorGalleryLogo({
               y="1"
               width="62"
               height="62"
-              rx="15"
-              className="fill-[#FFFFFF] dark:fill-[#131614] stroke-[#E0E4DD] dark:stroke-white/[0.12]"
+              rx="16"
+              className="fill-[#FFFFFF] dark:fill-[#131715] stroke-[#DDE2DC] dark:stroke-white/[0.14]"
               strokeWidth="1.5"
             />
             <rect
@@ -104,102 +113,85 @@ export function VectorGalleryLogo({
               y="3.5"
               width="57"
               height="57"
-              rx="12.5"
-              className="fill-[#FAFAF7] dark:fill-[#171A18]"
+              rx="13.5"
+              className="fill-[#F2F3F0] dark:fill-[#191E1B]"
             />
           </>
         )}
 
-        {/* Back Ceramic Wedge */}
-        <path
-          d={BACK_CERAMIC_WEDGE}
+        {/* Delicate Tilted Orbital Hairline */}
+        <ellipse
+          cx="32"
+          cy="32"
+          rx="23.5"
+          ry="8.8"
+          transform="rotate(-26 32 32)"
           className={cn(
             isMono
-              ? 'fill-current opacity-20'
+              ? 'stroke-current opacity-35'
               : isOnDark
-                ? 'fill-[#252A26]'
-                : 'fill-[#E9EBE5] dark:fill-[#252A26]'
+                ? 'stroke-[#B9C5C5]/40'
+                : 'stroke-[#A8B3B2]/55 dark:stroke-[#B9C5C5]/35'
           )}
+          strokeWidth="1.1"
         />
 
-        {/* Folded Planes */}
+        {/* Folded Silver & Translucent Acid-Lime Planes */}
         {isAnimated ? (
           <>
             <motion.path
-              d={LEFT_FOLD_PLANE}
-              className={cn(
-                isMono
-                  ? 'fill-current opacity-55'
-                  : isOnDark
-                    ? 'fill-[#75BDB3]/60 stroke-[#C4EDE1]/40'
-                    : 'fill-[#A6D9D0]/80 stroke-[#087F5B]/35 dark:fill-[#75BDB3]/58 dark:stroke-[#C4EDE1]/35'
-              )}
+              d={LEFT_SILVER_FOLD}
+              fill={isMono ? 'currentColor' : `url(#${silverGradId})`}
+              fillOpacity={isMono ? 0.55 : 0.94}
+              stroke={isMono ? 'none' : '#101211'}
+              strokeOpacity="0.14"
               strokeWidth="1"
-              initial={{ opacity: 0, x: -4, y: -3 }}
+              initial={{ opacity: 0, x: -3, y: -2 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             />
             <motion.path
-              d={RIGHT_FOLD_PLANE}
-              className={cn(
-                isMono
-                  ? 'fill-current opacity-95'
-                  : isOnDark
-                    ? 'fill-[#58D6A8]/92 stroke-[#C4EDE1]/55'
-                    : 'fill-[#087F5B]/94 stroke-[#C4EDE1]/55 dark:fill-[#58D6A8]/90 dark:stroke-[#C4EDE1]/50'
-              )}
-              strokeWidth="1.15"
-              initial={{ opacity: 0, x: 4, y: -3 }}
+              d={RIGHT_LIME_FOLD}
+              fill={isMono ? 'currentColor' : `url(#${limeGradId})`}
+              fillOpacity={isMono ? 0.92 : 0.96}
+              stroke={isMono ? 'none' : '#087F5B'}
+              strokeOpacity="0.35"
+              strokeWidth="1"
+              initial={{ opacity: 0, x: 3, y: -2 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             />
             <motion.path
-              d={APEX_PRISM_FACET}
-              className={cn(
-                isMono
-                  ? 'fill-current opacity-40'
-                  : isOnDark
-                    ? 'fill-[#F2F3EF]/90'
-                    : 'fill-[#C4EDE1]/95 dark:fill-[#F2F3EF]/90'
-              )}
-              initial={{ opacity: 0, scale: 0.6 }}
+              d={APEX_CORE_PRISM}
+              fill={isMono ? 'currentColor' : '#D4FF54'}
+              fillOpacity={isMono ? 0.45 : 0.95}
+              initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.4, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
             />
           </>
         ) : (
           <>
             <path
-              d={LEFT_FOLD_PLANE}
-              className={cn(
-                isMono
-                  ? 'fill-current opacity-55'
-                  : isOnDark
-                    ? 'fill-[#75BDB3]/60 stroke-[#C4EDE1]/40'
-                    : 'fill-[#A6D9D0]/80 stroke-[#087F5B]/35 dark:fill-[#75BDB3]/58 dark:stroke-[#C4EDE1]/35'
-              )}
+              d={LEFT_SILVER_FOLD}
+              fill={isMono ? 'currentColor' : `url(#${silverGradId})`}
+              fillOpacity={isMono ? 0.55 : 0.94}
+              stroke={isMono ? 'none' : '#101211'}
+              strokeOpacity="0.14"
               strokeWidth="1"
             />
             <path
-              d={RIGHT_FOLD_PLANE}
-              className={cn(
-                isMono
-                  ? 'fill-current opacity-95'
-                  : isOnDark
-                    ? 'fill-[#58D6A8]/92 stroke-[#C4EDE1]/55'
-                    : 'fill-[#087F5B]/94 stroke-[#C4EDE1]/55 dark:fill-[#58D6A8]/90 dark:stroke-[#C4EDE1]/50'
-              )}
-              strokeWidth="1.15"
+              d={RIGHT_LIME_FOLD}
+              fill={isMono ? 'currentColor' : `url(#${limeGradId})`}
+              fillOpacity={isMono ? 0.92 : 0.96}
+              stroke={isMono ? 'none' : '#087F5B'}
+              strokeOpacity="0.35"
+              strokeWidth="1"
             />
             <path
-              d={APEX_PRISM_FACET}
-              className={cn(
-                isMono
-                  ? 'fill-current opacity-40'
-                  : isOnDark
-                    ? 'fill-[#F2F3EF]/90'
-                    : 'fill-[#C4EDE1]/95 dark:fill-[#F2F3EF]/90'
-              )}
+              d={APEX_CORE_PRISM}
+              fill={isMono ? 'currentColor' : '#D4FF54'}
+              fillOpacity={isMono ? 0.45 : 0.95}
             />
           </>
         )}
@@ -208,13 +200,13 @@ export function VectorGalleryLogo({
       {showWordmark && variant !== 'mark' && (
         <span
           className={cn(
-            'font-display font-bold tracking-[-0.03em]',
+            'font-display font-bold tracking-[-0.035em]',
             dims.text,
             isMono
               ? 'text-current'
               : isOnDark
-                ? 'text-[#F2F3EF]'
-                : 'text-[#181C19] dark:text-[#F2F3EF]'
+                ? 'text-[#F3F5F1]'
+                : 'text-[#101211] dark:text-[#F3F5F1]'
           )}
         >
           VectorGallery
