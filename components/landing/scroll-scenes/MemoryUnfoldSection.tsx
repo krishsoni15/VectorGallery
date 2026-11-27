@@ -258,10 +258,12 @@ export function MemoryUnfoldSection() {
         mm.add('(min-width: 768px)', () => {
           const st = ScrollTrigger.create({
             trigger: wrap,
-            start: 'top 64px',
+            start: 'top 74px',
             end: '+=2000',
             pin: true,
-            scrub: 0.4,
+            scrub: 0.8,
+            fastScrollEnd: true,
+            invalidateOnRefresh: true,
             anticipatePin: 1,
             onUpdate: (self) => {
               stRef.current = { start: self.start, end: self.end }
@@ -319,9 +321,10 @@ export function MemoryUnfoldSection() {
 
   const cutoutSrc = VG_SPHERE_THEME_SPEC.heroVideoPoster
 
-  const maxSpreadX = Math.min(stageDims.w * 0.35, 420)
+  const maxSpreadX = Math.min(stageDims.w * 0.36, 560)
   const isCompactHeight = stageDims.h < 405
-  const maxSpreadY = Math.min(stageDims.h * (isCompactHeight ? 0.34 : 0.35), 166)
+  const maxSpreadY = Math.min(stageDims.h * (isCompactHeight ? 0.34 : 0.35), 210)
+  const useCssGlide = manualSceneIdx !== null || stageDims.w < 768
 
   return (
     <section
@@ -334,7 +337,7 @@ export function MemoryUnfoldSection() {
     >
       <div
         ref={triggerWrapRef}
-        className="relative w-full min-h-[560px] md:min-h-0 md:h-[calc(100vh-64px)] md:max-h-[840px] flex flex-col justify-between py-3 sm:py-4 lg:py-5 overflow-hidden"
+        className="relative w-full min-h-[560px] md:min-h-0 md:h-[calc(100vh-74px)] md:max-h-[900px] flex flex-col justify-between py-3 sm:py-4 lg:py-5 overflow-hidden"
       >
         <div
           aria-hidden="true"
@@ -498,12 +501,15 @@ export function MemoryUnfoldSection() {
                 opacity: stage.sphereOpacity,
                 transform: `scale(${stage.sphereScale.toFixed(3)}) rotate(${(effectiveProgress * 22).toFixed(2)}deg)`,
               }}
-              className="pointer-events-none relative z-20 w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] lg:w-[290px] lg:h-[290px] flex items-center justify-center"
+              className={cn(
+                'pointer-events-none relative z-20 w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] lg:w-[290px] lg:h-[290px] xl:w-[340px] xl:h-[340px] 2xl:w-[380px] 2xl:h-[380px] flex items-center justify-center will-change-[transform,opacity]',
+                useCssGlide && 'transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
+              )}
             >
               <img
                 src={cutoutSrc}
                 alt="Unfolding Memory Sphere core"
-                className="w-full h-full object-contain drop-shadow-[0_24px_40px_rgba(16,18,17,0.18)]"
+                className="w-full h-full object-contain"
               />
             </div>
 
@@ -550,10 +556,13 @@ export function MemoryUnfoldSection() {
                       transform: `translate3d(calc(-50% + ${xPx.toFixed(1)}px), calc(-50% + ${yPx.toFixed(1)}px), 0) rotate(${rFinal.toFixed(2)}deg) scale(${fragScale.toFixed(3)})`,
                     }}
                     className={cn(
-                      'absolute rounded-2xl overflow-hidden bg-[var(--vg-surface)] border transition-shadow duration-200',
+                      'absolute rounded-2xl overflow-hidden bg-[var(--vg-surface)] border will-change-[transform,opacity]',
+                      useCssGlide
+                        ? 'transition-[transform,opacity,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
+                        : 'transition-shadow duration-200',
                       isCompactHeight
                         ? 'w-[100px] sm:w-[110px] lg:w-[118px]'
-                        : 'w-[104px] sm:w-[144px] lg:w-[162px]',
+                        : 'w-[104px] sm:w-[146px] lg:w-[168px] 2xl:w-[196px]',
                       isHighlighted
                         ? 'border-[#087F5B] dark:border-[#CFFF49] shadow-[0_24px_54px_-14px_rgba(212,255,84,0.45),0_12px_28px_-10px_rgba(16,18,17,0.24)] ring-2 ring-[#D4FF54]/75 dark:ring-[#CFFF49]/75 z-30'
                         : 'border-[var(--vg-border-strong)] shadow-[var(--vg-shadow-card)] z-20'

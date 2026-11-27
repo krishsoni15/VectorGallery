@@ -57,7 +57,7 @@ export function CinematicWorkspaceSection() {
     <Section id="showcase" surface="secondary" ariaLabel="Cinematic workspace showcase">
       <Container wide>
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-12">
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 mb-3">
               <span className="font-mono text-[11px] uppercase tracking-[0.14em] px-2.5 py-1 rounded-full bg-[#FFFFFF] dark:bg-[#131715] text-[#101211] dark:text-[#CFFF49] border border-[var(--vg-border)]">
                 04 · Web Workspace
@@ -67,7 +67,7 @@ export function CinematicWorkspaceSection() {
 
             <h2
               className="font-display font-bold tracking-[-0.04em] leading-[1.03] text-[#101211] dark:text-[#F3F5F1]"
-              style={{ fontSize: 'clamp(2rem, 4.3vw, 3.85rem)' }}
+              style={{ fontSize: 'clamp(2.15rem, 4.4vw, 4.5rem)' }}
             >
               Calm software built for years of keeping.
             </h2>

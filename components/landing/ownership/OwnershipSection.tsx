@@ -120,12 +120,12 @@ export function OwnershipSection({
 
               <h2
                 className="font-display font-bold tracking-[-0.04em] leading-[1.02] text-[#101211] dark:text-[#F3F5F1]"
-                style={{ fontSize: 'clamp(2.1rem, 4.4vw, 4rem)' }}
+                style={{ fontSize: 'clamp(2.15rem, 4.4vw, 4.65rem)' }}
               >
                 Your world. Your rules.
               </h2>
 
-              <p className="mt-4 text-[16px] leading-[1.65] text-[var(--vg-ink-2)] max-w-xl">
+              <p className="mt-4 text-[16px] sm:text-[17.5px] leading-[1.65] text-[var(--vg-ink-2)] max-w-2xl">
                 Every photograph, PDF, and note remains yours. Run VectorGallery locally on your own disk without external AI accounts, or plug in your own storage buckets and optional Gemini, Groq, Cohere, or OpenAI keys when ready.
               </p>
             </div>

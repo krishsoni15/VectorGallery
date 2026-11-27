@@ -61,17 +61,17 @@ export function MagneticCircleButton({
 
   const sizeClass =
     size === 'lg'
-      ? 'w-[122px] h-[122px] sm:w-[144px] sm:h-[144px] xl:w-[154px] xl:h-[154px]'
+      ? 'w-[126px] h-[126px] sm:w-[144px] sm:h-[144px] xl:w-[164px] xl:h-[164px] 2xl:w-[184px] 2xl:h-[184px]'
       : 'w-[112px] h-[112px] sm:w-[128px] sm:h-[128px]'
 
   const innerContent = (
     <span className="flex flex-col items-center justify-center gap-1 px-4 leading-tight">
-      <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13.5px] font-bold tracking-[-0.015em] text-[#101211]">
-        <Play className="w-3 h-3 fill-[#101211] text-[#101211] shrink-0" />
+      <span className="inline-flex items-center gap-1.5 text-[13px] sm:text-[14px] xl:text-[15px] font-bold tracking-[-0.015em] text-[#101211]">
+        <Play className="w-3 h-3 xl:w-3.5 xl:h-3.5 fill-[#101211] text-[#101211] shrink-0" />
         <span>{label}</span>
       </span>
       {sublabel && (
-        <span className="text-[11px] font-medium text-[#101211]/75 tracking-[-0.01em]">
+        <span className="text-[11px] xl:text-[12px] font-medium text-[#101211]/75 tracking-[-0.01em]">
           {sublabel}
         </span>
       )}
@@ -186,12 +186,12 @@ export function InteractiveTriadIndex({
                 : 'text-[#626B64] hover:text-[#101211] dark:text-[#9AA69E] dark:hover:text-[#F3F5F1]'
             )}
           >
-            <span className="text-[13.5px] sm:text-[14.5px] font-medium tracking-[-0.015em] group-hover:translate-x-0.5 lg:group-hover:-translate-x-0.5 transition-transform">
+            <span className="text-[14px] sm:text-[15px] xl:text-[17px] font-medium tracking-[-0.015em] group-hover:translate-x-0.5 lg:group-hover:-translate-x-0.5 transition-transform">
               {item.label}
             </span>
             <span
               className={cn(
-                'font-mono text-[12px] tracking-[0.04em] transition-colors',
+                'font-mono text-[12px] xl:text-[13px] tracking-[0.04em] transition-colors',
                 isActive
                   ? 'text-[#087F5B] dark:text-[#CFFF49] font-semibold'
                   : 'text-[#626B64]/80 dark:text-[#828E86]'

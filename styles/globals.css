@@ -79,9 +79,9 @@ html.dark {
 }
 
 html {
-  scroll-behavior: smooth !important;
-  scroll-padding-top: 90px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  scroll-behavior: smooth;
+  scroll-padding-top: 84px;
+  transition: background-color 0.28s ease, color 0.28s ease;
 }
 
 html,

@@ -170,25 +170,25 @@ export const VG_TYPOGRAPHY = {
   },
   scale: {
     monumentalWordmark: {
-      fontSize: 'clamp(2.3rem, 8.6vw, 8.2rem)',
-      lineHeight: '0.88',
-      letterSpacing: '-0.05em',
+      fontSize: 'clamp(2.25rem, 11vw, 13.75rem)',
+      lineHeight: '0.86',
+      letterSpacing: '-0.056em',
       fontWeight: 700,
     },
     closingMonument: {
-      fontSize: 'clamp(2.4rem, 7.6vw, 7rem)',
-      lineHeight: '0.92',
-      letterSpacing: '-0.048em',
+      fontSize: 'clamp(2.45rem, 8.2vw, 8rem)',
+      lineHeight: '0.91',
+      letterSpacing: '-0.05em',
       fontWeight: 700,
     },
     h1: {
-      fontSize: 'clamp(2.5rem, 6.2vw, 6.25rem)',
-      lineHeight: '0.95',
+      fontSize: 'clamp(2.5rem, 6.4vw, 6.75rem)',
+      lineHeight: '0.94',
       letterSpacing: '-0.045em',
       fontWeight: 700,
     },
     h2: {
-      fontSize: 'clamp(2rem, 4.3vw, 4.25rem)',
+      fontSize: 'clamp(2.15rem, 4.4vw, 4.75rem)',
       lineHeight: '1.02',
       letterSpacing: '-0.038em',
       fontWeight: 700,
@@ -235,10 +235,11 @@ export const VG_TYPOGRAPHY = {
 
 export const VG_LAYOUT = {
   containers: {
-    narrow: 'max-w-[840px] mx-auto px-5 sm:px-6',
-    standard: 'max-w-[1260px] mx-auto px-5 sm:px-8',
-    wide: 'max-w-[1380px] mx-auto px-5 sm:px-8',
-    heroStage: 'max-w-[1440px] mx-auto px-4 sm:px-7 lg:px-10',
+    narrow: 'w-full max-w-[920px] mx-auto px-5 sm:px-8',
+    standard: 'w-full max-w-[1440px] 2xl:max-w-[1620px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-14',
+    wide: 'w-full max-w-[1580px] 2xl:max-w-[1780px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16',
+    heroStage: 'w-full max-w-[1860px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 2xl:px-20',
+    navbar: 'w-full px-5 sm:px-8 lg:px-10 xl:px-14 2xl:px-16',
   },
   sectionPadding: {
     hero: 'pt-2 sm:pt-4 pb-12 sm:pb-16',
@@ -293,7 +294,7 @@ export const VG_COMPONENTS = {
     primary:
       'vg-cta inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F3F5F1] dark:bg-[#F3F5F1] dark:hover:bg-[#FFFFFF] dark:text-[#090B0A] shadow-[0_16px_36px_-14px_rgba(16,18,17,0.35)] dark:shadow-[0_16px_36px_-14px_rgba(255,255,255,0.18)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
     primarySm:
-      'inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-semibold bg-[#E7E9E5] hover:bg-[#DDE0DA] text-[#101211] dark:bg-[#202522] dark:hover:bg-[#2B322E] dark:text-[#F3F5F1] border border-[#DDE2DC] dark:border-white/[0.12] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
+      'inline-flex items-center justify-center gap-1.5 h-9 lg:h-10 px-4 lg:px-5 rounded-full text-[13px] lg:text-[13.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F3F5F1] dark:bg-[#CFFF49] dark:hover:bg-[#DCFF73] dark:text-[#090B0A] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
     secondary:
       'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
     secondarySm:

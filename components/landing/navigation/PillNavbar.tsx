@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Github, Menu, Star, X } from 'lucide-react'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
-import { VG_COMPONENTS } from '@/components/landing/design-system'
+import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
 import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
 import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
 import { REPO_URL } from '@/components/landing/tokens'
@@ -16,7 +16,9 @@ interface PillNavbarProps {
 
 const NAV_LINKS = [
   { href: '#overview', label: 'Overview' },
+  { href: '#scroll-story', label: 'How it works' },
   { href: '#search', label: 'Search' },
+  { href: '#showcase', label: 'Workspace' },
   { href: '#mobile', label: 'Mobile' },
   { href: '#privacy', label: 'Open Source' },
 ]
@@ -60,34 +62,33 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
         Skip to main content
       </a>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-7 lg:px-10 h-16 flex items-center justify-between gap-4">
-        {/* Left: Brand + Pill Nav Cluster matching benchmark */}
-        <div className="flex items-center gap-4 lg:gap-6 min-w-0">
-          <Link
-            href="/"
-            aria-label="VectorGallery Home"
-            className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49] rounded-full"
-          >
-            <VectorGalleryLogo variant="animated" size="md" />
-          </Link>
+      <div className={cn(VG_LAYOUT.containers.navbar, 'h-16 lg:h-[74px] flex items-center justify-between gap-4')}>
+        {/* Left: Brand Logo */}
+        <Link
+          href="/"
+          aria-label="VectorGallery Home"
+          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49] rounded-full"
+        >
+          <VectorGalleryLogo variant="animated" size="md" />
+        </Link>
 
-          <nav
-            aria-label="Primary navigation"
-            className="hidden lg:inline-flex items-center gap-0.5 px-2 py-1 rounded-full bg-[#F2F3F0] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10]"
-          >
-            {NAV_LINKS.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={cn(VG_COMPONENTS.buttons.ghost, 'whitespace-nowrap')}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-        </div>
+        {/* Center: Full-width balanced pill navigation */}
+        <nav
+          aria-label="Primary navigation"
+          className="hidden lg:inline-flex items-center gap-0.5 xl:gap-1 px-2.5 py-1.5 rounded-full bg-[#F2F3F0] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10]"
+        >
+          {NAV_LINKS.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className={cn(VG_COMPONENTS.buttons.ghost, 'text-[13.5px] xl:text-[14px] px-3 xl:px-3.5 whitespace-nowrap')}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
-        {/* Right Controls: Theme Toggle + Login + Pill Get Started */}
+        {/* Right Controls: Theme Toggle + Stars + Sign in + Primary CTA */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <ThemeSwitch />
 
@@ -97,7 +98,7 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`GitHub Repository (${stars} stars)`}
-              className="hidden xl:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[12px] font-medium bg-[#F2F3F0] dark:bg-[#131715] text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors whitespace-nowrap"
+              className="hidden xl:inline-flex items-center gap-1.5 h-9 lg:h-10 px-3.5 rounded-full text-[12.5px] font-medium bg-[#F2F3F0] dark:bg-[#131715] text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors whitespace-nowrap"
             >
               <Github className="w-3.5 h-3.5" />
               <Star className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" />
@@ -107,7 +108,7 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
 
           <Link
             href="/login"
-            className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-full text-[13.5px] font-medium text-[var(--vg-ink)] hover:bg-[#F2F3F0] dark:hover:bg-[#131715] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
+            className="hidden sm:inline-flex items-center h-9 lg:h-10 px-4 rounded-full text-[13.5px] xl:text-[14px] font-medium text-[var(--vg-ink)] hover:bg-[#F2F3F0] dark:hover:bg-[#131715] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
           >
             Sign in
           </Link>

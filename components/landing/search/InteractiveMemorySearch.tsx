@@ -187,7 +187,7 @@ export function InteractiveMemorySearch() {
   return (
     <Section id="search" surface="default" ariaLabel="Interactive natural-language memory search">
       <Container wide>
-        <div className="max-w-3xl mb-10 sm:mb-12">
+        <div className="max-w-4xl mb-10 sm:mb-12">
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] px-2.5 py-1 rounded-full bg-[#E7E9E5] dark:bg-[#202522] text-[#101211] dark:text-[#CFFF49] border border-[var(--vg-border)]">
               03 · Search &amp; Recall
@@ -199,7 +199,7 @@ export function InteractiveMemorySearch() {
 
           <h2
             className="font-display font-bold tracking-[-0.04em] leading-[1.03] text-[#101211] dark:text-[#F3F5F1]"
-            style={{ fontSize: 'clamp(2rem, 4.4vw, 4rem)' }}
+            style={{ fontSize: 'clamp(2.15rem, 4.4vw, 4.65rem)' }}
           >
             Find it by{' '}
             <span className="underline decoration-[#D4FF54] dark:decoration-[#CFFF49] decoration-4 underline-offset-4">
@@ -207,7 +207,7 @@ export function InteractiveMemorySearch() {
             </span>{' '}
             it.
           </h2>
-          <p className="mt-4 text-[16px] sm:text-[17px] leading-[1.6] text-[var(--vg-ink-2)] max-w-2xl">
+          <p className="mt-4 text-[16px] sm:text-[17.5px] leading-[1.6] text-[var(--vg-ink-2)] max-w-2xl">
             Stop digging through nested folders. Search by a passing detail—a seat number on a boarding pass, an itemized headphone receipt, or afternoon harbor sunlight.
           </p>
         </div>

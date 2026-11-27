@@ -43,7 +43,7 @@ export function FinalBrandMomentSection() {
       />
 
       <Container wide className="relative z-10">
-        <div className="max-w-5xl mx-auto text-center space-y-8">
+        <div className="max-w-6xl mx-auto text-center space-y-8">
           <MotionReveal>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.14] text-[11.5px] font-mono uppercase tracking-[0.14em] text-[#CFFF49] mb-5">
               <span>07 · Start Your Vault</span>
@@ -51,8 +51,8 @@ export function FinalBrandMomentSection() {
 
             <h2
               id="final-moment-heading"
-              className="font-display font-bold uppercase tracking-[-0.052em] leading-[0.92] text-[#F3F5F1]"
-              style={{ fontSize: 'clamp(2.35rem, 7.6vw, 6.8rem)' }}
+              className="font-display font-bold uppercase tracking-[-0.052em] leading-[0.91] text-[#F3F5F1]"
+              style={{ fontSize: 'clamp(2.45rem, 8.2vw, 8rem)' }}
             >
               EVERYTHING WORTH KEEPING<span className="text-[#CFFF49]">.</span>
             </h2>
@@ -60,7 +60,7 @@ export function FinalBrandMomentSection() {
 
           {/* Converged Sphere Focal Stage flanked by miniature archival frames */}
           <div className="relative mx-auto flex items-center justify-center py-4">
-            <div className="hidden md:block w-36 aspect-[4/3] rounded-2xl overflow-hidden border border-white/[0.14] opacity-75 -rotate-6 -mr-6 shadow-2xl">
+            <div className="hidden md:block w-40 xl:w-44 aspect-[4/3] rounded-2xl overflow-hidden border border-white/[0.14] opacity-75 -rotate-6 -mr-6 shadow-2xl">
               <img
                 src="/landing/photos/aura-personal-travel.webp"
                 alt="Harbor travel archive capture"
@@ -68,15 +68,15 @@ export function FinalBrandMomentSection() {
               />
             </div>
 
-            <div className="w-[190px] h-[190px] sm:w-[230px] sm:h-[230px] relative z-10 shrink-0">
+            <div className="w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] xl:w-[280px] xl:h-[280px] relative z-10 shrink-0">
               <img
                 src="/landing/artwork/memory-sphere-video-poster.webp"
                 alt="VectorGallery Memory Sphere sculpture"
-                className="w-full h-full object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.75)]"
+                className="w-full h-full object-contain"
               />
             </div>
 
-            <div className="hidden md:block w-36 aspect-[4/3] rounded-2xl overflow-hidden border border-white/[0.14] opacity-75 rotate-6 -ml-6 shadow-2xl">
+            <div className="hidden md:block w-40 xl:w-44 aspect-[4/3] rounded-2xl overflow-hidden border border-white/[0.14] opacity-75 rotate-6 -ml-6 shadow-2xl">
               <img
                 src="/landing/photos/aura-arch-notes.webp"
                 alt="Architectural sketch archive capture"

@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { VG_COMPONENTS, VG_TYPOGRAPHY } from '@/components/landing/design-system'
+import { VG_COMPONENTS, VG_LAYOUT, VG_TYPOGRAPHY } from '@/components/landing/design-system'
 import { cn } from '@/lib/utils'
 
 export function Container({
@@ -16,8 +16,7 @@ export function Container({
   return (
     <div
       className={cn(
-        'mx-auto w-full px-5 sm:px-8',
-        wide ? 'max-w-[1340px]' : 'max-w-[1260px]',
+        wide ? VG_LAYOUT.containers.wide : VG_LAYOUT.containers.standard,
         className
       )}
     >

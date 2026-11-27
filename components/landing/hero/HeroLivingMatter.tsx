@@ -14,9 +14,24 @@ import { LivingAuraCanvas } from '@/components/landing/shaders/LivingAuraCanvas'
 import { MaskedReveal } from '@/components/landing/motion'
 
 const HERO_TRIAD: TriadItem[] = [
-  { numeral: '01', label: 'Capture', href: '#scroll-story', hint: 'Auto-backup & disk vault' },
-  { numeral: '02', label: 'Connect', href: '#search', hint: 'Photos, notes & PDFs' },
-  { numeral: '03', label: 'Remember', href: '#showcase', hint: 'Recall in plain words' },
+  {
+    numeral: '01',
+    label: 'Capture',
+    href: '#scroll-story',
+    hint: 'Auto-backup photos, screenshots & PDFs',
+  },
+  {
+    numeral: '02',
+    label: 'Connect',
+    href: '#search',
+    hint: 'AI vision & OCR index every visual detail',
+  },
+  {
+    numeral: '03',
+    label: 'Remember',
+    href: '#showcase',
+    hint: 'Ask in plain words, find instantly',
+  },
 ]
 
 const STACKED_THUMBNAILS = [
@@ -40,7 +55,7 @@ export function HeroLivingMatter() {
     <section
       id="overview"
       aria-labelledby="hero-monument-heading"
-      className="relative overflow-hidden bg-[#FFFFFF] dark:bg-[#090B0A] lg:min-h-[calc(100vh-64px)] flex flex-col justify-center border-b border-[var(--vg-border)]"
+      className="relative overflow-hidden bg-[#FFFFFF] dark:bg-[#090B0A] lg:min-h-[calc(100vh-74px)] flex flex-col justify-center border-b border-[var(--vg-border)]"
     >
       {/* Liquid Silver / Liquid Carbon Atmospheric Wave Backdrop in Lower Half */}
       <LivingAuraCanvas
@@ -60,18 +75,18 @@ export function HeroLivingMatter() {
       />
 
       <div
-        className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 flex flex-col justify-center pt-4 sm:pt-6 lg:pt-8 pb-8 sm:pb-10 lg:pb-12`}
+        className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 flex flex-col justify-center pt-3 sm:pt-5 lg:pt-6 xl:pt-8 pb-8 sm:pb-10 lg:pb-12 xl:pb-14`}
       >
-        {/* Monumental Typographic Stage spanning ~88-92% of desktop container behind Sculpture */}
+        {/* Monumental Typographic Stage spanning full horizon across desktop & big screens */}
         <MaskedReveal immediate direction="up" delay={0.02} className="relative z-10 w-full">
           <div className="w-full flex justify-center pt-1 sm:pt-2">
             <h1
               id="hero-monument-heading"
               className="font-display font-bold uppercase text-center select-none whitespace-nowrap text-[#101211] dark:text-[#F3F5F1] w-fit mx-auto"
               style={{
-                fontSize: 'clamp(2.2rem, 10.5vw, 10.75rem)',
+                fontSize: VG_TYPOGRAPHY.scale.monumentalWordmark.fontSize,
                 lineHeight: VG_TYPOGRAPHY.scale.monumentalWordmark.lineHeight,
-                letterSpacing: '-0.056em',
+                letterSpacing: VG_TYPOGRAPHY.scale.monumentalWordmark.letterSpacing,
               }}
             >
               VECTORGALLERY<span className="text-[#101211] dark:text-[#CFFF49]">.</span>
@@ -79,22 +94,22 @@ export function HeroLivingMatter() {
           </div>
         </MaskedReveal>
 
-        {/* Overlapping 3D Sculpture + Balanced Asymmetric Studio Grid */}
-        <div className="relative z-20 -mt-8 sm:-mt-16 md:-mt-24 lg:-mt-[9.2rem] xl:-mt-[10.2rem] grid grid-cols-1 lg:grid-cols-12 items-end gap-8 lg:gap-4">
-          {/* LEFT QUADRANT: Stacked Provenance Preview + Statement + Dotted Rule */}
+        {/* Overlapping 3D Sculpture + Collision-Free Big-Screen Asymmetric Studio Grid */}
+        <div className="relative z-20 mt-4 sm:mt-6 lg:mt-7 xl:mt-8 2xl:mt-10 grid grid-cols-1 lg:grid-cols-12 items-end gap-8 lg:gap-6">
+          {/* LEFT QUADRANT: Core Product Clarity + Provenance + Direct Entry Actions */}
           <motion.div
             initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08, ease: VG_MOTION.ease }}
-            className="order-2 lg:order-1 lg:col-span-4 flex flex-col justify-between gap-8 lg:gap-32 self-stretch lg:pt-36 lg:pb-4"
+            className="order-2 lg:order-1 lg:col-span-4 flex flex-col justify-between gap-8 lg:gap-20 xl:gap-28 2xl:gap-32 self-stretch lg:pb-4"
           >
-            {/* Honest Open-Source Memory Stack directly below left wordmark shoulder */}
-            <div className="flex items-center gap-3.5">
+            {/* Provenance captures + clear product category */}
+            <div className="flex items-center gap-3.5 xl:gap-4">
               <div className="flex -space-x-2.5 shrink-0">
                 {STACKED_THUMBNAILS.map((item) => (
                   <div
                     key={item.src}
-                    className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#FFFFFF] dark:border-[#090B0A] shadow-sm bg-[var(--vg-surface-2)]"
+                    className="w-9 h-9 xl:w-11 xl:h-11 rounded-full overflow-hidden border-2 border-[#FFFFFF] dark:border-[#090B0A] shadow-sm bg-[var(--vg-surface-2)]"
                   >
                     <img
                       src={item.src}
@@ -105,46 +120,43 @@ export function HeroLivingMatter() {
                 ))}
               </div>
               <div className="leading-tight">
-                <p className="text-[13.5px] font-bold tracking-[-0.02em] text-[#101211] dark:text-[#F3F5F1]">
-                  Open Source
+                <p className="text-[13.5px] xl:text-[15.5px] font-bold tracking-[-0.02em] text-[#101211] dark:text-[#F3F5F1]">
+                  Personal AI Cloud &amp; Vault
                 </p>
-                <p className="text-[11.5px] text-[var(--vg-ink-2)]">
-                  Personal AI cloud &amp; vault
+                <p className="text-[11.5px] xl:text-[13px] text-[var(--vg-ink-2)] mt-0.5">
+                  Open-source · Photos, OCR docs &amp; Android sync
                 </p>
               </div>
             </div>
 
-            {/* Bottom-Left Manifesto + Dotted Horizontal Rule */}
-            <div className="max-w-[330px]">
-              <p className="font-display text-[21px] sm:text-[24px] font-semibold leading-[1.18] tracking-[-0.03em] text-[#101211] dark:text-[#F3F5F1]">
-                Everything you save.
+            {/* Bottom-Left Product Promise + Dotted Hairline + Unambiguous Explainer */}
+            <div className="max-w-[420px] xl:max-w-[470px] 2xl:max-w-[510px]">
+              <p className="font-display text-[22px] sm:text-[24px] xl:text-[30px] 2xl:text-[34px] font-bold leading-[1.12] tracking-[-0.032em] text-[#101211] dark:text-[#F3F5F1]">
+                Every photo, note &amp; receipt.
                 <br />
-                Everything you remember.
+                Found in seconds by meaning.
               </p>
 
               <div
                 aria-hidden="true"
-                className="my-3.5 w-full border-b-2 border-dotted border-[#101211]/35 dark:border-[#F3F5F1]/30"
+                className="my-3.5 xl:my-4 w-full border-b-2 border-dotted border-[#101211]/35 dark:border-[#F3F5F1]/30"
               />
 
-              <p className="text-[13.5px] leading-[1.52] text-[var(--vg-ink-2)]">
-                Private photo library, OCR document recall, and automatic Android backup on storage you own.
+              <p className="text-[13.5px] sm:text-[14.5px] xl:text-[15.5px] 2xl:text-[16.5px] leading-[1.56] text-[var(--vg-ink-2)]">
+                Search camera rolls, scanned receipts, and handwritten notes using plain language AI — synced automatically from Android to storage you own.
               </p>
 
-              <div className="mt-4 flex flex-wrap items-center gap-3">
+              <div className="mt-5 flex flex-wrap items-center gap-3.5">
                 <Link
                   href="/app"
-                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#101211] dark:text-[#F3F5F1] hover:text-[#087F5B] dark:hover:text-[#CFFF49] transition-colors"
+                  className="inline-flex items-center gap-2 h-10 xl:h-11 px-5 rounded-full bg-[#101211] text-[#F3F5F1] dark:bg-[#F3F5F1] dark:text-[#090B0A] text-[13.5px] xl:text-[14px] font-semibold tracking-[-0.01em] hover:opacity-90 transition-all shadow-sm"
                 >
                   <span>Open Web Vault</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
-                <span aria-hidden="true" className="text-[var(--vg-border-strong)]">
-                  /
-                </span>
                 <Link
                   href="/install"
-                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
+                  className="inline-flex items-center gap-1.5 h-10 xl:h-11 px-3.5 rounded-full text-[13.5px] xl:text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
                 >
                   <Smartphone className="w-3.5 h-3.5" />
                   <span>Android APK</span>
@@ -153,36 +165,39 @@ export function HeroLivingMatter() {
             </div>
           </motion.div>
 
-          {/* CENTER STAGE: Dominant 3D Memory Sphere Sculpture overlapping wordmark lower edge */}
-          <div className="order-1 lg:order-2 lg:col-span-4 relative flex items-center justify-center self-center">
+          {/* CENTER STAGE: Only the 3D Sphere tucks upward to overlap wordmark lower edge cleanly */}
+          <div className="order-1 lg:order-2 lg:col-span-4 relative flex items-center justify-center self-center lg:-mt-28 xl:-mt-36 2xl:-mt-44">
             <MemorySphereCanvas
               mode="hero"
               priority
-              className="w-[310px] h-[310px] sm:w-[400px] sm:h-[400px] md:w-[460px] md:h-[460px] lg:w-[500px] lg:h-[500px] xl:w-[550px] xl:h-[550px] lg:-mx-14"
+              className="w-[290px] h-[290px] sm:w-[390px] sm:h-[390px] md:w-[460px] md:h-[460px] lg:w-[490px] lg:h-[490px] xl:w-[580px] xl:h-[580px] 2xl:w-[680px] 2xl:h-[680px] lg:-mx-14 xl:-mx-16"
             />
           </div>
 
-          {/* RIGHT QUADRANT: Triad Index + Magnetic Circular Lime CTA */}
+          {/* RIGHT QUADRANT: Workflow Triad + Live Step Hint + Magnetic Circular Lime CTA */}
           <motion.div
             initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.14, ease: VG_MOTION.ease }}
-            className="order-3 lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-end justify-between gap-6 self-stretch lg:pt-36 lg:pb-4"
+            className="order-3 lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-end justify-between gap-6 self-stretch lg:pb-4"
           >
-            {/* Top-Right Numbered Triad matching benchmark right shoulder */}
-            <div>
+            {/* Top-Right Numbered Triad + concise active explanation */}
+            <div className="flex flex-col lg:items-end gap-3">
               <InteractiveTriadIndex
                 items={HERO_TRIAD}
                 activeIndex={activeTriad}
                 onSelect={setActiveTriad}
               />
+              <p className="hidden sm:block text-[12px] xl:text-[13px] font-mono text-[var(--vg-ink-2)] lg:text-right max-w-[230px] leading-snug">
+                {HERO_TRIAD[activeTriad]?.hint}
+              </p>
             </div>
 
             {/* Bottom-Right Magnetic Acid-Lime Circular CTA */}
             <div className="shrink-0">
               <MagneticCircleButton
                 label="Explore"
-                sublabel="the experience"
+                sublabel="See how it works"
                 href="#scroll-story"
                 size="lg"
               />

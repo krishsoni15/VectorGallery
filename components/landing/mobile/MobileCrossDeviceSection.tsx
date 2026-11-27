@@ -57,12 +57,12 @@ export function MobileCrossDeviceSection({ apkSizeLabel = '107.8 MB' }: MobileCr
 
               <h2
                 className="font-display font-bold tracking-[-0.04em] leading-[1.03] text-[#101211] dark:text-[#F3F5F1]"
-                style={{ fontSize: 'clamp(2rem, 4vw, 3.6rem)' }}
+                style={{ fontSize: 'clamp(2.15rem, 4.2vw, 4.25rem)' }}
               >
                 Capture here. Find it anywhere.
               </h2>
 
-              <p className="mt-4 text-[16px] leading-[1.6] text-[var(--vg-ink-2)]">
+              <p className="mt-4 text-[16px] sm:text-[17px] leading-[1.6] text-[var(--vg-ink-2)]">
                 Snap a receipt, scan a notebook spread, or save a sunset roll on Android. VectorGallery backs up over Wi-Fi with SHA-256 duplicate protection and leaves every phone original untouched.
               </p>
             </div>
