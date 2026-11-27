@@ -49,12 +49,12 @@ export function FinalInvitationSection() {
           viewport={VG_MOTION.viewport}
           transition={{ duration: VG_MOTION.durations.editorial, ease: VG_MOTION.ease }}
         >
-          <div className="relative p-3.5 rounded-3xl bg-[#0D261D]/85 border border-[#58D6A8]/25 shadow-[0_24px_60px_-14px_rgba(88,214,168,0.28)]">
+          <div className="relative">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -inset-4 rounded-full bg-[#58D6A8]/15 blur-2xl"
+              className="pointer-events-none absolute -inset-6 rounded-full bg-[#58D6A8]/20 blur-2xl"
             />
-            <div className="relative z-10">
+            <div className="relative z-10 shadow-[0_24px_60px_-14px_rgba(88,214,168,0.32)] rounded-2xl">
               <VectorGalleryLogo variant="on-dark" size="lg" showWordmark={false} />
             </div>
           </div>
@@ -67,6 +67,7 @@ export function FinalInvitationSection() {
               fontSize: VG_TYPOGRAPHY.scale.h2.fontSize,
               lineHeight: VG_TYPOGRAPHY.scale.h2.lineHeight,
               letterSpacing: VG_TYPOGRAPHY.scale.h2.letterSpacing,
+              textWrap: 'balance',
             }}
           >
             Keep everything that makes{' '}

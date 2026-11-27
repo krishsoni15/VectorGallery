@@ -34,7 +34,7 @@ type FlutterTab = 'home' | 'files' | 'chat' | 'search' | 'settings'
 const HUMAN_BENEFITS = [
   {
     title: 'Back up automatically',
-    detail: 'New camera shots and screenshots queue quietly whenever you are on Wi-Fi.',
+    detail: 'New camera shots and screenshots queue quietly whenever you are on Wi\u2011Fi.',
   },
   {
     title: 'Keep your originals',
@@ -518,9 +518,9 @@ export function MobileSection({
                 </div>
 
                 {/* Luminous Emerald Stream -> Sleek Desktop Preview */}
-                <div className="hidden sm:flex flex-col items-start sm:-ml-6 z-10 w-full max-w-[330px]">
+                <div className="hidden sm:flex flex-col items-start sm:-ml-2 z-10 w-full max-w-[330px]">
                   {/* Animated Emerald Stream Bridge */}
-                  <div className="w-full px-6 py-2 flex items-center gap-2" aria-hidden="true">
+                  <div className="w-full pl-5 pr-4 py-2 flex items-center gap-2" aria-hidden="true">
                     <span className="text-[10.5px] font-mono text-[var(--vg-ink-muted)] shrink-0">
                       Syncing
                     </span>
@@ -553,7 +553,7 @@ export function MobileSection({
 
                   {/* Sculpted Desktop Browser Frame */}
                   <div className="w-full rounded-2xl border border-[#E0E4DD] dark:border-white/[0.12] bg-[#FFFFFF] dark:bg-[#131614] shadow-[var(--vg-shadow-card)] overflow-hidden">
-                    <div className="px-3.5 py-2.5 bg-[#F0F1EC] dark:bg-[#171A18] border-b border-[var(--vg-border)] flex items-center justify-between">
+                    <div className="pl-5 pr-3.5 py-2.5 bg-[#F0F1EC] dark:bg-[#171A18] border-b border-[var(--vg-border)] flex items-center justify-between">
                       <div className="flex items-center gap-1.5" aria-hidden="true">
                         <span className="w-2 h-2 rounded-full bg-[#CBD2C7] dark:bg-white/20" />
                         <span className="w-2 h-2 rounded-full bg-[#CBD2C7] dark:bg-white/20" />
@@ -565,7 +565,7 @@ export function MobileSection({
                       </span>
                     </div>
 
-                    <div className="p-3.5 space-y-3">
+                    <div className="p-3.5 sm:pl-5 space-y-3">
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="font-semibold text-[var(--vg-ink)]">Just arrived</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#C4EDE1]/65 text-[#066649] dark:bg-[#252A26] dark:text-[#58D6A8] font-medium">

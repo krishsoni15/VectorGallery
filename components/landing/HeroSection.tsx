@@ -219,10 +219,8 @@ export function HeroSection() {
                 <div
                   className="relative overflow-hidden"
                   style={{
-                    maskImage:
-                      'radial-gradient(ellipse 56% 56% at 58% 50%, #000 30%, rgba(0,0,0,0.62) 52%, transparent 74%)',
-                    WebkitMaskImage:
-                      'radial-gradient(ellipse 56% 56% at 58% 50%, #000 30%, rgba(0,0,0,0.62) 52%, transparent 74%)',
+                    maskImage: VG_COMPONENTS.media.sculptureMask,
+                    WebkitMaskImage: VG_COMPONENTS.media.sculptureMask,
                   }}
                 >
                   <img

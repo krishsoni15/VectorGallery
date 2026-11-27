@@ -307,7 +307,7 @@ export function ProductShowcaseSection() {
                                   'flex items-center gap-3 p-2.5 rounded-2xl border text-left transition-all',
                                   selected
                                     ? 'bg-[var(--vg-surface-2)] border-[var(--vg-brand)] shadow-sm'
-                                    : 'bg-[var(--vg-surface)] border-[var(--vg-border)] hover:border-[var(--vg-border-strong)]'
+                                    : 'bg-[var(--vg-surface)] border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] hover:bg-[#F0F1EC]/60 dark:hover:bg-[#171A18]/80'
                                 )}
                               >
                                 <img

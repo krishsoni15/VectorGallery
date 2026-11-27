@@ -369,11 +369,11 @@ export function InteractiveSearchDemo() {
       id="search-demo"
       surface="default"
       ariaLabel="Interactive search demonstration"
-      className="border-t border-[var(--vg-border)]"
+      className="py-16 sm:py-20 lg:py-24 border-t border-[var(--vg-border)]"
     >
       <Container>
         {/* Centered Editorial Grotesk Heading (Zero serif italics) */}
-        <MotionReveal className="max-w-[820px] mx-auto text-center space-y-5">
+        <MotionReveal className="max-w-[820px] mx-auto text-center space-y-4">
           <p className="text-[13px] font-medium text-[var(--vg-ink-2)]">
             Interactive sample demo · Sample files only
           </p>
@@ -400,8 +400,8 @@ export function InteractiveSearchDemo() {
         </MotionReveal>
 
         {/* Studio Inquiry Stage */}
-        <MotionReveal delay={0.08} className="mt-12 max-w-[1160px] mx-auto space-y-6">
-          <div className={cn(VG_COMPONENTS.cards.surface, 'p-5 sm:p-8 space-y-6')}>
+        <MotionReveal delay={0.08} className="mt-9 max-w-[1160px] mx-auto space-y-5">
+          <div className={cn(VG_COMPONENTS.cards.surface, 'p-4 sm:p-6 space-y-5')}>
             {/* Mode Switcher + Clear Label */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div
@@ -548,21 +548,21 @@ export function InteractiveSearchDemo() {
                     onClick={() => setInspectedId(item.id)}
                     animate={
                       prefersReducedMotion
-                        ? { opacity: isMatched ? 1 : 0.35 }
+                        ? { opacity: isMatched ? 1 : 0.48 }
                         : {
-                            opacity: isMatched ? 1 : 0.35,
-                            scale: isMatched ? 1 : 0.95,
+                            opacity: isMatched ? 1 : 0.48,
+                            scale: isMatched ? 1 : 0.96,
                           }
                     }
                     transition={VG_MOTION.springSnappy}
                     className={cn(
-                      'group text-left rounded-2xl border p-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+                      'group text-left rounded-2xl border p-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
                       isMatched
-                        ? 'bg-[var(--vg-surface)] border-[var(--vg-border)] hover:border-[var(--vg-brand)] shadow-[var(--vg-shadow-card)]'
+                        ? 'bg-[var(--vg-surface)] border-[var(--vg-border)] hover:border-[var(--vg-brand)] hover:-translate-y-0.5 shadow-[var(--vg-shadow-card)] hover:shadow-[var(--vg-shadow-hero)]'
                         : 'bg-[var(--vg-surface-2)] border-[var(--vg-border)]'
                     )}
                   >
-                    <div className="aspect-[16/10] rounded-xl overflow-hidden bg-[var(--vg-surface-2)] mb-3 relative">
+                    <div className="aspect-[16/9] rounded-xl overflow-hidden bg-[var(--vg-surface-2)] mb-2.5 relative">
                       <img
                         src={item.thumb}
                         alt={item.alt}

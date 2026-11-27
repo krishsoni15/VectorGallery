@@ -86,23 +86,6 @@ export function LandingNavbar({ stars, hasLocalApk = false }: LandingNavbarProps
         <div className="flex items-center gap-2 sm:gap-2.5">
           <ThemeSwitch />
 
-          <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="VectorGallery on GitHub"
-            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#F0F1EC]/90 dark:hover:bg-[#171A18] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
-          >
-            <Github className="w-4 h-4" />
-            <span>GitHub</span>
-            {showStars && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[var(--vg-surface-2)] text-[var(--vg-brand)]">
-                <Star className="w-3 h-3 fill-current" />
-                {stars}
-              </span>
-            )}
-          </a>
-
           <Link
             href="/login"
             className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-full text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#F0F1EC]/90 dark:hover:bg-[#171A18] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"

@@ -322,7 +322,7 @@ export const VG_COMPONENTS = {
   },
   media: {
     sculptureMask:
-      'radial-gradient(ellipse 64% 66% at 54% 48%, #000 38%, rgba(0,0,0,0.68) 62%, transparent 86%)',
+      'radial-gradient(ellipse 58% 58% at 56% 49%, #000 32%, rgba(0,0,0,0.62) 54%, transparent 75%)',
   },
 } as const
 
