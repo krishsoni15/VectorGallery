@@ -3,15 +3,17 @@ import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   Check,
-  CheckCircle2,
+  ChevronDown,
   Cloud,
   Copy,
-  Database,
   Download,
   ExternalLink,
-  FolderCheck,
-  QrCode,
+  FolderOpen,
+  Home,
+  Laptop,
+  MessageSquare,
   Search,
+  Settings,
   ShieldCheck,
   Smartphone,
   Wifi,
@@ -27,31 +29,45 @@ import {
 import { MotionReveal } from './motion'
 import { APK_EXPECTED_SHA256, RELEASES_URL } from './tokens'
 
-type DeviceTab = 'backup' | 'gallery' | 'recall'
+type FlutterTab = 'home' | 'files' | 'chat' | 'search' | 'settings'
 
-const MOBILE_HIGHLIGHTS = [
+const HUMAN_BENEFITS = [
   {
-    icon: Wifi,
-    title: 'Wi-Fi only backup',
-    detail: 'Pauses off Wi-Fi and resumes automatically on your home network.',
+    title: 'Back up automatically',
+    detail: 'New camera shots and screenshots queue quietly whenever you are on Wi-Fi.',
   },
   {
-    icon: ShieldCheck,
-    title: 'Non-destructive sync',
-    detail: 'Read-only on your phone gallery; vault actions never delete originals.',
+    title: 'Keep your originals',
+    detail: 'Read-only on your phone gallery — organizing or removing items in your vault never touches local photos.',
   },
   {
-    icon: Database,
-    title: 'SHA-256 deduplication',
-    detail: 'Pre-flight hash check skips duplicates via a persistent SQLite retry queue.',
+    title: 'Avoid duplicate uploads',
+    detail: 'Already-backed-up memories are recognized and skipped automatically before any transfer begins.',
+  },
+  {
+    title: 'Find your files from connected devices',
+    detail: 'Moments captured on the move appear cleanly inside your desktop and tablet workspace.',
   },
 ] as const
 
-const DEVICE_TABS: Array<{ id: DeviceTab; label: string }> = [
-  { id: 'backup', label: 'Backup Queue' },
-  { id: 'gallery', label: 'Phone Gallery' },
-  { id: 'recall', label: 'Mobile Recall' },
+const FLUTTER_TABS: Array<{
+  id: FlutterTab
+  label: string
+  icon: typeof Home
+}> = [
+  { id: 'home', label: 'Home', icon: Home },
+  { id: 'files', label: 'Files', icon: FolderOpen },
+  { id: 'chat', label: 'AI Chat', icon: MessageSquare },
+  { id: 'search', label: 'Search', icon: Search },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ]
+
+const CONTINUITY_STEPS = [
+  { label: 'Phone', sub: 'Captured on camera' },
+  { label: 'Queue', sub: 'Waits for Wi-Fi' },
+  { label: 'Private Cloud', sub: 'Stored safely' },
+  { label: 'Desktop', sub: 'Ready to search' },
+] as const
 
 export function MobileSection({
   apkSizeLabel = '107.8 MB',
@@ -59,7 +75,8 @@ export function MobileSection({
   apkSizeLabel?: string
 }) {
   const prefersReduced = useReducedMotion()
-  const [activeTab, setActiveTab] = useState<DeviceTab>('backup')
+  const [activeTab, setActiveTab] = useState<FlutterTab>('home')
+  const [showChecksum, setShowChecksum] = useState(false)
   const [copiedSha, setCopiedSha] = useState(false)
 
   const copySha = async () => {
@@ -68,7 +85,7 @@ export function MobileSection({
       setCopiedSha(true)
       setTimeout(() => setCopiedSha(false), 1800)
     } catch {
-      // Clipboard unavailable in restricted browser contexts
+      // Clipboard unavailable in restricted context
     }
   }
 
@@ -81,434 +98,531 @@ export function MobileSection({
         VG_LAYOUT.sectionPadding.standard
       )}
     >
-      <div className={VG_LAYOUT.containers.standard}>
+      <div className={VG_LAYOUT.containers.wide}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
-          {/* Left Column: Copy, APK Download, SHA-256 & 3 Core Mechanics */}
-          <MotionReveal className="lg:col-span-6 space-y-6">
-            <span className={VG_COMPONENTS.badges.sage}>
-              <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Flutter Android Companion · v2.0.0+1</span>
-            </span>
+          {/* Left Column: Copy, 4 Human Benefits, CTAs & Expandable Checksum */}
+          <MotionReveal className="lg:col-span-5 space-y-6">
+            <div
+              className="inline-flex items-center gap-2 text-[var(--vg-ink-2)]"
+              style={{
+                fontSize: VG_TYPOGRAPHY.scale.kicker.fontSize,
+                fontWeight: VG_TYPOGRAPHY.scale.kicker.fontWeight,
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#58D6A8]" aria-hidden="true" />
+              <span>Android Companion</span>
+            </div>
 
             <h2
-              className="font-display font-bold tracking-[-0.03em] leading-[1.08] text-[var(--vg-ink)]"
+              className="font-display font-bold text-[var(--vg-ink)]"
               style={{
                 fontSize: VG_TYPOGRAPHY.scale.h2.fontSize,
                 lineHeight: VG_TYPOGRAPHY.scale.h2.lineHeight,
                 letterSpacing: VG_TYPOGRAPHY.scale.h2.letterSpacing,
-                textWrap: 'balance',
               }}
             >
-              Your world,{' '}
-              <em className={VG_TYPOGRAPHY.editorialWordClass}>wherever</em>{' '}
-              you{'\u00A0'}go.
+              Your memories move with you.
             </h2>
 
             <p
-              className="text-[var(--vg-ink-2)] max-w-xl"
+              className="text-[var(--vg-ink-2)]"
               style={{
                 fontSize: VG_TYPOGRAPHY.scale.lead.fontSize,
                 lineHeight: VG_TYPOGRAPHY.scale.lead.lineHeight,
               }}
             >
-              Automatic, non-destructive Android backup over Wi-Fi. Built in Flutter with a
-              persistent SQLite retry queue and SHA-256 pre-check so phone originals stay untouched.
+              Back up your Android camera roll automatically over Wi-Fi without ever touching the
+              originals on your phone — ready on desktop the moment you need them.
             </p>
 
-            {/* Primary APK CTA + /install Guide */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            {/* 4 Human Benefits (Clean editorial list, no boxed cards) */}
+            <ul className="space-y-3.5 pt-1">
+              {HUMAN_BENEFITS.map((benefit) => (
+                <li key={benefit.title} className="flex items-start gap-3">
+                  <span
+                    className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#58D6A8] shrink-0"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <p className="text-[14.5px] font-semibold text-[var(--vg-ink)]">
+                      {benefit.title}
+                    </p>
+                    <p className="text-[13.5px] text-[var(--vg-ink-2)] leading-relaxed">
+                      {benefit.detail}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Primary & Secondary CTAs */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="/vectorgallery.apk"
                 download="VectorGallery.apk"
                 className={VG_COMPONENTS.buttons.primary}
               >
                 <Download className="w-4 h-4 shrink-0" aria-hidden="true" />
-                <span>Download Android APK</span>
-                <span className="ml-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[#FFFFFF]/15 dark:bg-[#061811]/15">
+                <span>Download for Android</span>
+                <span className="ml-0.5 px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/20 dark:bg-[#071912]/15">
                   ~{apkSizeLabel}
                 </span>
               </a>
 
               <Link href="/install" className={VG_COMPONENTS.buttons.secondary}>
-                <QrCode className="w-4 h-4 text-[var(--vg-brand)]" aria-hidden="true" />
-                <span>Install &amp; QR Guide</span>
+                <span>Installation guide</span>
               </Link>
             </div>
 
-            {/* 3 Succinct Feature Highlights */}
-            <ul className="space-y-3 pt-1">
-              {MOBILE_HIGHLIGHTS.map((item) => {
-                const Icon = item.icon
-                return (
-                  <li key={item.title} className="flex items-start gap-3.5">
-                    <span className="w-8 h-8 rounded-xl bg-[var(--vg-surface-soft)] border border-[var(--vg-border)] flex items-center justify-center text-[var(--vg-brand)] shrink-0 mt-0.5">
-                      <Icon className="w-4 h-4" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-[14px] font-semibold text-[var(--vg-ink)]">
-                        {item.title}
-                      </p>
-                      <p className="text-[13px] text-[var(--vg-ink-2)] leading-relaxed">
-                        {item.detail}
-                      </p>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-
-            {/* Verified SHA-256 Checksum & Honest Distribution */}
-            <div className={cn(VG_COMPONENTS.cards.secondary, 'p-4 space-y-2.5')}>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[12px] font-semibold text-[var(--vg-ink)]">
-                  Verified APK SHA-256 Checksum
-                </span>
-                <button
-                  type="button"
-                  onClick={copySha}
-                  className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[var(--vg-brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] rounded"
-                >
-                  {copiedSha ? (
-                    <Check className="w-3.5 h-3.5" aria-hidden="true" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" aria-hidden="true" />
+            {/* Compact Expandable SHA-256 Checksum Disclosure */}
+            <div className="pt-1">
+              <button
+                type="button"
+                aria-expanded={showChecksum}
+                onClick={() => setShowChecksum((prev) => !prev)}
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)] rounded"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[var(--vg-brand)]" aria-hidden="true" />
+                <span>Verify APK checksum</span>
+                <ChevronDown
+                  className={cn(
+                    'w-3.5 h-3.5 transition-transform duration-200',
+                    showChecksum && 'rotate-180'
                   )}
-                  <span>{copiedSha ? 'SHA-256 Copied' : 'Copy SHA-256'}</span>
-                </button>
-              </div>
-              <p className="font-mono text-[11px] break-all text-[var(--vg-ink-2)] bg-[var(--vg-surface)] px-3 py-2 rounded-xl border border-[var(--vg-border)] select-all">
-                {APK_EXPECTED_SHA256}
-              </p>
-              <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] text-[var(--vg-ink-muted)]">
-                <span>
-                  Direct APK &amp; source build only (not published on Google Play or App Store).
-                </span>
-                <a
-                  href={RELEASES_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 font-medium text-[var(--vg-brand)] hover:underline"
-                >
-                  <span>GitHub Releases</span>
-                  <ExternalLink className="w-3 h-3" aria-hidden="true" />
-                </a>
-              </div>
+                  aria-hidden="true"
+                />
+              </button>
+
+              {showChecksum && (
+                <div className="mt-3 p-4 rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface-2)] space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[12px] font-medium text-[var(--vg-ink)]">
+                      Android v2.0.0+1 · SHA-256
+                    </span>
+                    <button
+                      type="button"
+                      onClick={copySha}
+                      className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[var(--vg-brand)] hover:underline"
+                    >
+                      {copiedSha ? (
+                        <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" aria-hidden="true" />
+                      )}
+                      <span>{copiedSha ? 'Copied' : 'Copy checksum'}</span>
+                    </button>
+                  </div>
+                  <p className="font-mono text-[11px] break-all text-[var(--vg-ink-2)] bg-[var(--vg-surface)] px-3 py-2 rounded-xl border border-[var(--vg-border)] select-all">
+                    {APK_EXPECTED_SHA256}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-[var(--vg-ink-muted)]">
+                    <span>Direct APK &amp; open-source build only (not on Google Play).</span>
+                    <a
+                      href={RELEASES_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 font-medium text-[var(--vg-brand)] hover:underline"
+                    >
+                      <span>GitHub Releases</span>
+                      <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </MotionReveal>
 
-          {/* Right Column: Cinematic CSS/SVG Android Hardware Mockup + Phone-to-Cloud Flow */}
-          <MotionReveal delay={0.08} className="lg:col-span-6 relative flex flex-col items-center">
-            {/* Soft Sanctuary Mint/Jade Backdrop Glow */}
+          {/* Right Column: Sculpted Dual-Hardware Story (Android Phone + Desktop Preview) */}
+          <MotionReveal delay={0.08} className="lg:col-span-7 relative">
+            {/* Subtle Ambient Studio Glow */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -inset-6 rounded-full opacity-75 dark:opacity-55 blur-3xl"
+              className="pointer-events-none absolute -inset-6 rounded-full opacity-60 dark:opacity-45 blur-3xl"
               style={{
                 background:
-                  'radial-gradient(circle at 50% 48%, rgba(83, 217, 163, 0.22), rgba(184, 231, 212, 0.16) 45%, transparent 72%)',
+                  'radial-gradient(ellipse 64% 58% at 50% 48%, rgba(166, 217, 208, 0.25), rgba(196, 237, 225, 0.14) 45%, transparent 74%)',
               }}
             />
 
-            {/* Screen Selector Pills */}
-            <div
-              role="tablist"
-              aria-label="Flutter Android screen preview"
-              className="relative z-10 inline-flex items-center gap-1.5 p-1 rounded-full border border-[var(--vg-border)] bg-[#FFFFFF]/95 dark:bg-[#101914]/95 backdrop-blur-md shadow-sm mb-5"
-            >
-              {DEVICE_TABS.map((tab) => {
-                const active = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    role="tab"
-                    aria-selected={active}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                      'px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all',
-                      active
-                        ? 'bg-[#087F5B] text-[#FFFFFF] dark:bg-[#53D9A3] dark:text-[#061811] shadow-sm'
-                        : 'text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)]'
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Animated Phone -> Cloud Transfer Bridge */}
-            <div className="relative z-10 w-full max-w-[356px] mb-4 px-4 py-2.5 rounded-2xl border border-[var(--vg-border)] bg-[#FFFFFF]/92 dark:bg-[#101914]/92 backdrop-blur-md shadow-sm flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="w-7 h-7 rounded-lg bg-[var(--vg-surface-soft)] border border-[var(--vg-border)] flex items-center justify-center text-[var(--vg-brand)]">
-                  <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
-                </span>
-                <span className="text-[11px] font-mono text-[var(--vg-ink)]">DCIM</span>
-              </div>
-
-              {/* SVG Transfer Stream */}
-              <div className="relative flex-1 h-6 flex items-center" aria-hidden="true">
-                <svg viewBox="0 0 140 24" className="w-full h-6 overflow-visible">
-                  <line
-                    x1="4"
-                    y1="12"
-                    x2="136"
-                    y2="12"
-                    stroke="currentColor"
-                    strokeOpacity="0.22"
-                    strokeWidth="1.5"
-                    strokeDasharray="4 4"
-                    className="text-[var(--vg-brand)]"
+            <div className="relative z-10 flex flex-col items-center lg:items-end gap-6">
+              {/* Dual-Device Composition */}
+              <div className="w-full flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-5 sm:gap-0">
+                {/* Sculpted Metallic-Bezel Android Phone */}
+                <div className="relative z-20 w-[288px] sm:w-[296px] shrink-0">
+                  {/* Side Metallic Volume & Power Keys */}
+                  <span
+                    aria-hidden="true"
+                    className="hidden sm:block absolute -right-[3px] top-24 w-[3px] h-11 rounded-r bg-[#363D38] border-y border-r border-white/15"
                   />
-                  {!prefersReduced && (
-                    <motion.circle
-                      r="3.5"
-                      cy="12"
-                      fill="#53D9A3"
-                      initial={{ cx: 8, opacity: 0 }}
-                      animate={{ cx: [8, 70, 132], opacity: [0.3, 1, 0.3] }}
-                      transition={{
-                        duration: 2.2,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                    />
-                  )}
-                  {prefersReduced && (
-                    <circle cx="70" cy="12" r="3.5" fill="#087F5B" />
-                  )}
-                </svg>
-              </div>
+                  <span
+                    aria-hidden="true"
+                    className="hidden sm:block absolute -right-[3px] top-40 w-[3px] h-7 rounded-r bg-[#363D38] border-y border-r border-white/15"
+                  />
 
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[11px] font-mono text-[var(--vg-brand)]">Vault</span>
-                <span className="w-7 h-7 rounded-lg bg-[var(--vg-surface-soft)] border border-[#087F5B]/25 dark:border-[#53D9A3]/25 flex items-center justify-center text-[var(--vg-brand)]">
-                  <Cloud className="w-3.5 h-3.5" aria-hidden="true" />
-                </span>
-              </div>
-            </div>
+                  {/* Sculpted Metallic Titanium Bezel */}
+                  <div className="p-[9px] rounded-[2.45rem] bg-gradient-to-b from-[#2B312D] via-[#171B18] to-[#0B0D0C] ring-1 ring-white/20 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.45)] dark:shadow-[0_36px_90px_-18px_rgba(0,0,0,0.85)]">
+                    <div className="rounded-[1.9rem] overflow-hidden bg-[#090A0D] text-[#F4F5F7] border border-white/[0.08]">
+                      {/* Android Status Bar + Punch-Hole Camera */}
+                      <div className="px-5 pt-2.5 pb-1.5 flex items-center justify-between text-[10px] font-mono text-[#9AA0AC] bg-[#111318]">
+                        <span>9:41</span>
+                        <span
+                          aria-hidden="true"
+                          className="w-2.5 h-2.5 rounded-full bg-[#050608] ring-1 ring-white/15"
+                        />
+                        <svg
+                          width="38"
+                          height="10"
+                          viewBox="0 0 38 10"
+                          fill="none"
+                          aria-hidden="true"
+                          className="text-[#F4F5F7]"
+                        >
+                          <rect x="0" y="5" width="2" height="4" rx="0.6" fill="currentColor" opacity="0.5" />
+                          <rect x="3" y="3.5" width="2" height="5.5" rx="0.6" fill="currentColor" opacity="0.75" />
+                          <rect x="6" y="1.5" width="2" height="7.5" rx="0.6" fill="currentColor" />
+                          <path
+                            d="M14 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-2.5-2a3.6 3.6 0 0 1 5 0M10 4.2a5.8 5.8 0 0 1 8 0"
+                            stroke="#58D6A8"
+                            strokeWidth="1.15"
+                            strokeLinecap="round"
+                          />
+                          <rect
+                            x="22"
+                            y="1.5"
+                            width="13"
+                            height="7"
+                            rx="1.8"
+                            stroke="currentColor"
+                            strokeOpacity="0.55"
+                            strokeWidth="1"
+                          />
+                          <rect x="23.5" y="3" width="9" height="4" rx="0.9" fill="#58D6A8" />
+                        </svg>
+                      </div>
 
-            {/* CSS/SVG Android Hardware Device Frame */}
-            <div className="relative z-10 w-full max-w-[332px]">
-              {/* Side Hardware Keys */}
-              <span
-                aria-hidden="true"
-                className="hidden sm:block absolute -right-1.5 top-28 w-1 h-12 rounded-r bg-[#1C3329] border border-[#B8E7D4]/20"
-              />
-              <span
-                aria-hidden="true"
-                className="hidden sm:block absolute -right-1.5 top-44 w-1 h-8 rounded-r bg-[#1C3329] border border-[#B8E7D4]/20"
-              />
+                      {/* Real Flutter App Header */}
+                      <div className="px-3.5 py-2.5 bg-[#111318] border-b border-white/[0.08] flex items-center justify-between">
+                        <VectorGalleryLogo variant="on-dark" size="sm" />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-medium bg-[#171A21] text-[#58D6A8] border border-[#58D6A8]/25">
+                          <Wifi className="w-2.5 h-2.5" aria-hidden="true" />
+                          <span>Wi-Fi</span>
+                        </span>
+                      </div>
 
-              {/* Outer Bezel */}
-              <div
-                className={cn(
-                  'p-[10px] bg-[#0B1612] border border-[#B8E7D4]/18',
-                  VG_LAYOUT.radii.device,
-                  VG_LAYOUT.shadows.hero
-                )}
-              >
-                {/* Inner OLED Screen */}
-                <div className="rounded-[1.7rem] overflow-hidden bg-[#080E0C] text-[#EFF7F3] border border-[#B8E7D4]/12">
-                  {/* Realistic Android Status Bar + Punch-Hole Camera */}
-                  <div className="px-5 pt-3 pb-2 flex items-center justify-between text-[10.5px] font-mono text-[#9CB6AA] bg-[#0B1410]">
-                    <span>9:41</span>
-                    {/* Punch-hole selfie camera */}
-                    <span
-                      aria-hidden="true"
-                      className="w-3 h-3 rounded-full bg-[#040806] ring-1 ring-[#B8E7D4]/20 flex items-center justify-center"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-[#1C3329]" />
+                      {/* Flutter Screen Content matching mobile/lib/ */}
+                      <div className="p-3 space-y-2.5 min-h-[304px] bg-[#090A0D]">
+                        {activeTab === 'home' && (
+                          <>
+                            {/* VectorGallery Cloud Backup Sheet (from home_screen.dart) */}
+                            <div className="p-3 rounded-2xl bg-[#111318] border border-white/[0.08] space-y-2.5">
+                              <div className="flex items-center gap-2.5">
+                                <span className="w-8 h-8 rounded-full bg-gradient-to-br from-[#087F5B] to-[#58D6A8] flex items-center justify-center text-[#071912] shrink-0">
+                                  <Cloud className="w-4 h-4" aria-hidden="true" />
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-[11.5px] font-semibold text-[#F4F5F7] truncate">
+                                    VectorGallery Cloud Backup
+                                  </p>
+                                  <p className="text-[10px] text-[#9AA0AC]">
+                                    Wi-Fi connected · Originals untouched
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="rounded-xl overflow-hidden relative aspect-[16/10] border border-white/[0.08]">
+                                <img
+                                  src="/landing/photos/aura-personal-travel.webp"
+                                  alt="Harbor walk photograph queuing and syncing in Flutter app"
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="vg-photo-caption absolute inset-x-0 bottom-0 px-2.5 py-1.5 bg-gradient-to-t from-[#090A0D]/90 to-transparent flex items-center justify-between">
+                                  <span className="text-[10px] font-mono">harbor_walk.webp</span>
+                                  <span className="text-[9.5px] px-1.5 py-0.5 rounded-full bg-[#171A21] text-[#58D6A8]">
+                                    Syncing
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-[10px] text-[#9AA0AC]">
+                                  <span>Uploading queue</span>
+                                  <span className="font-mono text-[#58D6A8]">3 of 3 ready</span>
+                                </div>
+                                <div className="h-1.5 rounded-full bg-[#171A21] overflow-hidden">
+                                  <motion.div
+                                    className="h-full rounded-full bg-gradient-to-r from-[#087F5B] to-[#58D6A8]"
+                                    initial={prefersReduced ? { width: '94%' } : { width: '54%' }}
+                                    animate={{ width: '94%' }}
+                                    transition={{ duration: 1.1, ease: VG_MOTION.ease }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="rounded-xl overflow-hidden aspect-[4/3] border border-white/[0.08] relative">
+                                <img
+                                  src="/landing/photos/aura-family-morning.webp"
+                                  alt="Family morning pears synced on Android"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="rounded-xl overflow-hidden aspect-[4/3] border border-white/[0.08] relative">
+                                <img
+                                  src="/landing/photos/aura-coastal-path.webp"
+                                  alt="Coastal footpath photo synced on Android"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {activeTab === 'files' && (
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="font-semibold text-[#F4F5F7]">Synced Library</span>
+                              <span className="text-[#58D6A8] text-[10px]">All backed up</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="rounded-xl overflow-hidden aspect-square border border-white/[0.08]">
+                                <img
+                                  src="/landing/photos/aura-personal-travel.webp"
+                                  alt="Harbor walk memory"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="rounded-xl overflow-hidden aspect-square border border-white/[0.08]">
+                                <img
+                                  src="/landing/photos/aura-family-morning.webp"
+                                  alt="Sunday kitchen morning memory"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="rounded-xl overflow-hidden aspect-square border border-white/[0.08]">
+                                <img
+                                  src="/landing/photos/aura-coastal-path.webp"
+                                  alt="Coastal path memory"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="rounded-xl overflow-hidden aspect-square border border-white/[0.08]">
+                                <img
+                                  src="/landing/photos/aura-journal-desk.webp"
+                                  alt="Handwritten journal spread"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {activeTab === 'chat' && (
+                          <div className="space-y-2.5">
+                            <div className="p-2.5 rounded-xl bg-[#171A21] border border-white/[0.08] text-[11px] text-[#F4F5F7]">
+                              “When did we take that harbor walk photo?”
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-[#111318] border border-[#58D6A8]/25 space-y-2">
+                              <p className="text-[11px] text-[#D2D6DC] leading-relaxed">
+                                Captured on <strong className="text-[#58D6A8]">August 4</strong> during
+                                your coastal trip and backed up cleanly over Wi-Fi.
+                              </p>
+                              <div className="rounded-lg overflow-hidden aspect-[16/9]">
+                                <img
+                                  src="/landing/photos/aura-personal-travel.webp"
+                                  alt="Harbor promenade photo cited in mobile AI chat"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {activeTab === 'search' && (
+                          <div className="space-y-2.5">
+                            <div className="px-3 py-2 rounded-xl bg-[#171A21] border border-[#58D6A8]/35 flex items-center gap-2 text-[11px] text-[#F4F5F7]">
+                              <Search className="w-3.5 h-3.5 text-[#58D6A8] shrink-0" aria-hidden="true" />
+                              <span className="truncate">coastal footpath</span>
+                            </div>
+                            <div className="rounded-xl overflow-hidden aspect-[16/10] border border-white/[0.08]">
+                              <img
+                                src="/landing/photos/aura-coastal-path.webp"
+                                alt="Coastal footpath matched in mobile search"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-[#111318] border border-white/[0.08]">
+                              <p className="text-[11px] font-medium text-[#F4F5F7]">
+                                chalk_cliff_footpath.webp
+                              </p>
+                              <p className="text-[10px] text-[#9AA0AC]">
+                                Matched from your travel roll
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {activeTab === 'settings' && (
+                          <div className="space-y-2">
+                            <p className="text-[11px] font-semibold text-[#F4F5F7] mb-1">
+                              Backup Preferences
+                            </p>
+                            {[
+                              { label: 'Automatic backup', value: 'On' },
+                              { label: 'Wi-Fi only', value: 'Enabled' },
+                              { label: 'Keep phone originals', value: 'Always' },
+                              { label: 'Skip duplicates', value: 'Active' },
+                            ].map((row) => (
+                              <div
+                                key={row.label}
+                                className="px-3 py-2 rounded-xl bg-[#111318] border border-white/[0.08] flex items-center justify-between text-[11px]"
+                              >
+                                <span className="text-[#D2D6DC]">{row.label}</span>
+                                <span className="text-[#58D6A8] font-medium">{row.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Real 5-Tab Flutter BottomNavShell */}
+                      <div className="px-1.5 py-2 bg-[#111318] border-t border-white/[0.08] grid grid-cols-5 gap-0.5">
+                        {FLUTTER_TABS.map((tab) => {
+                          const Icon = tab.icon
+                          const active = activeTab === tab.id
+                          return (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => setActiveTab(tab.id)}
+                              className={cn(
+                                'flex flex-col items-center gap-0.5 py-1 rounded-lg transition-colors',
+                                active ? 'text-[#58D6A8]' : 'text-[#686E7B] hover:text-[#D2D6DC]'
+                              )}
+                            >
+                              <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                              <span className="text-[9px] font-medium leading-none">
+                                {tab.label}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      {/* Android Gesture Bar */}
+                      <div className="py-1.5 bg-[#090A0D] flex justify-center" aria-hidden="true">
+                        <span className="w-16 h-1 rounded-full bg-white/20" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Luminous Emerald Stream -> Sleek Desktop Preview */}
+                <div className="hidden sm:flex flex-col items-start sm:-ml-6 z-10 w-full max-w-[330px]">
+                  {/* Animated Emerald Stream Bridge */}
+                  <div className="w-full px-6 py-2 flex items-center gap-2" aria-hidden="true">
+                    <span className="text-[10.5px] font-mono text-[var(--vg-ink-muted)] shrink-0">
+                      Syncing
                     </span>
-                    {/* SVG Signal / Wi-Fi / Battery */}
-                    <svg
-                      width="42"
-                      height="11"
-                      viewBox="0 0 42 11"
-                      fill="none"
-                      aria-hidden="true"
-                      className="text-[#EFF7F3]"
-                    >
-                      <rect x="0" y="6" width="2" height="4" rx="0.6" fill="currentColor" opacity="0.55" />
-                      <rect x="3.5" y="4" width="2" height="6" rx="0.6" fill="currentColor" opacity="0.75" />
-                      <rect x="7" y="2" width="2" height="8" rx="0.6" fill="currentColor" />
-                      <path
-                        d="M15 8.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Zm-2.8-2.3a4 4 0 0 1 5.6 0M10.4 4.3a6.6 6.6 0 0 1 9.2 0"
-                        stroke="#53D9A3"
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                      />
-                      <rect
-                        x="25"
-                        y="2"
-                        width="14"
-                        height="7.5"
-                        rx="2"
+                    <svg viewBox="0 0 160 18" className="w-full h-4 overflow-visible">
+                      <line
+                        x1="0"
+                        y1="9"
+                        x2="160"
+                        y2="9"
                         stroke="currentColor"
-                        strokeOpacity="0.55"
-                        strokeWidth="1"
+                        strokeOpacity="0.24"
+                        strokeWidth="1.5"
+                        strokeDasharray="4 4"
+                        className="text-[var(--vg-brand)]"
                       />
-                      <rect x="26.5" y="3.5" width="9.5" height="4.5" rx="1" fill="#53D9A3" />
-                      <rect x="39.5" y="4.3" width="1.5" height="3" rx="0.6" fill="currentColor" opacity="0.55" />
+                      {!prefersReduced ? (
+                        <motion.circle
+                          r="3.5"
+                          cy="9"
+                          fill="#58D6A8"
+                          initial={{ cx: 4, opacity: 0.2 }}
+                          animate={{ cx: [4, 80, 156], opacity: [0.3, 1, 0.3] }}
+                          transition={{ duration: 2.1, repeat: Infinity, ease: 'easeInOut' }}
+                        />
+                      ) : (
+                        <circle cx="80" cy="9" r="3.5" fill="#087F5B" />
+                      )}
                     </svg>
                   </div>
 
-                  {/* Flutter App Header */}
-                  <div className="px-4 py-2.5 bg-[#101914] border-y border-[#B8E7D4]/10 flex items-center justify-between">
-                    <VectorGalleryLogo variant="on-dark" size="sm" />
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#1C3329] text-[#53D9A3] border border-[#53D9A3]/25">
-                      <Wifi className="w-2.5 h-2.5" aria-hidden="true" />
-                      <span>Wi-Fi Only</span>
-                    </span>
-                  </div>
+                  {/* Sculpted Desktop Browser Frame */}
+                  <div className="w-full rounded-2xl border border-[#E0E4DD] dark:border-white/[0.12] bg-[#FFFFFF] dark:bg-[#131614] shadow-[var(--vg-shadow-card)] overflow-hidden">
+                    <div className="px-3.5 py-2.5 bg-[#F0F1EC] dark:bg-[#171A18] border-b border-[var(--vg-border)] flex items-center justify-between">
+                      <div className="flex items-center gap-1.5" aria-hidden="true">
+                        <span className="w-2 h-2 rounded-full bg-[#CBD2C7] dark:bg-white/20" />
+                        <span className="w-2 h-2 rounded-full bg-[#CBD2C7] dark:bg-white/20" />
+                        <span className="w-2 h-2 rounded-full bg-[#CBD2C7] dark:bg-white/20" />
+                      </div>
+                      <span className="text-[11px] font-medium text-[var(--vg-ink-2)] flex items-center gap-1.5">
+                        <Laptop className="w-3 h-3 text-[var(--vg-brand)]" aria-hidden="true" />
+                        <span>Desktop Library</span>
+                      </span>
+                    </div>
 
-                  {/* Active Flutter Screen Body */}
-                  <div className="p-3.5 space-y-3 min-h-[332px] bg-[#080E0C]">
-                    {activeTab === 'backup' && (
-                      <>
-                        <div className="rounded-2xl overflow-hidden relative aspect-[16/10] border border-[#B8E7D4]/15">
+                    <div className="p-3.5 space-y-3">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-[var(--vg-ink)]">Just arrived</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#C4EDE1]/65 text-[#066649] dark:bg-[#252A26] dark:text-[#58D6A8] font-medium">
+                          From Phone
+                        </span>
+                      </div>
+
+                      <div className="rounded-xl overflow-hidden aspect-[16/10] border border-[var(--vg-border)] relative">
+                        <img
+                          src="/landing/photos/aura-personal-travel.webp"
+                          alt="Harbor walk memory appearing inside VectorGallery desktop library"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="vg-photo-caption absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-[#0B0D0C]/75 text-[10px] font-mono">
+                          harbor_walk.webp
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-lg overflow-hidden aspect-[4/3] border border-[var(--vg-border)]">
                           <img
-                            src="/landing/photos/misty-pines.webp"
-                            alt="Misty evergreen ridge synced in Android backup queue"
+                            src="/landing/photos/aura-family-morning.webp"
+                            alt="Family kitchen pears synced to desktop"
                             className="w-full h-full object-cover"
                           />
-                          <div className="vg-photo-caption absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-[#080E0C]/90 via-[#080E0C]/45 to-transparent flex items-center justify-between">
-                            <span className="text-[10.5px] font-mono">IMG_2026_PINES.webp</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1C3329]/90 text-[#53D9A3] border border-[#53D9A3]/30">
-                              SHA-256 OK
-                            </span>
-                          </div>
                         </div>
-
-                        {/* SQLite Queue Card */}
-                        <div className="p-3 rounded-2xl bg-[#101914] border border-[#B8E7D4]/12 space-y-2">
-                          <div className="flex items-center justify-between text-[11.5px]">
-                            <span className="font-semibold text-[#EFF7F3]">SQLite Upload Queue</span>
-                            <span className="font-mono text-[10.5px] text-[#53D9A3]">14 / 14 synced</span>
-                          </div>
-                          <div className="h-1.5 rounded-full bg-[#1C3329] overflow-hidden">
-                            <motion.div
-                              className="h-full rounded-full bg-gradient-to-r from-[#087F5B] to-[#53D9A3]"
-                              initial={prefersReduced ? { width: '92%' } : { width: '58%' }}
-                              animate={{ width: '92%' }}
-                              transition={{ duration: 1.1, ease: VG_MOTION.ease }}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between text-[10.5px] text-[#9CB6AA]">
-                            <span>Folders: Camera, Screenshots</span>
-                            <span>0 deleted locally</span>
-                          </div>
-                        </div>
-
-                        {/* Secondary Synced Row */}
-                        <div className="p-2.5 rounded-xl bg-[#111C17] border border-[#B8E7D4]/10 flex items-center gap-2.5">
+                        <div className="rounded-lg overflow-hidden aspect-[4/3] border border-[var(--vg-border)]">
                           <img
-                            src="/landing/photos/lake-morning.webp"
-                            alt="Morning lake canoe photo backed up non-destructively"
-                            className="w-10 h-10 rounded-lg object-cover shrink-0"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[11.5px] font-semibold text-[#EFF7F3] truncate">
-                              Lake_Morning_Canoe.webp
-                            </p>
-                            <p className="text-[10px] text-[#9CB6AA] truncate">
-                              Deduplicated · Read-only source
-                            </p>
-                          </div>
-                          <FolderCheck className="w-4 h-4 text-[#53D9A3] shrink-0" aria-hidden="true" />
-                        </div>
-                      </>
-                    )}
-
-                    {activeTab === 'gallery' && (
-                      <>
-                        <div className="flex items-center justify-between text-[11px] text-[#9CB6AA]">
-                          <span className="font-semibold text-[#EFF7F3]">Camera Roll · November</span>
-                          <span className="font-mono text-[#53D9A3]">Non-Destructive</span>
-                        </div>
-                        <div className="rounded-2xl overflow-hidden relative aspect-[16/10] border border-[#B8E7D4]/15">
-                          <img
-                            src="/landing/photos/snow-expedition.webp"
-                            alt="Alpine snow expedition tent featured in Android phone gallery"
+                            src="/landing/photos/aura-coastal-path.webp"
+                            alt="Coastal footpath synced to desktop"
                             className="w-full h-full object-cover"
                           />
-                          <span className="vg-photo-caption absolute bottom-2 left-2 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#080E0C]/80 border border-[#B8E7D4]/20">
-                            Alpine_Basecamp.webp · Backed Up
-                          </span>
                         </div>
-                        <div className="grid grid-cols-2 gap-2.5">
-                          <div className="rounded-xl overflow-hidden aspect-[4/3] border border-[#B8E7D4]/12 relative">
-                            <img
-                              src="/landing/photos/lake-morning.webp"
-                              alt="Morning canoe trip thumbnail"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="rounded-xl overflow-hidden aspect-[4/3] border border-[#B8E7D4]/12 relative">
-                            <img
-                              src="/landing/photos/misty-pines.webp"
-                              alt="Misty pine forest thumbnail"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {activeTab === 'recall' && (
-                      <>
-                        <div className="px-3 py-2 rounded-xl bg-[#101914] border border-[#53D9A3]/30 flex items-center gap-2 text-[11.5px] text-[#EFF7F3]">
-                          <Search className="w-3.5 h-3.5 text-[#53D9A3] shrink-0" aria-hidden="true" />
-                          <span className="truncate">“warm canyon sunset ridge”</span>
-                        </div>
-                        <div className="rounded-2xl overflow-hidden relative aspect-[16/10] border border-[#B8E7D4]/15">
-                          <img
-                            src="/landing/photos/canyon-dusk.webp"
-                            alt="Golden canyon ridge at dusk matched by mobile recall"
-                            className="w-full h-full object-cover"
-                          />
-                          <span className="vg-photo-caption absolute top-2 right-2 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1C3329]/90 text-[#53D9A3] border border-[#53D9A3]/30">
-                            98% Match
-                          </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-[#111C17] border border-[#B8E7D4]/12 space-y-1">
-                          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#53D9A3]">
-                            <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
-                            <span>Grounded Recall</span>
-                          </div>
-                          <p className="text-[11px] text-[#9CB6AA] leading-snug">
-                            Canyon_Dusk_Horizon.webp · Backed up from DCIM/Camera over Wi-Fi.
-                          </p>
-                        </div>
-                      </>
-                    )}
+                      </div>
+                    </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Flutter Bottom Navigation Bar */}
-                  <div className="px-3 py-2 bg-[#101914] border-t border-[#B8E7D4]/10 grid grid-cols-3 gap-1 text-[10px]">
-                    {DEVICE_TABS.map((tab) => {
-                      const active = activeTab === tab.id
-                      return (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          onClick={() => setActiveTab(tab.id)}
-                          className={cn(
-                            'py-1.5 rounded-lg font-medium transition-colors',
-                            active
-                              ? 'bg-[#1C3329] text-[#53D9A3]'
-                              : 'text-[#749184] hover:text-[#EFF7F3]'
-                          )}
-                        >
-                          {tab.id === 'backup' ? 'Home' : tab.id === 'gallery' ? 'Files' : 'Search'}
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  {/* Android Gesture Pill */}
-                  <div className="py-2 bg-[#080E0C] flex justify-center" aria-hidden="true">
-                    <span className="w-20 h-1 rounded-full bg-[#B8E7D4]/25" />
-                  </div>
+              {/* Horizontal Continuity Strip: Phone -> Queue -> Private Cloud -> Desktop */}
+              <div className="w-full rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] px-4 sm:px-6 py-4 shadow-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
+                  {CONTINUITY_STEPS.map((step, index) => (
+                    <div key={step.label} className="flex items-center gap-3">
+                      <span className="w-6 h-6 rounded-full bg-[#F0F1EC] dark:bg-[#171A18] border border-[var(--vg-border)] text-[11px] font-semibold text-[var(--vg-brand)] flex items-center justify-center shrink-0">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[12.5px] font-semibold text-[var(--vg-ink)] truncate">
+                          {step.label}
+                        </p>
+                        <p className="text-[11px] text-[var(--vg-ink-muted)] truncate">
+                          {step.sub}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

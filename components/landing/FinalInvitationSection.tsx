@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, ExternalLink } from 'lucide-react'
+import { ArrowRight, Download, ExternalLink } from 'lucide-react'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
 import { cn } from '@/lib/utils'
 import {
@@ -21,85 +21,55 @@ export function FinalInvitationSection() {
       id="get-started"
       aria-label="Get started with VectorGallery"
       className={cn(
-        'relative overflow-hidden bg-gradient-to-b from-[#0C3526] via-[#092219] to-[#071A13] text-[#EFF7F3]',
+        'relative overflow-hidden text-[#F2F3EF]',
         VG_LAYOUT.sectionPadding.finalInvitation
       )}
+      style={{
+        background:
+          'radial-gradient(ellipse 85% 75% at 50% 18%, #0F5C43 0%, #08291D 52%, #05130E 100%)',
+      }}
     >
-      {/* Subtle Sanctuary Mint Atmospheric Glow */}
+      {/* Signature Emerald Light-Field Aura */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 68% 58% at 50% 35%, rgba(83, 217, 163, 0.14), rgba(8, 127, 91, 0.08) 45%, transparent 75%)',
+            'radial-gradient(ellipse 56% 48% at 50% 34%, rgba(88, 214, 168, 0.16), rgba(196, 237, 225, 0.06) 45%, transparent 74%)',
         }}
       />
 
-      {/* Fine Botanical Dot Grain */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-45"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(184, 231, 212, 0.08) 1px, transparent 0)',
-          backgroundSize: '26px 26px',
-        }}
-      />
-
-      {/* Peripheral Framed Memory Accents on Wide Viewports */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none hidden xl:block absolute left-8 2xl:left-16 top-1/2 -translate-y-1/2 w-44 -rotate-6 rounded-2xl overflow-hidden border border-[#B8E7D4]/20 shadow-2xl opacity-75"
-      >
-        <img
-          src="/landing/photos/valley-reflection.webp"
-          alt=""
-          className="w-full h-32 object-cover"
-        />
-        <div className="px-3 py-1.5 bg-[#071A13]/90 text-[10px] font-mono text-[#B8E7D4]">
-          Valley_Stream.webp
-        </div>
-      </div>
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none hidden xl:block absolute right-8 2xl:right-16 top-1/2 -translate-y-1/2 w-44 rotate-6 rounded-2xl overflow-hidden border border-[#B8E7D4]/20 shadow-2xl opacity-75"
-      >
-        <img
-          src="/landing/photos/coffee-ritual.webp"
-          alt=""
-          className="w-full h-32 object-cover"
-        />
-        <div className="px-3 py-1.5 bg-[#071A13]/90 text-[10px] font-mono text-[#B8E7D4]">
-          Sunday_Pour_Over.webp
-        </div>
-      </div>
-
-      {/* Centered Monumental Invitation */}
+      {/* Centered Sculptural Invitation */}
       <div className={cn(VG_LAYOUT.containers.narrow, 'relative z-10 text-center')}>
-        {/* Animated VectorGallery Connected Frames Mark */}
+        {/* Sculptural Memory Fold Mark */}
         <motion.div
-          className="inline-flex justify-center mb-7"
-          initial={prefersReduced ? false : { opacity: 0, scale: 0.88 }}
+          className="inline-flex justify-center mb-8"
+          initial={prefersReduced ? false : { opacity: 0, scale: 0.9 }}
           whileInView={prefersReduced ? undefined : { opacity: 1, scale: 1 }}
           viewport={VG_MOTION.viewport}
           transition={{ duration: VG_MOTION.durations.editorial, ease: VG_MOTION.ease }}
         >
-          <div className="p-2.5 rounded-[1.35rem] bg-[#0E2E22]/85 border border-[#53D9A3]/30 shadow-[0_18px_48px_-14px_rgba(83,217,163,0.28)]">
-            <VectorGalleryLogo variant="on-dark" size="lg" showWordmark={false} />
+          <div className="relative p-3.5 rounded-3xl bg-[#0D261D]/85 border border-[#58D6A8]/25 shadow-[0_24px_60px_-14px_rgba(88,214,168,0.28)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-4 rounded-full bg-[#58D6A8]/15 blur-2xl"
+            />
+            <div className="relative z-10">
+              <VectorGalleryLogo variant="on-dark" size="lg" showWordmark={false} />
+            </div>
           </div>
         </motion.div>
 
         <MotionReveal delay={0.04}>
           <h2
-            className="font-display font-bold tracking-[-0.03em] text-[#EFF7F3]"
+            className="font-display font-bold text-[#F2F3EF]"
             style={{
               fontSize: VG_TYPOGRAPHY.scale.h2.fontSize,
               lineHeight: VG_TYPOGRAPHY.scale.h2.lineHeight,
               letterSpacing: VG_TYPOGRAPHY.scale.h2.letterSpacing,
-              textWrap: 'balance',
             }}
           >
-            Keep what makes{' '}
+            Keep everything that makes{' '}
             <em className={VG_TYPOGRAPHY.editorialWordOnForestClass}>life</em>{' '}
             yours.
           </h2>
@@ -107,39 +77,41 @@ export function FinalInvitationSection() {
 
         <MotionReveal delay={0.08}>
           <p
-            className="mt-5 text-[#B8E7D4]/85 max-w-xl mx-auto"
+            className="mt-5 text-[#C4EDE1]/85 max-w-xl mx-auto"
             style={{
               fontSize: VG_TYPOGRAPHY.scale.lead.fontSize,
               lineHeight: VG_TYPOGRAPHY.scale.lead.lineHeight,
             }}
           >
-            Start privately on your own computer in under a minute, or install the Android
-            companion for effortless Wi-Fi backup.
+            Set up privately on your computer in minutes, or pair your Android phone over Wi-Fi.
           </p>
         </MotionReveal>
 
         <MotionReveal delay={0.12}>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3.5">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3.5">
             <Link href="/app" className={VG_COMPONENTS.buttons.forestPrimary}>
               <span>Get started</span>
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noreferrer"
-              className={VG_COMPONENTS.buttons.forestSecondary}
-            >
-              <span>View on GitHub</span>
-              <ExternalLink className="w-4 h-4" aria-hidden="true" />
-            </a>
+            <Link href="/install" className={VG_COMPONENTS.buttons.forestSecondary}>
+              <Download className="w-4 h-4" aria-hidden="true" />
+              <span>Download Android</span>
+            </Link>
           </div>
         </MotionReveal>
 
         <MotionReveal delay={0.16}>
-          <p className="mt-8 font-mono text-[11.5px] tracking-wide text-[#9CB6AA]">
-            Apache-2.0 Open Source · Local Disk, Supabase, or Cloudflare R2 · Zero Lock-In
-          </p>
+          <div className="mt-7">
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-[#C4EDE1]/80 hover:text-[#F2F3EF] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4EDE1] rounded"
+            >
+              <span>Explore on GitHub</span>
+              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+            </a>
+          </div>
         </MotionReveal>
       </div>
     </section>
