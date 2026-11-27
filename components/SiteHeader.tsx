@@ -40,11 +40,11 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
         scrolled
-          ? 'bg-[#FFFFFF]/90 dark:bg-[#090B0A]/90 backdrop-blur-2xl border-b border-[var(--vg-border)] shadow-sm'
-          : 'vg-transparent-header bg-[#FFFFFF]/95 dark:bg-[#090B0A]/95 border-b border-transparent'
+          ? 'bg-[#FFFFFF]/78 dark:bg-[#090B0A]/78 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#101211]/[0.08] dark:border-white/[0.10] shadow-sm'
+          : 'vg-transparent-header bg-[#FFFFFF]/72 dark:bg-[#090B0A]/68 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#101211]/[0.05] dark:border-white/[0.06]'
       )}
     >
-      <div className={cn(VG_LAYOUT.containers.navbar, 'h-16 lg:h-[74px] flex items-center justify-between gap-4')}>
+      <div className={cn(VG_LAYOUT.containers.navbar, 'h-16 lg:h-[76px] flex items-center justify-between gap-4')}>
         <Link href="/" className="shrink-0">
           <VectorGalleryLogo size="md" variant="horizontal" />
         </Link>
@@ -52,7 +52,7 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
         {!minimal && (
           <nav
             aria-label="Secondary navigation"
-            className="hidden md:inline-flex items-center gap-0.5 xl:gap-1 px-2.5 py-1.5 rounded-full bg-[#F2F3F0] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10]"
+            className="hidden md:inline-flex items-center gap-0.5 xl:gap-1 px-2.5 py-1.5 rounded-full bg-[#FFFFFF]/60 dark:bg-white/[0.06] backdrop-blur-2xl border border-[#101211]/[0.09] dark:border-white/[0.14] shadow-[0_6px_24px_-10px_rgba(16,18,17,0.10),inset_0_1px_1px_rgba(255,255,255,0.9)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]"
           >
             {NAV_LINKS.map((item) => (
               <Link

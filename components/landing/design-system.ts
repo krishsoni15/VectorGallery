@@ -170,7 +170,7 @@ export const VG_TYPOGRAPHY = {
   },
   scale: {
     monumentalWordmark: {
-      fontSize: 'clamp(2.25rem, 11vw, 13.75rem)',
+      fontSize: 'clamp(2.45rem, 12.4vw, 15.2rem)',
       lineHeight: '0.86',
       letterSpacing: '-0.056em',
       fontWeight: 700,
@@ -236,10 +236,10 @@ export const VG_TYPOGRAPHY = {
 export const VG_LAYOUT = {
   containers: {
     narrow: 'w-full max-w-[920px] mx-auto px-5 sm:px-8',
-    standard: 'w-full max-w-[1440px] 2xl:max-w-[1620px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-14',
+    standard: 'w-full max-w-[1440px] 2xl:max-w-[1620px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16',
     wide: 'w-full max-w-[1580px] 2xl:max-w-[1780px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16',
-    heroStage: 'w-full max-w-[1860px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 2xl:px-20',
-    navbar: 'w-full px-5 sm:px-8 lg:px-10 xl:px-14 2xl:px-16',
+    heroStage: 'w-full max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 2xl:px-20',
+    navbar: 'w-full max-w-[1920px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 2xl:px-20',
   },
   sectionPadding: {
     hero: 'pt-2 sm:pt-4 pb-12 sm:pb-16',

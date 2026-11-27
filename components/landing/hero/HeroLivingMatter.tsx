@@ -64,10 +64,10 @@ export function HeroLivingMatter() {
         className="absolute inset-0 z-0 pointer-events-none"
       />
 
-      {/* Crisp Upper White / Obsidian Floor cleanly framing Monumental Wordmark -> fades behind Sphere equator */}
+      {/* Upper Pure Studio Horizon Band ending cleanly behind Sphere equator like benchmark */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[44%] z-[1] bg-gradient-to-b from-[#FFFFFF] via-[#FFFFFF]/95 to-transparent dark:from-[#090B0A] dark:via-[#090B0A]/95 dark:to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[43%] z-[1] rounded-b-[28px] sm:rounded-b-[42px] bg-[#FFFFFF] dark:bg-[#090B0A] shadow-[0_18px_46px_-28px_rgba(16,18,17,0.10)] dark:shadow-[0_22px_50px_-28px_rgba(0,0,0,0.75)]"
       />
       <div
         aria-hidden="true"
@@ -75,9 +75,9 @@ export function HeroLivingMatter() {
       />
 
       <div
-        className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 flex flex-col justify-center pt-3 sm:pt-5 lg:pt-6 xl:pt-8 pb-8 sm:pb-10 lg:pb-12 xl:pb-14`}
+        className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 flex flex-col justify-center pt-2 sm:pt-4 lg:pt-5 xl:pt-8 pb-6 sm:pb-8 lg:pb-9 xl:pb-14`}
       >
-        {/* Monumental Typographic Stage spanning full horizon across desktop & big screens */}
+        {/* Monumental Typographic Stage spanning full container rail edge-to-edge */}
         <MaskedReveal immediate direction="up" delay={0.02} className="relative z-10 w-full">
           <div className="w-full flex justify-center pt-1 sm:pt-2">
             <h1
@@ -94,14 +94,14 @@ export function HeroLivingMatter() {
           </div>
         </MaskedReveal>
 
-        {/* Overlapping 3D Sculpture + Collision-Free Big-Screen Asymmetric Studio Grid */}
-        <div className="relative z-20 mt-4 sm:mt-6 lg:mt-7 xl:mt-8 2xl:mt-10 grid grid-cols-1 lg:grid-cols-12 items-end gap-8 lg:gap-6">
+        {/* Overlapping 3D Sculpture + Edge-Aligned Asymmetric Studio Grid */}
+        <div className="relative z-20 mt-2 sm:mt-5 lg:mt-6 xl:mt-10 2xl:mt-12 grid grid-cols-1 lg:grid-cols-12 items-end gap-5 sm:gap-7 lg:gap-4">
           {/* LEFT QUADRANT: Core Product Clarity + Provenance + Direct Entry Actions */}
           <motion.div
             initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08, ease: VG_MOTION.ease }}
-            className="order-2 lg:order-1 lg:col-span-4 flex flex-col justify-between gap-8 lg:gap-20 xl:gap-28 2xl:gap-32 self-stretch lg:pb-4"
+            className="order-2 lg:order-1 lg:col-span-4 flex flex-col justify-between gap-5 sm:gap-7 lg:gap-16 xl:gap-32 2xl:gap-40 self-stretch lg:pb-3 xl:pb-4"
           >
             {/* Provenance captures + clear product category */}
             <div className="flex items-center gap-3.5 xl:gap-4">
@@ -120,18 +120,18 @@ export function HeroLivingMatter() {
                 ))}
               </div>
               <div className="leading-tight">
-                <p className="text-[13.5px] xl:text-[15.5px] font-bold tracking-[-0.02em] text-[#101211] dark:text-[#F3F5F1]">
+                <p className="text-[14px] xl:text-[16px] font-bold tracking-[-0.02em] text-[#101211] dark:text-[#F3F5F1]">
                   Personal AI Cloud &amp; Vault
                 </p>
-                <p className="text-[11.5px] xl:text-[13px] text-[var(--vg-ink-2)] mt-0.5">
+                <p className="text-[12px] xl:text-[13.5px] text-[var(--vg-ink-2)] mt-0.5">
                   Open-source · Photos, OCR docs &amp; Android sync
                 </p>
               </div>
             </div>
 
             {/* Bottom-Left Product Promise + Dotted Hairline + Unambiguous Explainer */}
-            <div className="max-w-[420px] xl:max-w-[470px] 2xl:max-w-[510px]">
-              <p className="font-display text-[22px] sm:text-[24px] xl:text-[30px] 2xl:text-[34px] font-bold leading-[1.12] tracking-[-0.032em] text-[#101211] dark:text-[#F3F5F1]">
+            <div className="max-w-[440px] xl:max-w-[480px] 2xl:max-w-[530px]">
+              <p className="font-display text-[21px] sm:text-[23px] lg:text-[24px] xl:text-[31px] 2xl:text-[36px] font-bold leading-[1.12] tracking-[-0.032em] text-[#101211] dark:text-[#F3F5F1]">
                 Every photo, note &amp; receipt.
                 <br />
                 Found in seconds by meaning.
@@ -142,7 +142,7 @@ export function HeroLivingMatter() {
                 className="my-3.5 xl:my-4 w-full border-b-2 border-dotted border-[#101211]/35 dark:border-[#F3F5F1]/30"
               />
 
-              <p className="text-[13.5px] sm:text-[14.5px] xl:text-[15.5px] 2xl:text-[16.5px] leading-[1.56] text-[var(--vg-ink-2)]">
+              <p className="text-[14px] sm:text-[15px] xl:text-[16px] 2xl:text-[17px] leading-[1.56] text-[var(--vg-ink-2)]">
                 Search camera rolls, scanned receipts, and handwritten notes using plain language AI — synced automatically from Android to storage you own.
               </p>
 
@@ -165,12 +165,12 @@ export function HeroLivingMatter() {
             </div>
           </motion.div>
 
-          {/* CENTER STAGE: Only the 3D Sphere tucks upward to overlap wordmark lower edge cleanly */}
-          <div className="order-1 lg:order-2 lg:col-span-4 relative flex items-center justify-center self-center lg:-mt-28 xl:-mt-36 2xl:-mt-44">
+          {/* CENTER STAGE: Larger Sculptural Sphere overlapping wordmark horizon boldly on desktop */}
+          <div className="order-1 lg:order-2 lg:col-span-4 relative flex items-center justify-center self-center lg:-mt-28 xl:-mt-40 2xl:-mt-52">
             <MemorySphereCanvas
               mode="hero"
               priority
-              className="w-[290px] h-[290px] sm:w-[390px] sm:h-[390px] md:w-[460px] md:h-[460px] lg:w-[490px] lg:h-[490px] xl:w-[580px] xl:h-[580px] 2xl:w-[680px] 2xl:h-[680px] lg:-mx-14 xl:-mx-16"
+              className="w-[265px] h-[265px] sm:w-[390px] sm:h-[390px] md:w-[460px] md:h-[460px] lg:w-[510px] lg:h-[510px] xl:w-[640px] xl:h-[640px] 2xl:w-[760px] 2xl:h-[760px] lg:-mx-14 xl:-mx-20"
             />
           </div>
 
