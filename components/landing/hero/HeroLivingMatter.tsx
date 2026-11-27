@@ -52,7 +52,7 @@ export function HeroLivingMatter() {
       {/* Crisp Upper White / Obsidian Floor cleanly framing Monumental Wordmark -> fades behind Sphere equator */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[44%] z-[1] bg-gradient-to-b from-[#FFFFFF] via-[#FFFFFF]/96 to-transparent dark:from-[#090B0A] dark:via-[#090B0A]/96 dark:to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[44%] z-[1] bg-gradient-to-b from-[#FFFFFF] via-[#FFFFFF]/95 to-transparent dark:from-[#090B0A] dark:via-[#090B0A]/95 dark:to-transparent"
       />
       <div
         aria-hidden="true"
@@ -80,13 +80,13 @@ export function HeroLivingMatter() {
         </MaskedReveal>
 
         {/* Overlapping 3D Sculpture + Balanced Asymmetric Studio Grid */}
-        <div className="relative z-20 -mt-6 sm:-mt-14 md:-mt-20 lg:-mt-[7.2rem] xl:-mt-[8.0rem] grid grid-cols-1 lg:grid-cols-12 items-end gap-8 lg:gap-4">
+        <div className="relative z-20 -mt-8 sm:-mt-16 md:-mt-24 lg:-mt-[9.2rem] xl:-mt-[10.2rem] grid grid-cols-1 lg:grid-cols-12 items-end gap-8 lg:gap-4">
           {/* LEFT QUADRANT: Stacked Provenance Preview + Statement + Dotted Rule */}
           <motion.div
             initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08, ease: VG_MOTION.ease }}
-            className="order-2 lg:order-1 lg:col-span-4 flex flex-col justify-between gap-8 lg:gap-28 self-stretch lg:pt-28 lg:pb-4"
+            className="order-2 lg:order-1 lg:col-span-4 flex flex-col justify-between gap-8 lg:gap-32 self-stretch lg:pt-36 lg:pb-4"
           >
             {/* Honest Open-Source Memory Stack directly below left wordmark shoulder */}
             <div className="flex items-center gap-3.5">
@@ -167,7 +167,7 @@ export function HeroLivingMatter() {
             initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.14, ease: VG_MOTION.ease }}
-            className="order-3 lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-end justify-between gap-6 self-stretch lg:pt-28 lg:pb-4"
+            className="order-3 lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-end justify-between gap-6 self-stretch lg:pt-36 lg:pb-4"
           >
             {/* Top-Right Numbered Triad matching benchmark right shoulder */}
             <div>

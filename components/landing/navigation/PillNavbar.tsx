@@ -52,7 +52,7 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
         scrolled
-          ? 'bg-[#FFFFFF]/88 dark:bg-[#090B0A]/88 backdrop-blur-xl border-b border-[var(--vg-border)] shadow-[0_6px_26px_-14px_rgba(16,18,17,0.12)]'
+          ? 'bg-[#FFFFFF]/90 dark:bg-[#090B0A]/90 backdrop-blur-xl border-b border-[var(--vg-border)] shadow-[0_6px_26px_-14px_rgba(16,18,17,0.12)]'
           : 'bg-[#FFFFFF]/95 dark:bg-[#090B0A]/95 border-b border-transparent'
       )}
     >

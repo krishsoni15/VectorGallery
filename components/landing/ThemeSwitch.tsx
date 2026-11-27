@@ -72,7 +72,7 @@ export function ThemeSwitch({ mode = 'compact', className }: ThemeSwitchProps) {
               className={cn(
                 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
                 active
-                  ? 'bg-[#E9EBE5] dark:bg-[#252A26] text-[#087F5B] dark:text-[#58D6A8] shadow-sm'
+                  ? 'bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] font-semibold shadow-sm'
                   : 'text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)]'
               )}
             >

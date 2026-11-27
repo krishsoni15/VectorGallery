@@ -1,5 +1,6 @@
 import React from 'react'
-import { motion, useReducedMotion, type HTMLMotionProps } from 'framer-motion'
+import { motion, type HTMLMotionProps } from 'framer-motion'
+import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
 import { cn } from '@/lib/utils'
 
 const EASE_OUT_EXPO: [number, number, number, number] = [0.22, 1, 0.36, 1]
@@ -24,7 +25,7 @@ export function Reveal({
   immediate = false,
   ...props
 }: RevealProps) {
-  const prefersReduced = useReducedMotion()
+  const prefersReduced = useClientReducedMotion()
 
   if (prefersReduced) {
     return <div className={className}>{children}</div>
@@ -65,7 +66,7 @@ export function StaggerGroup({
   children: React.ReactNode
   className?: string
 }) {
-  const prefersReduced = useReducedMotion()
+  const prefersReduced = useClientReducedMotion()
 
   if (prefersReduced) {
     return <div className={className}>{children}</div>
@@ -98,7 +99,7 @@ export function StaggerItem({
   children: React.ReactNode
   className?: string
 }) {
-  const prefersReduced = useReducedMotion()
+  const prefersReduced = useClientReducedMotion()
 
   if (prefersReduced) {
     return <div className={className}>{children}</div>

@@ -35,3 +35,4 @@ Located under `components/landing/sculpture/MemorySphereCanvas.tsx`:
 - `ownership/` — `"Your world. Your rules."` open-source, self-hosting, local disk/BYO storage architecture & live GitHub stats.
 - `footer/` — Final Brand Moment (`"EVERYTHING WORTH KEEPING."`), compact FAQ accordion, and clean minimal footer.
 - `motion/` — Reusable customized motion primitives (`MagneticCircleButton`, `SplitTextReveal`, `ScrollScrubStage`, `ParallaxCard`).
+

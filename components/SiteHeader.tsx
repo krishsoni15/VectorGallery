@@ -39,22 +39,22 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
         scrolled
-          ? 'bg-[#FAFAF7]/88 dark:bg-[#0B0D0C]/88 backdrop-blur-2xl border-b border-[#E0E4DD] dark:border-white/[0.09] shadow-sm'
+          ? 'bg-[#FFFFFF]/90 dark:bg-[#090B0A]/90 backdrop-blur-2xl border-b border-[#DDE2DC] dark:border-white/[0.10] shadow-sm'
           : 'vg-transparent-header bg-transparent border-b border-transparent'
       )}
     >
-      <div className="max-w-[1340px] mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-7 lg:px-10 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="shrink-0">
           <VectorGalleryLogo size="sm" variant="horizontal" />
         </Link>
 
         {!minimal && (
-          <nav className="hidden md:flex items-center gap-6 text-[13.5px] font-medium text-[#626B64] dark:text-[#A3ADA5]">
+          <nav className="hidden md:flex items-center gap-6 text-[13.5px] font-medium text-[#555E58] dark:text-[#9AA69E]">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="hover:text-[#181C19] dark:hover:text-[#F2F3EF] transition-colors"
+                className="hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
               >
                 {item.label}
               </Link>
@@ -64,11 +64,11 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
               className={cn(
                 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-[13px] transition-colors',
                 router.pathname === '/install'
-                  ? 'border-[#087F5B]/35 dark:border-[#58D6A8]/35 bg-[#C4EDE1]/55 dark:bg-[#252A26] text-[#087F5B] dark:text-[#58D6A8]'
-                  : 'border-[#E0E4DD] dark:border-white/[0.09] bg-[#FFFFFF] dark:bg-[#131614] hover:border-[#087F5B]/45 dark:hover:border-[#58D6A8]/45 text-[#181C19] dark:text-[#F2F3EF]'
+                  ? 'border-[#101211]/15 bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] font-semibold'
+                  : 'border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] hover:border-[#087F5B]/45 dark:hover:border-[#CFFF49]/45 text-[#101211] dark:text-[#F3F5F1]'
               )}
             >
-              <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#58D6A8]" />
+              <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
               <span>Android App</span>
             </Link>
           </nav>
@@ -114,7 +114,7 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.22 }}
-              className="md:hidden overflow-hidden border-t border-[#E0E4DD] dark:border-white/[0.09] bg-[#FAFAF7]/96 dark:bg-[#0B0D0C]/96 backdrop-blur-2xl"
+              className="md:hidden overflow-hidden border-t border-[#E0E4DD] dark:border-white/[0.09] bg-[#F2F3F0]/95 dark:bg-[#090B0A]/95 backdrop-blur-2xl"
             >
               <div className="px-5 py-4 space-y-2">
                 {NAV_LINKS.map((item) => (

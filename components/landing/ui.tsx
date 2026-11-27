@@ -41,9 +41,9 @@ export function Section({
 }) {
   const bgMap = {
     default: 'bg-[var(--vg-bg)]',
-    secondary: 'bg-[var(--vg-surface-2)]',
-    soft: 'bg-[#E9EBE5]/75 dark:bg-[#171A18]',
-    forest: 'bg-[#092219] text-[#F2F3EF]',
+    secondary: 'bg-[#E7E9E5]/65 dark:bg-[#131715]',
+    soft: 'bg-[#E7E9E5] dark:bg-[#202522]',
+    forest: 'bg-[#090B0A] text-[#F3F5F1]',
   }
 
   return (

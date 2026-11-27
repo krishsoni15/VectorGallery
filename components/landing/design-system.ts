@@ -317,7 +317,7 @@ export const VG_COMPONENTS = {
     elevated:
       'rounded-2xl border border-[var(--vg-border)] bg-[var(--vg-surface)] dark:bg-[#202522] shadow-sm',
     glass:
-      'rounded-2xl border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF]/88 dark:bg-[#131715]/86 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
+      'rounded-2xl border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF]/90 dark:bg-[#131715]/85 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)]',
     photoFrame:
       'rounded-2xl overflow-hidden border border-[var(--vg-border)] bg-[var(--vg-surface)] shadow-[var(--vg-shadow-card)]',
     forest:
@@ -333,7 +333,7 @@ export const VG_COMPONENTS = {
     monoTag:
       'font-mono text-[11px] px-2.5 py-0.5 rounded-md bg-[var(--vg-surface-2)] text-[var(--vg-ink-2)] border border-[var(--vg-border)]',
     photoScrim:
-      'vg-photo-caption px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#090B0A]/78 text-[#F3F5F1] backdrop-blur-md border border-white/[0.14]',
+      'vg-photo-caption px-2.5 py-1 rounded-full text-[11px] font-mono bg-[#090B0A]/80 text-[#F3F5F1] backdrop-blur-md border border-white/[0.14]',
   },
   inputs: {
     search:
@@ -376,6 +376,9 @@ export const VG_AURA_SHADER_SPEC = {
 } as const
 
 export const VG_SPHERE_THEME_SPEC = {
+  heroVideoWebm: '/landing/artwork/memory-sphere-hero.webm',
+  heroVideoPoster: '/landing/artwork/memory-sphere-video-poster.webp',
+  heroSourceMp4: '/original-95b39c963d2d05ef93d4459cf213c8cb.mp4',
   light: {
     cutoutSrc: '/landing/artwork/memory-sphere-light-cutout.webp',
     studioSrc: '/landing/artwork/memory-sphere-light.webp',

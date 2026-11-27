@@ -317,9 +317,7 @@ export function MemoryUnfoldSection() {
     }
   }
 
-  const cutoutSrc = isDark
-    ? VG_SPHERE_THEME_SPEC.dark.cutoutSrc
-    : VG_SPHERE_THEME_SPEC.light.cutoutSrc
+  const cutoutSrc = VG_SPHERE_THEME_SPEC.heroVideoPoster
 
   const maxSpreadX = Math.min(stageDims.w * 0.35, 420)
   const maxSpreadY = Math.min(stageDims.h * 0.36, 168)
