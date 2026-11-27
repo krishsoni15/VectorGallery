@@ -71,10 +71,74 @@ export function MotionReveal({
   )
 }
 
+interface MaskedRevealProps extends HTMLMotionProps<'div'> {
+  children: React.ReactNode
+  delay?: number
+  duration?: number
+  y?: number
+  immediate?: boolean
+  direction?: 'up' | 'down' | 'center'
+  className?: string
+}
+
+/**
+ * Editorial clip-path masked reveal for hero typography, studio artwork, and chapter moments.
+ */
+export function MaskedReveal({
+  children,
+  delay = 0,
+  duration = VG_MOTION.durations.editorial,
+  y = 10,
+  immediate = false,
+  direction = 'up',
+  className,
+  ...props
+}: MaskedRevealProps) {
+  const reduced = useReducedMotion()
+
+  if (reduced) {
+    return <div className={className}>{children}</div>
+  }
+
+  const hiddenClip =
+    direction === 'down'
+      ? 'inset(0% 0% 18% 0%)'
+      : direction === 'center'
+        ? 'inset(6% 6% 6% 6%)'
+        : 'inset(14% 0% 0% 0%)'
+
+  if (immediate) {
+    return (
+      <motion.div
+        initial={{ clipPath: hiddenClip, y, opacity: 0.92 }}
+        animate={{ clipPath: 'inset(0% 0% 0% 0%)', y: 0, opacity: 1 }}
+        transition={{ duration, delay, ease: VG_EASE }}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    )
+  }
+
+  return (
+    <motion.div
+      initial={{ clipPath: hiddenClip, y, opacity: 0.92 }}
+      whileInView={{ clipPath: 'inset(0% 0% 0% 0%)', y: 0, opacity: 1 }}
+      viewport={VG_MOTION.viewport}
+      transition={{ duration, delay, ease: VG_EASE }}
+      className={className}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 export function StaggerGrid({
   children,
   className,
-  stagger = 0.05,
+  stagger = VG_MOTION.stagger.tight,
 }: {
   children: React.ReactNode
   className?: string
