@@ -1,4 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import fs from 'fs'
+import path from 'path'
 import {
   getAdminSupabase,
   getServerUser,
@@ -72,6 +74,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const keys = removedFiles.map((f) => f.storage_key).filter(Boolean)
         if (keys.length > 0) {
           await storage.delete(keys).catch(() => {})
+        }
+        // Remove empty per-user local upload directory cleanly
+        const safeUserId = path.basename(user.id)
+        if (safeUserId && safeUserId === user.id) {
+          const userUploadDir = path.join(process.cwd(), 'public', 'uploads', safeUserId)
+          try {
+            if (fs.existsSync(userUploadDir) && fs.readdirSync(userUploadDir).length === 0) {
+              fs.rmdirSync(userUploadDir)
+            }
+          } catch {}
         }
         purgeUserVectorChunks(user.id)
         purgeUserAppData(user.id)
