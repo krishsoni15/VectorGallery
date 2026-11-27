@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
 import '../backup/backup_engine.dart';
+import '../guide/guide_sheet.dart';
+import '../memories/memories_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final void Function(String category)? onOpenCategory;
+  final void Function(int tabIndex)? onOpenTab;
+
+  const HomeScreen({super.key, this.onOpenCategory, this.onOpenTab});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -56,13 +61,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         });
       }
     } catch (_) {
-      // Fallback gracefully
+      // Fallback cleanly when offline
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // ─── Google Photos Style Backup Bottom Sheet ───
   void _showBackupSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -71,11 +75,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       builder: (ctx) {
         return StatefulBuilder(
           builder: (modalCtx, setModalState) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            final sheetBg = isDark ? const Color(0xFF161922) : Colors.white;
-            final cardBg = isDark ? const Color(0xFF1F2430) : const Color(0xFFF1F5F9);
-            final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-            final subtextColor = isDark ? Colors.grey[400]! : const Color(0xFF64748B);
+            final sheetBg = AppTheme.surfaceOf(ctx);
+            final cardBg = AppTheme.elevatedOf(ctx);
+            final textColor = AppTheme.textPrimaryOf(ctx);
+            final subtextColor = AppTheme.textSecondaryOf(ctx);
+            final brand = AppTheme.brandOf(ctx);
 
             final storage = _stats?['storage'] ?? {};
             final formattedUsed = storage['formatted_used'] ?? '0 KB';
@@ -90,29 +94,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               decoration: BoxDecoration(
                 color: sheetBg,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 20, offset: const Offset(0, -4)),
-                ],
+                border: Border(top: BorderSide(color: AppTheme.borderOf(ctx))),
               ),
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top Drag Handle
                   Center(
                     child: Container(
                       width: 44,
                       height: 5,
                       margin: const EdgeInsets.only(bottom: 18),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: subtextColor.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
 
-                  // Header: Account & Storage Overview
                   Row(
                     children: [
                       Container(
@@ -120,16 +120,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         height: 44,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [AppTheme.accent, Color(0xFF38BDF8)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(color: AppTheme.accent.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2)),
-                          ],
+                          color: brand.withOpacity(0.16),
                         ),
-                        child: const Icon(Icons.cloud_done, color: Colors.white, size: 22),
+                        child: Icon(Icons.cloud_done, color: brand, size: 22),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -141,10 +134,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor),
                             ),
                             const SizedBox(height: 2),
-                            Text(
-                              '$formattedUsed of $formattedQuota used',
-                              style: TextStyle(fontSize: 12, color: subtextColor),
-                            ),
+                            Text('$formattedUsed of $formattedQuota used', style: TextStyle(fontSize: 12, color: subtextColor)),
                           ],
                         ),
                       ),
@@ -153,20 +143,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                   const SizedBox(height: 14),
 
-                  // Storage Meter
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
-                      value: percentUsed.clamp(0.01, 1.0),
+                      value: percentUsed.clamp(0.02, 1.0),
                       minHeight: 8,
-                      backgroundColor: isDark ? const Color(0xFF282F3E) : const Color(0xFFE2E8F0),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accent),
+                      backgroundColor: cardBg,
+                      valueColor: AlwaysStoppedAnimation<Color>(brand),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // ─── Live Active Status Card ───
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -174,9 +162,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       color: cardBg,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: isUploading || isScanning
-                            ? AppTheme.accent.withOpacity(0.4)
-                            : Colors.transparent,
+                        color: isUploading || isScanning ? brand.withOpacity(0.45) : AppTheme.borderOf(ctx),
                       ),
                     ),
                     child: Column(
@@ -187,21 +173,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             if (isUploading || isScanning)
                               RotationTransition(
                                 turns: _spinController,
-                                child: const Icon(Icons.sync, color: AppTheme.accent, size: 20),
+                                child: Icon(Icons.sync, color: brand, size: 20),
                               )
                             else if (isDone)
-                              const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 20)
+                              Icon(Icons.check_circle, color: brand, size: 20)
                             else
-                              const Icon(Icons.cloud_upload_outlined, color: AppTheme.accent, size: 20),
+                              Icon(Icons.cloud_upload_outlined, color: brand, size: 20),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 isUploading
-                                    ? 'Backing up items (${_backupEngine.uploadedCount}/${_backupEngine.totalQueued})'
+                                    ? 'Backing up (${_backupEngine.uploadedCount}/${_backupEngine.totalQueued})'
                                     : isScanning
                                         ? 'Scanning device files...'
                                         : isDone
-                                            ? 'Backup is up to date'
+                                            ? 'Backup up to date'
                                             : 'Ready to back up',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor),
                               ),
@@ -216,80 +202,36 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   }
                                   setModalState(() {});
                                 },
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
                                 child: Text(
                                   _backupEngine.isPaused ? 'Resume' : 'Pause',
-                                  style: const TextStyle(fontSize: 12, color: AppTheme.accent, fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 12, color: brand, fontWeight: FontWeight.bold),
                                 ),
                               ),
                           ],
                         ),
-
-                        if (isUploading) ...[
-                          const SizedBox(height: 10),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: _backupEngine.progress.clamp(0.01, 1.0),
-                              minHeight: 6,
-                              backgroundColor: Colors.grey.withOpacity(0.2),
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accent),
-                            ),
-                          ),
-                          if (_backupEngine.currentUploadingFile != null) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              'Current: ${_backupEngine.currentUploadingFile}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 11, color: subtextColor, fontFamily: 'monospace'),
-                            ),
-                          ],
-                        ] else ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            _backupEngine.lastStatusMessage ?? 'All files deduplicated using SHA-256 cloud indexing.',
-                            style: TextStyle(fontSize: 12, color: subtextColor),
-                          ),
-                        ],
-
-                        if (_backupEngine.duplicateCount > 0) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(Icons.verified_outlined, size: 14, color: Color(0xFF10B981)),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${_backupEngine.duplicateCount} duplicate file(s) saved from re-uploading',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFF10B981), fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ],
+                        const SizedBox(height: 6),
+                        Text(
+                          _backupEngine.lastStatusMessage ?? 'Originals stay untouched using SHA-256 deduplication.',
+                          style: TextStyle(fontSize: 12, color: subtextColor),
+                        ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
-                  // ─── Backup Action Options (Google Photos Style Grid) ───
                   Text(
-                    'What would you like to back up?',
+                    'Select Source to Back Up',
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: subtextColor),
                   ),
                   const SizedBox(height: 10),
 
                   Row(
                     children: [
-                      // Option 1: Photos & Gallery
                       Expanded(
                         child: _BackupActionCard(
                           icon: Icons.photo_library_outlined,
-                          iconColor: const Color(0xFFF43F5E),
+                          iconColor: const Color(0xFFE11D48),
                           title: 'Photos',
                           subtitle: 'Camera & Gallery',
                           onTap: () async {
@@ -299,14 +241,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ),
                       ),
                       const SizedBox(width: 10),
-
-                      // Option 2: Documents & PDFs
                       Expanded(
                         child: _BackupActionCard(
                           icon: Icons.description_outlined,
                           iconColor: const Color(0xFF0284C7),
                           title: 'Documents',
-                          subtitle: 'PDFs, Docs & Notes',
+                          subtitle: 'PDFs & Notes',
                           onTap: () async {
                             Navigator.pop(ctx);
                             await _backupEngine.pickAndUploadDocuments();
@@ -315,18 +255,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
                   Row(
                     children: [
-                      // Option 3: Choose Any Folder (WhatsApp, Downloads)
                       Expanded(
                         child: _BackupActionCard(
                           icon: Icons.folder_open_outlined,
-                          iconColor: const Color(0xFFEAB308),
-                          title: 'Choose Folder',
-                          subtitle: 'WhatsApp, Downloads...',
+                          iconColor: const Color(0xFFD97706),
+                          title: 'Folder',
+                          subtitle: 'WhatsApp, Downloads',
                           onTap: () async {
                             Navigator.pop(ctx);
                             await _backupEngine.pickFolderAndBackup();
@@ -334,14 +271,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ),
                       ),
                       const SizedBox(width: 10),
-
-                      // Option 4: Auto Scan Storage
                       Expanded(
                         child: _BackupActionCard(
                           icon: Icons.auto_awesome,
-                          iconColor: AppTheme.accent,
+                          iconColor: brand,
                           title: 'Auto Scan',
-                          subtitle: 'Full device storage',
+                          subtitle: 'Device storage',
                           onTap: () async {
                             Navigator.pop(ctx);
                             await _backupEngine.scanAndBackupDevice();
@@ -350,14 +285,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
 
-                  const SizedBox(height: 18),
-
-                  // Wi-Fi Only Switch
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: cardBg.withOpacity(0.6),
+                      color: cardBg,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
@@ -367,12 +300,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           children: [
                             Icon(Icons.wifi, size: 18, color: subtextColor),
                             const SizedBox(width: 8),
-                            Text('Back up over Wi-Fi only', style: TextStyle(fontSize: 12, color: textColor)),
+                            Text('Wi-Fi only backup', style: TextStyle(fontSize: 12.5, color: textColor)),
                           ],
                         ),
                         Switch(
                           value: _backupEngine.wifiOnly,
-                          activeColor: AppTheme.accent,
+                          activeColor: brand,
                           onChanged: (val) {
                             _backupEngine.initialize(wifiOnlySetting: val);
                             setModalState(() {});
@@ -392,6 +325,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppTheme.surfaceOf(context);
+    final elevated = AppTheme.elevatedOf(context);
+    final border = AppTheme.borderOf(context);
+    final primaryText = AppTheme.textPrimaryOf(context);
+    final secondaryText = AppTheme.textSecondaryOf(context);
+    final brand = AppTheme.brandOf(context);
+
     final storage = _stats?['storage'] ?? {};
     final counts = _stats?['counts'] ?? {};
     final recentFiles = (_stats?['recent_files'] as List?) ?? [];
@@ -413,30 +353,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: Image.asset('assets/icon.png', width: 28, height: 28),
             ),
             const SizedBox(width: 10),
-            const Text('VectorGallery', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+            Text(
+              'VectorGallery',
+              style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5, color: primaryText),
+            ),
           ],
         ),
         actions: [
-          // ─── Google Photos Style Cloud Sync Avatar Button ───
+          IconButton(
+            icon: const Icon(Icons.help_outline_rounded, size: 21),
+            tooltip: 'User Guide',
+            onPressed: () => showMobileUserGuideSheet(context),
+          ),
           GestureDetector(
             onTap: () => _showBackupSheet(context),
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: isUploading || isScanning
-                    ? AppTheme.accent.withOpacity(0.18)
-                    : isDone
-                        ? const Color(0xFF10B981).withOpacity(0.15)
-                        : Colors.grey.withOpacity(0.12),
+                color: brand.withOpacity(0.14),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isUploading || isScanning
-                      ? AppTheme.accent.withOpacity(0.4)
-                      : isDone
-                          ? const Color(0xFF10B981).withOpacity(0.3)
-                          : Colors.grey.withOpacity(0.2),
-                ),
+                border: Border.all(color: brand.withOpacity(0.32)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -444,28 +381,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   if (isUploading || isScanning)
                     RotationTransition(
                       turns: _spinController,
-                      child: const Icon(Icons.sync, color: AppTheme.accent, size: 16),
+                      child: Icon(Icons.sync, color: brand, size: 15),
                     )
-                  else if (isDone)
-                    const Icon(Icons.cloud_done, color: Color(0xFF10B981), size: 16)
                   else
-                    const Icon(Icons.cloud_upload_outlined, color: AppTheme.accent, size: 16),
-                  const SizedBox(width: 6),
+                    Icon(isDone ? Icons.cloud_done : Icons.cloud_upload_outlined, color: brand, size: 15),
+                  const SizedBox(width: 5),
                   Text(
                     isUploading
                         ? '${_backupEngine.totalQueued - _backupEngine.uploadedCount}'
                         : isDone
                             ? 'Saved'
                             : 'Backup',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isUploading
-                          ? AppTheme.accent
-                          : isDone
-                              ? const Color(0xFF10B981)
-                              : Colors.grey[300],
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: brand),
                   ),
                 ],
               ),
@@ -473,10 +400,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           IconButton(
             icon: _isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.accent),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: brand),
                   )
                 : const Icon(Icons.refresh, size: 20),
             tooltip: 'Refresh',
@@ -486,28 +413,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       body: RefreshIndicator(
         onRefresh: _fetchStats,
-        color: AppTheme.accent,
+        color: brand,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // ─── Google Photos Style Hero Card ───
+            // Clean Theme-Adaptive Vault Summary Card
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1E2638), Color(0xFF11141C)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.25),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: Border.all(color: border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,24 +435,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppTheme.accent.withOpacity(0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.cloud_queue, color: AppTheme.accent, size: 20),
+                            decoration: BoxDecoration(color: brand.withOpacity(0.14), shape: BoxShape.circle),
+                            child: Icon(Icons.cloud_queue, color: brand, size: 20),
                           ),
                           const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Personal Cloud Memory',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
-                              ),
                               Text(
-                                '$formattedUsed / $formattedQuota',
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                'Personal Cloud Memory',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: primaryText),
                               ),
+                              Text('$formattedUsed / $formattedQuota', style: TextStyle(fontSize: 12, color: secondaryText)),
                             ],
                           ),
                         ],
@@ -546,190 +456,155 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         icon: const Icon(Icons.backup, size: 14),
                         label: const Text('Backup', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.accent,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppTheme.voltLime,
+                          foregroundColor: const Color(0xFF101211),
+                          elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // Storage Bar
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: LinearProgressIndicator(
-                      value: percentUsed.clamp(0.01, 1.0),
-                      minHeight: 8,
-                      backgroundColor: const Color(0xFF2B3347),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accent),
+                      value: percentUsed.clamp(0.02, 1.0),
+                      minHeight: 7,
+                      backgroundColor: elevated,
+                      valueColor: AlwaysStoppedAnimation<Color>(brand),
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
-                  // Real-time live backup notification in Hero card
-                  if (isUploading || isScanning) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.accent.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('${counts['total_files'] ?? 0} total items backed up', style: TextStyle(fontSize: 12, color: secondaryText)),
+                      Row(
                         children: [
-                          RotationTransition(
-                            turns: _spinController,
-                            child: const Icon(Icons.sync, size: 14, color: AppTheme.accent),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _backupEngine.lastStatusMessage ?? 'Backing up items...',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 11, color: AppTheme.accent, fontWeight: FontWeight.w600),
-                            ),
-                          ),
+                          Icon(Icons.shield_outlined, size: 13, color: brand),
+                          const SizedBox(width: 4),
+                          Text('SHA-256 Protected', style: TextStyle(fontSize: 11, color: brand, fontWeight: FontWeight.w600)),
                         ],
                       ),
-                    ),
-                  ] else ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${counts['total_files'] ?? 0} total files backed up',
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        const Row(
-                          children: [
-                            Icon(Icons.shield_outlined, size: 12, color: Color(0xFF10B981)),
-                            SizedBox(width: 4),
-                            Text('Encrypted & Deduplicated', style: TextStyle(fontSize: 11, color: Color(0xFF10B981))),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // ─── Quick Backup Actions ───
+            // Quick Actions Row
             Row(
               children: [
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.photo_library_outlined,
-                    label: 'Add Photos',
-                    color: const Color(0xFFF43F5E),
-                    onTap: () async {
-                      await _backupEngine.pickAndUploadPhotos();
-                    },
+                    label: 'Photos',
+                    color: const Color(0xFFE11D48),
+                    onTap: () => _backupEngine.pickAndUploadPhotos(),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.upload_file_outlined,
-                    label: 'Add Docs',
+                    label: 'Docs',
                     color: const Color(0xFF0284C7),
-                    onTap: () async {
-                      await _backupEngine.pickAndUploadDocuments();
-                    },
+                    onTap: () => _backupEngine.pickAndUploadDocuments(),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _QuickActionButton(
-                    icon: Icons.folder_open_outlined,
-                    label: 'Add Folder',
-                    color: const Color(0xFFEAB308),
-                    onTap: () async {
-                      await _backupEngine.pickFolderAndBackup();
+                    icon: Icons.collections_bookmark_outlined,
+                    label: 'Albums',
+                    color: brand,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MemoriesScreen()));
                     },
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
 
-            // ─── Category Quick Browse with Real Counts ───
-            const Text(
-              'Library Categories',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
+            Text('Library Categories', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: primaryText)),
+            const SizedBox(height: 10),
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
               childAspectRatio: 2.2,
               children: [
                 _CategoryTile(
                   icon: Icons.photo_outlined,
                   title: 'Photos',
                   count: counts['photos'] ?? 0,
-                  color: const Color(0xFFF43F5E),
+                  color: const Color(0xFFE11D48),
+                  onTap: () => widget.onOpenCategory?.call('photos'),
                 ),
                 _CategoryTile(
                   icon: Icons.screenshot_outlined,
                   title: 'Screenshots',
                   count: counts['screenshots'] ?? 0,
-                  color: AppTheme.accent,
+                  color: brand,
+                  onTap: () => widget.onOpenCategory?.call('screenshots'),
                 ),
                 _CategoryTile(
                   icon: Icons.description_outlined,
                   title: 'Documents',
                   count: counts['documents'] ?? 0,
-                  color: Colors.blueAccent,
+                  color: const Color(0xFF0284C7),
+                  onTap: () => widget.onOpenCategory?.call('documents'),
                 ),
                 _CategoryTile(
                   icon: Icons.videocam_outlined,
                   title: 'Videos',
                   count: counts['videos'] ?? 0,
-                  color: Colors.purpleAccent,
+                  color: const Color(0xFF7C3AED),
+                  onTap: () => widget.onOpenCategory?.call('videos'),
                 ),
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
 
-            // ─── Recent Files ───
             if (recentFiles.isNotEmpty) ...[
-              const Text(
-                'Recent Backed-Up Files',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Recent Memories', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: primaryText)),
+                  TextButton(
+                    onPressed: () => widget.onOpenCategory?.call('all'),
+                    child: Text('View all', style: TextStyle(color: brand, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              ...recentFiles.take(6).map((f) => Container(
+              const SizedBox(height: 6),
+              ...recentFiles.take(6).map((f) {
+                final cat = (f['category'] ?? 'documents').toString();
+                return InkWell(
+                  onTap: () => widget.onOpenCategory?.call(cat == 'photos' || cat == 'screenshots' || cat == 'documents' ? cat : 'all'),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface,
+                      color: surface,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppTheme.borderSubtle),
+                      border: Border.all(color: border),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accent.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            _getFileIcon(f['category'] ?? 'documents'),
-                            color: AppTheme.accent,
-                            size: 18,
-                          ),
+                          decoration: BoxDecoration(color: brand.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+                          child: Icon(_getFileIcon(cat), color: brand, size: 18),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -737,23 +612,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                f['name'] ?? 'File',
-                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                f['name'] ?? f['original_name'] ?? 'File',
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: primaryText),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${f['category'] ?? 'documents'} • ${f['formatted_size'] ?? ''}',
-                                style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                '$cat • ${f['formatted_size'] ?? ''}',
+                                style: TextStyle(fontSize: 11, color: secondaryText),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.check_circle_outline, color: Color(0xFF10B981), size: 16),
+                        Icon(Icons.check_circle_outline, color: brand, size: 16),
                       ],
                     ),
-                  )),
+                  ),
+                );
+              }),
             ],
           ],
         ),
@@ -792,40 +669,32 @@ class _BackupActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF1F2430) : const Color(0xFFF1F5F9);
-    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final subtextColor = isDark ? Colors.grey[400]! : const Color(0xFF64748B);
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: cardBg,
+          color: AppTheme.elevatedOf(context),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.04)),
+          border: Border.all(color: AppTheme.borderOf(context)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor, size: 20),
+              decoration: BoxDecoration(color: iconColor.withOpacity(0.14), shape: BoxShape.circle),
+              child: Icon(icon, color: iconColor, size: 19),
             ),
             const SizedBox(height: 10),
-            Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
+            Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimaryOf(context))),
             const SizedBox(height: 2),
             Text(
               subtitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 10, color: subtextColor),
+              style: TextStyle(fontSize: 10.5, color: AppTheme.textSecondaryOf(context)),
             ),
           ],
         ),
@@ -840,12 +709,7 @@ class _QuickActionButton extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
+  const _QuickActionButton({required this.icon, required this.label, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -855,15 +719,15 @@ class _QuickActionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: AppTheme.surfaceOf(context),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.borderSubtle),
+          border: Border.all(color: AppTheme.borderOf(context)),
         ),
         child: Column(
           children: [
             Icon(icon, color: color, size: 20),
             const SizedBox(height: 6),
-            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+            Text(label, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppTheme.textPrimaryOf(context))),
           ],
         ),
       ),
@@ -876,45 +740,48 @@ class _CategoryTile extends StatelessWidget {
   final String title;
   final int count;
   final Color color;
+  final VoidCallback? onTap;
 
   const _CategoryTile({
     required this.icon,
     required this.title,
     required this.count,
     required this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.borderSubtle),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceOf(context),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.borderOf(context)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+              child: Icon(icon, color: color, size: 19),
             ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                Text('$count items', style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-              ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textPrimaryOf(context))),
+                  Text('$count items', style: TextStyle(fontSize: 11, color: AppTheme.textSecondaryOf(context))),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

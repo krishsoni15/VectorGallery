@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Dark Theme Design Tokens
-  static const Color background = Color(0xFF090A0D);
-  static const Color surface = Color(0xFF111318);
-  static const Color surfaceElevated = Color(0xFF171A21);
+  // Obsidian Volt Dark Theme Design Tokens
+  static const Color background = Color(0xFF090B0D);
+  static const Color surface = Color(0xFF111416);
+  static const Color surfaceElevated = Color(0xFF191D20);
   static const Color borderSubtle = Color(0x1AFFFFFF);
-  static const Color textPrimary = Color(0xFFF4F5F7);
-  static const Color textSecondary = Color(0xFF9AA0AC);
-  static const Color textMuted = Color(0xFF686E7B);
+  static const Color textPrimary = Color(0xFFF4F6F2);
+  static const Color textSecondary = Color(0xFFA4AEA9);
+  static const Color textMuted = Color(0xFF7C8782);
 
-  // Light Theme Design Tokens
-  static const Color lightBackground = Color(0xFFF8FAFC);
+  // Liquid Titanium Light Theme Design Tokens
+  static const Color lightBackground = Color(0xFFF4F5F2);
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSurfaceElevated = Color(0xFFF1F5F9);
-  static const Color lightBorderSubtle = Color(0xFFE2E8F0);
-  static const Color lightTextPrimary = Color(0xFF0F172A);
-  static const Color lightTextSecondary = Color(0xFF64748B);
-  static const Color lightTextMuted = Color(0xFF94A3B8);
+  static const Color lightSurfaceElevated = Color(0xFFE9EDE8);
+  static const Color lightBorderSubtle = Color(0xFFDBE0DA);
+  static const Color lightTextPrimary = Color(0xFF101211);
+  static const Color lightTextSecondary = Color(0xFF606961);
+  static const Color lightTextMuted = Color(0xFF606961);
 
-  // Brand Accents
-  static const Color accent = Color(0xFF10B981);
-  static const Color accentHover = Color(0xFF059669);
-  static const Color accentMuted = Color(0x2610B981);
+  // Shared Brand Accents (High-contrast in both Light & Dark)
+  static const Color accent = Color(0xFF087F5B);
+  static const Color accentDark = Color(0xFF46D6A4);
+  static const Color voltLime = Color(0xFFCDFF45);
+  static const Color accentHover = Color(0xFF066649);
+  static const Color accentMuted = Color(0x22087F5B);
   static const Color error = Color(0xFFEF4444);
 
   // Global Theme Mode Notifier for Instant Dark / Light Switching
@@ -32,22 +34,36 @@ class AppTheme {
     themeModeNotifier.value = mode;
   }
 
+  static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+
+  static Color bgOf(BuildContext context) => isDark(context) ? background : lightBackground;
+  static Color surfaceOf(BuildContext context) => isDark(context) ? surface : lightSurface;
+  static Color elevatedOf(BuildContext context) => isDark(context) ? surfaceElevated : lightSurfaceElevated;
+  static Color borderOf(BuildContext context) => isDark(context) ? borderSubtle : lightBorderSubtle;
+  static Color textPrimaryOf(BuildContext context) => isDark(context) ? textPrimary : lightTextPrimary;
+  static Color textSecondaryOf(BuildContext context) => isDark(context) ? textSecondary : lightTextSecondary;
+  static Color textMutedOf(BuildContext context) => isDark(context) ? textMuted : lightTextMuted;
+  static Color brandOf(BuildContext context) => isDark(context) ? accentDark : accent;
+  static Color warnOf(BuildContext context) => isDark(context) ? const Color(0xFFFBBF24) : const Color(0xFFB45309);
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: background,
       colorScheme: const ColorScheme.dark(
-        primary: accent,
-        onPrimary: Colors.white,
+        primary: accentDark,
+        onPrimary: Color(0xFF090B0D),
         surface: surface,
         onSurface: textPrimary,
         error: error,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: surface,
+        backgroundColor: background,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
+        iconTheme: IconThemeData(color: textPrimary),
         titleTextStyle: TextStyle(
           color: textPrimary,
           fontSize: 18,
@@ -57,10 +73,10 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surface,
-        selectedItemColor: accent,
+        selectedItemColor: voltLime,
         unselectedItemColor: textMuted,
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: 0,
       ),
       cardTheme: CardTheme(
         color: surface,
@@ -70,21 +86,22 @@ class AppTheme {
           side: const BorderSide(color: borderSubtle),
         ),
       ),
+      dividerTheme: const DividerThemeData(color: borderSubtle),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceElevated,
         hintStyle: const TextStyle(color: textMuted, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: borderSubtle),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: borderSubtle),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: accent, width: 1.5),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: voltLime, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
@@ -104,8 +121,9 @@ class AppTheme {
         error: error,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: lightSurface,
+        backgroundColor: lightBackground,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         iconTheme: IconThemeData(color: lightTextPrimary),
         titleTextStyle: TextStyle(
@@ -117,33 +135,34 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: lightSurface,
-        selectedItemColor: accent,
-        unselectedItemColor: lightTextMuted,
+        selectedItemColor: lightTextPrimary,
+        unselectedItemColor: lightTextSecondary,
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: 0,
       ),
       cardTheme: CardTheme(
         color: lightSurface,
-        elevation: 0.5,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: lightBorderSubtle),
         ),
       ),
+      dividerTheme: const DividerThemeData(color: lightBorderSubtle),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: lightSurfaceElevated,
-        hintStyle: const TextStyle(color: lightTextMuted, fontSize: 14),
+        fillColor: lightSurface,
+        hintStyle: const TextStyle(color: lightTextSecondary, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: lightBorderSubtle),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: lightBorderSubtle),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: accent, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

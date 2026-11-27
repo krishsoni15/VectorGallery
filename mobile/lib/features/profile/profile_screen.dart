@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
 import '../auth/auth_provider.dart';
 import '../backup/backup_engine.dart';
+import '../guide/guide_sheet.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -21,7 +22,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _wifiOnly = false;
   bool _autoBackup = true;
   String _userName = 'Personal Vault';
-  String _userEmail = 'local@vectorgallery.app';
+  String _userEmail = 'Local Sandbox Session';
   String? _geminiApiKey;
   bool _isTestingConnection = false;
   String? _connectionStatus;
@@ -36,20 +37,107 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _loadApiKey() async {
     final key = await _storage.read(key: 'vm_ai_api_key') ?? await _storage.read(key: 'vm_gemini_api_key');
-    if (mounted) {
-      setState(() => _geminiApiKey = key);
-    }
+    if (mounted) setState(() => _geminiApiKey = key);
   }
 
   Future<void> _saveApiKey(String key) async {
     await _storage.write(key: 'vm_ai_api_key', value: key.trim());
     if (mounted) {
       setState(() => _geminiApiKey = key.trim());
-      final providerName = key.trim().startsWith('gsk_') ? 'Groq Llama 3.3' : 'Google Gemini';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$providerName API key saved successfully')),
+        const SnackBar(content: Text('Personal AI API key saved cleanly')),
       );
     }
+  }
+
+  void _showAuthDialog({required bool isSignUp}) {
+    final nameCtrl = TextEditingController();
+    final emailCtrl = TextEditingController();
+    final passCtrl = TextEditingController();
+    bool submitSignUp = isSignUp;
+    String? dialogError;
+    bool submitting = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (modalCtx, setDialogState) => AlertDialog(
+          title: Text(submitSignUp ? 'Create Account' : 'Sign In to Sync'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (submitSignUp) ...[
+                  TextField(
+                    controller: nameCtrl,
+                    decoration: const InputDecoration(labelText: 'Full Name', hintText: 'Your name'),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                TextField(
+                  controller: emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(labelText: 'Email Address', hintText: 'you@example.com'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: passCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Password', hintText: 'Min 6 characters'),
+                ),
+                if (dialogError != null) ...[
+                  const SizedBox(height: 10),
+                  Text(dialogError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                ],
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => setDialogState(() {
+                    submitSignUp = !submitSignUp;
+                    dialogError = null;
+                  }),
+                  child: Text(submitSignUp ? 'Already have an account? Sign in' : 'New to VectorGallery? Create account'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
+              onPressed: submitting
+                  ? null
+                  : () async {
+                      setDialogState(() {
+                        submitting = true;
+                        dialogError = null;
+                      });
+                      final notifier = ref.read(authProvider.notifier);
+                      final ok = submitSignUp
+                          ? await notifier.signUp(nameCtrl.text, emailCtrl.text, passCtrl.text)
+                          : await notifier.signIn(emailCtrl.text, passCtrl.text);
+
+                      if (!modalCtx.mounted) return;
+                      if (ok) {
+                        Navigator.pop(ctx);
+                        await _fetchProfile();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(submitSignUp ? 'Account created & vault synced!' : 'Signed in successfully!')),
+                          );
+                        }
+                      } else {
+                        setDialogState(() {
+                          submitting = false;
+                          dialogError = ref.read(authProvider).error ?? 'Authentication failed';
+                        });
+                      }
+                    },
+              child: Text(submitting ? 'Please wait...' : (submitSignUp ? 'Create Account' : 'Sign In')),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showApiKeyDialog() {
@@ -57,36 +145,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Free AI Key (Groq or Gemini)'),
+        title: const Text('Personal AI Key (Groq or Gemini)'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Enter your free Groq API key (starts with gsk_) or Google Gemini API key (starts with AIzaSy) to enable real conversational AI answers grounded in your files.',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            Text(
+              'Enter a Groq API key (gsk_...) or Gemini key (AIzaSy...) to override the server default key.',
+              style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryOf(ctx)),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'API Key',
-                hintText: 'gsk_... or AIzaSy...',
-              ),
+              decoration: const InputDecoration(labelText: 'API Key', hintText: 'gsk_... or AIzaSy...'),
               obscureText: true,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '• Groq Free Key: console.groq.com/keys\n• Gemini Free Key: aistudio.google.com/app/apikey',
-              style: TextStyle(fontSize: 11, color: AppTheme.accent, height: 1.4),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
             onPressed: () {
@@ -111,7 +188,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (res.statusCode == 200 && mounted) {
         final data = res.data;
         setState(() {
-          _connectionStatus = 'Connected: VectorGallery v${data['version'] ?? '2.0'} (Storage: ${data['storage']?['driver'] ?? 'local'})';
+          _connectionStatus = 'Connected: VectorGallery v${data['version'] ?? '2.0'} (${data['storage']?['driver'] ?? 'local'})';
         });
       }
     } catch (e) {
@@ -121,20 +198,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         });
       }
     } finally {
-      if (mounted) {
-        setState(() => _isTestingConnection = false);
-      }
+      if (mounted) setState(() => _isTestingConnection = false);
     }
   }
 
   Future<void> _fetchProfile() async {
     try {
       final res = await _api.dio.get('/api/v2/auth/profile');
-      if (res.statusCode == 200 && res.data['profile'] != null) {
+      if (res.statusCode == 200 && res.data['profile'] != null && mounted) {
         final profile = res.data['profile'];
         setState(() {
           _userName = profile['full_name'] ?? 'Personal Vault';
-          _userEmail = profile['email'] ?? 'local@vectorgallery.app';
+          _userEmail = profile['email'] ?? 'Local Sandbox Session';
           final settings = profile['backup_settings'];
           if (settings != null) {
             if (settings['wifi_only'] != null) _wifiOnly = settings['wifi_only'];
@@ -160,51 +235,141 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    final surface = AppTheme.surfaceOf(context);
+    final border = AppTheme.borderOf(context);
+    final primaryText = AppTheme.textPrimaryOf(context);
+    final secondaryText = AppTheme.textSecondaryOf(context);
+    final brand = AppTheme.brandOf(context);
+    final warn = AppTheme.warnOf(context);
+
+    final shownName = auth.displayName ?? _userName;
+    final shownEmail = auth.email ?? _userEmail;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings & Preferences'),
+        title: const Text('Settings'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // User Profile Card
+          // Account Identity & Sign-In/Sign-Up Card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.borderSubtle),
+              color: surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: border),
             ),
-            child: Row(
+            child: Column(
               children: [
-                const CircleAvatar(
-                  backgroundColor: AppTheme.accentMuted,
-                  child: Text('VM', style: TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text(_userName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                    const SizedBox(height: 2),
-                    Text(auth.email ?? _userEmail, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                    CircleAvatar(
+                      backgroundColor: AppTheme.voltLime,
+                      child: Text(
+                        shownName.isNotEmpty ? shownName[0].toUpperCase() : 'V',
+                        style: const TextStyle(color: Color(0xFF101211), fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(shownName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: primaryText)),
+                          const SizedBox(height: 2),
+                          Text(shownEmail, style: TextStyle(color: secondaryText, fontSize: 12), overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
+                    ),
+                    if (auth.isAuthenticated)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: brand.withOpacity(0.14),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text('Synced', style: TextStyle(color: brand, fontSize: 10.5, fontWeight: FontWeight.bold)),
+                      ),
                   ],
                 ),
+                if (!auth.isAuthenticated) ...[
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.voltLime,
+                            foregroundColor: const Color(0xFF101211),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          onPressed: () => _showAuthDialog(isSignUp: true),
+                          child: const Text('Create Account', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          onPressed: () => _showAuthDialog(isSignUp: false),
+                          child: const Text('Sign In', style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // User Guide Entry Card
+          InkWell(
+            onTap: () => showMobileUserGuideSheet(context),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(color: brand.withOpacity(0.14), borderRadius: BorderRadius.circular(10)),
+                    child: Icon(Icons.menu_book_rounded, color: brand, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('User Guide · How to use', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: primaryText)),
+                        Text('Account setup, safe Wi-Fi backup, OCR & AI tips', style: TextStyle(fontSize: 12, color: secondaryText)),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, color: secondaryText),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
 
-          // ─── Appearance (Dark / Light Mode) ───
-          const Text('Appearance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text('Appearance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: primaryText)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.borderSubtle),
+              border: Border.all(color: border),
             ),
             child: ValueListenableBuilder<ThemeMode>(
               valueListenable: AppTheme.themeModeNotifier,
@@ -212,11 +377,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.palette_outlined, color: AppTheme.accent, size: 20),
-                        SizedBox(width: 10),
-                        Text('Theme', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+                        Icon(Icons.palette_outlined, color: brand, size: 20),
+                        const SizedBox(width: 10),
+                        Text('Theme', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: primaryText)),
                       ],
                     ),
                     SegmentedButton<ThemeMode>(
@@ -233,9 +398,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ],
                       selected: {currentMode},
-                      onSelectionChanged: (newSelection) {
-                        AppTheme.toggleTheme(newSelection.first);
-                      },
+                      onSelectionChanged: (newSelection) => AppTheme.toggleTheme(newSelection.first),
                     ),
                   ],
                 );
@@ -244,15 +407,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 20),
 
-          // ─── AI Model Configuration ───
-          const Text('AI Digital Memory Model', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text('AI Digital Memory Model', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: primaryText)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.borderSubtle),
+              border: Border.all(color: border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,21 +422,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Model Provider', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('Model Provider', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: primaryText)),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
                         color: (_geminiApiKey != null && _geminiApiKey!.isNotEmpty)
-                            ? AppTheme.accent.withOpacity(0.15)
-                            : Colors.amberAccent.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(6),
+                            ? brand.withOpacity(0.14)
+                            : warn.withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         (_geminiApiKey != null && _geminiApiKey!.isNotEmpty)
-                            ? (_geminiApiKey!.startsWith('gsk_') ? 'GROQ LLAMA 3.3 ACTIVE' : 'GEMINI 1.5 ACTIVE')
-                            : 'LOCAL GROUNDED',
+                            ? (_geminiApiKey!.startsWith('gsk_') ? 'GROQ LLAMA 3.3' : 'GEMINI ACTIVE')
+                            : 'SERVER DEFAULT',
                         style: TextStyle(
-                          color: (_geminiApiKey != null && _geminiApiKey!.isNotEmpty) ? AppTheme.accent : Colors.amberAccent,
+                          color: (_geminiApiKey != null && _geminiApiKey!.isNotEmpty) ? brand : warn,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -285,24 +447,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   (_geminiApiKey != null && _geminiApiKey!.isNotEmpty)
-                      ? (_geminiApiKey!.startsWith('gsk_')
-                          ? 'Groq Llama 3.3 70B is active. Ultra-fast conversational AI synthesis is running.'
-                          : 'Google Gemini API Key is configured. Natural conversational synthesis is active.')
-                      : 'Running in offline grounded mode. Responses match and cite stored files directly. Add a free Groq or Gemini key to enable generative synthesis.',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                      ? 'Personal API key is stored securely on this device.'
+                      : 'Uses server AI keys when available or add your own free Groq/Gemini key.',
+                  style: TextStyle(fontSize: 12, color: secondaryText),
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
                   onPressed: _showApiKeyDialog,
                   icon: const Icon(Icons.key, size: 16),
                   label: Text(
-                    (_geminiApiKey != null && _geminiApiKey!.isNotEmpty) ? 'Update AI Key' : 'Enter Free Groq / Gemini API Key',
-                    style: const TextStyle(fontSize: 12),
+                    (_geminiApiKey != null && _geminiApiKey!.isNotEmpty) ? 'Update Personal Key' : 'Add Groq / Gemini Key',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    backgroundColor: AppTheme.voltLime,
+                    foregroundColor: const Color(0xFF101211),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
                 ),
               ],
@@ -310,34 +471,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 20),
 
-          // ─── Backup Preferences ───
-          const Text('Backup Preferences', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text('Backup Preferences', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: primaryText)),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.borderSubtle),
+              border: Border.all(color: border),
             ),
             child: Column(
               children: [
                 SwitchListTile(
-                  title: const Text('Wi-Fi Only Backup', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                  subtitle: const Text('Pause backup when on cellular data', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                  title: Text('Wi-Fi Only Backup', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: primaryText)),
+                  subtitle: Text('Pause backup when on cellular data', style: TextStyle(fontSize: 12, color: secondaryText)),
                   value: _wifiOnly,
-                  activeColor: AppTheme.accent,
+                  activeColor: brand,
                   onChanged: (val) {
                     setState(() => _wifiOnly = val);
                     _backupEngine.wifiOnly = val;
                     _saveSettings();
                   },
                 ),
-                const Divider(height: 1, color: AppTheme.borderSubtle),
+                Divider(height: 1, color: border),
                 SwitchListTile(
-                  title: const Text('Automatic Backup', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                  subtitle: const Text('Scan camera roll and screenshots', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                  title: Text('Automatic Backup', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: primaryText)),
+                  subtitle: Text('Scan camera roll and screenshots', style: TextStyle(fontSize: 12, color: secondaryText)),
                   value: _autoBackup,
-                  activeColor: AppTheme.accent,
+                  activeColor: brand,
                   onChanged: (val) {
                     setState(() => _autoBackup = val);
                     _saveSettings();
@@ -348,24 +508,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 20),
 
-          // ─── Server & Network Connection ───
-          const Text('Backend Connection', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text('Backend Connection', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: primaryText)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.borderSubtle),
+              border: Border.all(color: border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Host Server URL', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                Text('Host Server URL', style: TextStyle(fontSize: 12, color: secondaryText)),
                 const SizedBox(height: 4),
                 Text(
                   _api.dio.options.baseUrl,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, fontFamily: 'monospace'),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, fontFamily: 'monospace', color: primaryText),
                 ),
                 if (_connectionStatus != null) ...[
                   const SizedBox(height: 8),
@@ -373,8 +532,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _connectionStatus!,
                     style: TextStyle(
                       fontSize: 12,
-                      color: _connectionStatus!.startsWith('Connected') ? AppTheme.accent : Colors.redAccent,
-                      fontWeight: FontWeight.w500,
+                      color: _connectionStatus!.startsWith('Connected') ? brand : Colors.redAccent,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -389,9 +548,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.network_check, size: 16),
                       label: const Text('Test Connection', style: TextStyle(fontSize: 12)),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+                      style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
                     ),
                     OutlinedButton.icon(
                       onPressed: () {
@@ -402,22 +559,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             title: const Text('Host Server URL'),
                             content: TextField(
                               controller: urlController,
-                              decoration: const InputDecoration(
-                                labelText: 'Base URL',
-                                hintText: 'http://192.168.x.x:3000',
-                              ),
+                              decoration: const InputDecoration(labelText: 'Base URL', hintText: 'http://192.168.x.x:3000'),
                               keyboardType: TextInputType.url,
                             ),
                             actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Cancel'),
-                              ),
+                              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
                               ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.accent,
-                                  foregroundColor: Colors.white,
-                                ),
+                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
                                 onPressed: () async {
                                   await _api.saveBaseUrl(urlController.text);
                                   if (ctx.mounted) Navigator.pop(ctx);
@@ -431,36 +579,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       },
                       icon: const Icon(Icons.edit, size: 16),
                       label: const Text('Configure URL', style: TextStyle(fontSize: 12)),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+                      style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
 
-          // Sign Out Button
-          OutlinedButton.icon(
-            onPressed: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              await ref.read(authProvider.notifier).signOut();
-              if (mounted) {
-                messenger.showSnackBar(
-                  const SnackBar(content: Text('Signed out successfully')),
-                );
-              }
-            },
-            icon: const Icon(Icons.logout, size: 16, color: Colors.redAccent),
-            label: const Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.redAccent),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+          if (auth.isAuthenticated) ...[
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                await ref.read(authProvider.notifier).signOut();
+                if (mounted) {
+                  messenger.showSnackBar(const SnackBar(content: Text('Signed out successfully')));
+                }
+              },
+              icon: const Icon(Icons.logout, size: 16, color: Colors.redAccent),
+              label: const Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.redAccent),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

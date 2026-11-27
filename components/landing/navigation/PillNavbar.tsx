@@ -22,6 +22,10 @@ const NAV_LINKS = [
   { id: 'opensource', href: '#privacy', label: 'Open source' },
 ]
 
+const PAGE_LINKS = [
+  { href: '/guide', label: 'Guide' },
+]
+
 /**
  * Slim, symmetrical Liquid Titanium / Obsidian Volt Navigation Bar.
  * Places brand + minimal navigation pill cleanly on the left balanced against compact utilities on the right,
@@ -157,6 +161,15 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
                 </a>
               )
             })}
+            {PAGE_LINKS.map((p) => (
+              <Link
+                key={p.href}
+                href={p.href}
+                className="relative px-3.5 py-1 rounded-full text-[12.5px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] transition-[background-color,color] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
+              >
+                {p.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
@@ -249,6 +262,13 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
                   {item.label}
                 </a>
               ))}
+              <Link
+                href="/guide"
+                onClick={() => setMobileOpen(false)}
+                className="py-2.5 px-3 rounded-xl hover:bg-[var(--vg-surface-2)] transition-colors"
+              >
+                User Guide
+              </Link>
               <a
                 href={REPO_URL}
                 target="_blank"

@@ -246,6 +246,13 @@ export default function InstallPage() {
                   <span>GitHub Releases</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
+                <Link
+                  href="/guide"
+                  className="inline-flex items-center gap-1 hover:text-[#087F5B] dark:hover:text-[#58D6A8] transition-colors"
+                >
+                  <span>User Guide</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
             </motion.div>
 

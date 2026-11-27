@@ -316,6 +316,11 @@ export function CompactFaqAndFooter({ apkSizeLabel }: { apkSizeLabel?: string })
                     Questions
                   </a>
                 </li>
+                <li>
+                  <Link href="/guide" className="hover:text-[var(--vg-ink)] transition-colors">
+                    User Guide
+                  </Link>
+                </li>
               </ul>
             </div>
 

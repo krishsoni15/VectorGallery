@@ -563,8 +563,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                     </span>
                   </div>
 
-                  {/* Responsive Gallery Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2.5 sm:gap-3.5">
+                  {/* Responsive Google Photos Minimal Grid (Pure unoccluded photography at rest) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-1.5 sm:gap-2.5">
                     {group.items.map((file) => {
                       const isSelected = selectedIds.includes(file.id)
                       const isVideo = file.category === 'videos' || file.mime_type?.startsWith('video/')
@@ -573,10 +573,10 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                         <div
                           key={file.id}
                           onClick={() => onSelectFile(file)}
-                          className={`group relative rounded-2xl overflow-hidden aspect-square bg-[#E7E9E5] dark:bg-[#131715] border transition-all cursor-pointer shadow-sm select-none hover:shadow-md ${
+                          className={`group relative rounded-xl overflow-hidden aspect-square bg-[#E9EDE8] dark:bg-[#191D20] transition-all cursor-pointer select-none ${
                             isSelected
-                              ? 'border-[#087F5B] dark:border-[#CFFF49] ring-2 ring-[#087F5B]/40 dark:ring-[#CFFF49]/50 scale-[0.98]'
-                              : 'border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/40 dark:hover:border-[#CFFF49]/50'
+                              ? 'ring-2 ring-[#087F5B] dark:ring-[#CDFF45] ring-offset-2 ring-offset-[#F4F5F2] dark:ring-offset-[#090B0D] scale-[0.96] shadow-md'
+                              : 'hover:brightness-[0.98]'
                           }`}
                         >
                           {(() => {
@@ -587,7 +587,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                                 <img
                                   src={file.thumbnail_url}
                                   alt={file.original_name}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
                                   loading="lazy"
                                   onError={() =>
                                     setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
@@ -597,24 +597,29 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                             }
                             const FallbackIcon = getFileIcon(file)
                             return (
-                              <div className="w-full h-full flex items-center justify-center bg-[#FFFFFF] dark:bg-[#131715]">
+                              <div className="w-full h-full flex items-center justify-center bg-[#FFFFFF] dark:bg-[#111416] border border-[#DDE2DC] dark:border-white/[0.08]">
                                 <FallbackIcon className="w-8 h-8 text-[#626B64] dark:text-[#9AA69E]" />
                               </div>
                             )
                           })()}
 
-                          {/* Vignette Gradients */}
-                          <div className="photo-overlay absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/30 opacity-60 group-hover:opacity-90 transition-opacity" />
+                          {/* Whisper-quiet Vignette Gradients (Hidden at rest so photos stay pure & bright) */}
+                          <div
+                            className={`photo-overlay pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/35 transition-opacity duration-200 ${
+                              isSelected ? 'opacity-65' : 'opacity-0 group-hover:opacity-100'
+                            }`}
+                          />
 
-                          {/* Top Actions: Select & Video Badge / Favorite */}
-                          <div className="photo-overlay absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10">
+                          {/* Top Actions: Select Checkmark & Video/Star Badges */}
+                          <div className="photo-overlay absolute top-2 left-2 right-2 flex items-center justify-between z-10">
                             <button
                               onClick={(e) => toggleSelect(file.id, e)}
                               title={isSelected ? 'Deselect' : 'Select'}
+                              aria-label={isSelected ? 'Deselect photo' : 'Select photo'}
                               className={`w-6 h-6 rounded-full flex items-center justify-center transition-all backdrop-blur-md ${
                                 isSelected
-                                  ? 'bg-[#CFFF49] text-[#101211] shadow-md scale-105'
-                                  : 'bg-black/50 border border-white/70 text-transparent hover:text-white/80 opacity-0 group-hover:opacity-100'
+                                  ? 'bg-[#CDFF45] text-[#101211] shadow-md scale-105'
+                                  : 'bg-black/45 border border-white/80 text-transparent hover:text-white opacity-0 group-hover:opacity-100'
                               }`}
                             >
                               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -634,10 +639,11 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                                     e.stopPropagation()
                                     onToggleFavorite(file.id, file.is_favorite)
                                   }}
-                                  className={`photo-overlay-pill p-1.5 rounded-lg transition-colors backdrop-blur-md ${
+                                  aria-label={file.is_favorite ? 'Remove favorite' : 'Favorite'}
+                                  className={`photo-overlay-pill p-1.5 rounded-full transition-opacity backdrop-blur-md ${
                                     file.is_favorite
-                                      ? 'bg-black/60 text-amber-400'
-                                      : 'bg-black/40 text-white/75 hover:text-amber-400 opacity-0 group-hover:opacity-100'
+                                      ? 'bg-black/55 text-amber-400 opacity-100'
+                                      : 'bg-black/45 text-white/85 hover:text-amber-400 opacity-0 group-hover:opacity-100'
                                   }`}
                                 >
                                   <Star
@@ -650,18 +656,18 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                             </div>
                           </div>
 
-                          {/* Bottom Info */}
-                          <div className="photo-overlay absolute bottom-2.5 left-2.5 right-2.5 z-10 flex items-end justify-between">
+                          {/* Subtle Hover-Only Caption & Quick Actions */}
+                          <div className="photo-overlay absolute bottom-2 left-2.5 right-2.5 z-10 flex items-end justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <div className="min-w-0 pr-2">
-                              <p className="text-xs font-semibold text-white truncate drop-shadow-sm">
+                              <p className="text-[11px] font-medium text-white truncate drop-shadow-sm">
                                 {file.original_name}
                               </p>
-                              <p className="text-[10px] text-zinc-200 font-mono drop-shadow-sm">
+                              <p className="text-[9.5px] text-zinc-200 font-mono drop-shadow-sm">
                                 {formatSize(file.size_bytes)}
                               </p>
                             </div>
 
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1 shrink-0">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation()
@@ -669,13 +675,14 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                                     navigator.share({
                                       title: file.original_name,
                                       url: file.thumbnail_url,
-                                    })
+                                    }).catch(() => {})
                                   } else {
                                     onDownloadFile(file)
                                   }
                                 }}
                                 title="Share photo"
-                                className="p-1.5 rounded-lg bg-black/60 hover:bg-[#CFFF49] text-white hover:text-[#101211] transition-colors"
+                                aria-label="Share photo"
+                                className="p-1.5 rounded-full bg-black/55 hover:bg-[#CDFF45] text-white hover:text-[#101211] transition-colors"
                               >
                                 <Share2 className="w-3 h-3" />
                               </button>
@@ -685,7 +692,8 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                                   onDownloadFile(file)
                                 }}
                                 title="Download photo"
-                                className="p-1.5 rounded-lg bg-black/60 hover:bg-[#CFFF49] text-white hover:text-[#101211] transition-colors"
+                                aria-label="Download photo"
+                                className="p-1.5 rounded-full bg-black/55 hover:bg-[#CDFF45] text-white hover:text-[#101211] transition-colors"
                               >
                                 <Download className="w-3 h-3" />
                               </button>

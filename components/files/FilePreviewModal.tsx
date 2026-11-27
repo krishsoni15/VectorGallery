@@ -123,23 +123,23 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl animate-fadeIn select-none">
-      {/* ─── Top Control Bar (Google Photos Style) ─── */}
-      <div className="absolute top-0 inset-x-0 h-16 px-6 flex items-center justify-between z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
-        <div className="flex items-center gap-3 min-w-0">
+      {/* ─── Top Control Bar (Google Photos Style, Mobile Responsive) ─── */}
+      <div className="absolute top-0 inset-x-0 h-16 px-3 sm:px-6 flex items-center justify-between gap-2 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300 hover:text-white transition-colors"
+            className="p-2 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300 hover:text-white transition-colors shrink-0"
             title="Close (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-white truncate max-w-sm sm:max-w-md">{displayName}</h3>
-            <p className="text-[11px] text-zinc-400 font-mono">
+            <h3 className="text-xs sm:text-sm font-semibold text-white truncate max-w-[140px] sm:max-w-md">{displayName}</h3>
+            <p className="text-[10.5px] sm:text-[11px] text-zinc-400 font-mono truncate">
               {formattedDate} • {formatSize(displayBytes)}
               {currentIndex !== -1 && (
-                <span className="ml-2 px-1.5 py-0.5 rounded bg-white/[0.08] text-zinc-300">
+                <span className="hidden sm:inline ml-2 px-1.5 py-0.5 rounded bg-white/[0.08] text-zinc-300">
                   {currentIndex + 1} of {filesList.length}
                 </span>
               )}
@@ -148,7 +148,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {onOpenAssistantWithFile && (
             <button
               onClick={() => onOpenAssistantWithFile(file)}
@@ -239,7 +239,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             <img
               src={file.thumbnail_url}
               alt={displayName}
-              className="max-h-[82vh] max-w-[90vw] object-contain rounded-lg shadow-2xl drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]"
+              className="max-h-[70vh] sm:max-h-[82vh] max-w-[92vw] object-contain rounded-lg shadow-2xl drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]"
               onError={() =>
                 setBrokenThumbs((prev) => ({ ...prev, [mainThumbKey]: true }))
               }

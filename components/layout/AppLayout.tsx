@@ -6,10 +6,7 @@ import {
   Search,
   Zap,
   Image as ImageIcon,
-  Video,
   FileText,
-  Music,
-  Download,
   FolderHeart,
   Clock,
   Star,
@@ -17,16 +14,13 @@ import {
   HardDrive,
   Smartphone,
   Settings,
-  User,
-  Plus,
   UploadCloud,
-  ChevronRight,
   LogOut,
-  Folder,
   X,
   Menu,
   Sun,
   Moon,
+  HelpCircle,
 } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
 
@@ -43,6 +37,7 @@ export type NavItemKey =
   | 'recent'
   | 'favorites'
   | 'trash'
+  | 'guide'
   | 'settings'
 
 interface AppLayoutProps {
@@ -90,12 +85,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     window.dispatchEvent(new Event('vm_theme_change'))
   }
 
+  // Minimal non-repeating sidebar items (Search lives once in header/bottom bar; Upload once in header)
   const navItems: Array<{
     key: NavItemKey
     label: string
     icon: React.ComponentType<{ className?: string }>
     badge?: string
-    action?: () => void
     sectionLabel?: string
   }> = [
     { key: 'home', label: 'Overview', icon: Home },
@@ -104,33 +99,29 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     { key: 'documents', label: 'Documents', icon: FileText },
     { key: 'collections', label: 'Collections', icon: FolderHeart },
     { key: 'assistant', label: 'Assistant', icon: Zap, badge: 'AI', sectionLabel: 'Intelligence' },
-    { key: 'search', label: 'AI Search', icon: Search, action: onOpenSearch },
-    { key: 'favorites', label: 'Favorites', icon: Star, sectionLabel: 'Organize' },
+    { key: 'favorites', label: 'Favorites', icon: Star, sectionLabel: 'Library' },
     { key: 'trash', label: 'Trash', icon: Trash2 },
   ]
 
   const TAB_TITLES: Record<NavItemKey, string> = {
     home: 'Overview',
-    photos: 'Photos & Screenshots',
+    photos: 'Photos',
     recent: 'All Files',
     documents: 'Documents',
-    collections: 'Albums & Collections',
+    collections: 'Collections',
     assistant: 'AI Assistant',
-    search: 'AI Search',
+    search: 'Search',
     favorites: 'Favorites',
     trash: 'Trash',
     downloads: 'All Files',
     videos: 'Videos',
     audio: 'Audio',
+    guide: 'User Guide',
     settings: 'Settings',
   }
 
-  const handleNavClick = (item: (typeof navItems)[0]) => {
-    if (item.action) {
-      item.action()
-    } else {
-      onSelectTab(item.key)
-    }
+  const handleNavClick = (key: NavItemKey) => {
+    onSelectTab(key)
     setMobileMenuOpen(false)
   }
 
@@ -185,7 +176,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       </div>
                     )}
                     <button
-                      onClick={() => handleNavClick(item)}
+                      onClick={() => handleNavClick(item.key)}
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors ${
                         isActive
                           ? 'bg-[#101211] text-[#F3F5F1] dark:bg-white/[0.10] dark:text-[#F3F5F1] font-semibold'
@@ -194,17 +185,19 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     >
                       <div className="flex items-center gap-3">
                         <Icon
-                          className={`w-4 h-4 ${isActive ? 'text-[#D4FF54] dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#7B867F]'
-                            }`}
+                          className={`w-4 h-4 ${
+                            isActive ? 'text-[#D4FF54] dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#7B867F]'
+                          }`}
                         />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
                         <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${isActive
-                            ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]'
-                            : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
-                            }`}
+                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${
+                            isActive
+                              ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]'
+                              : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
+                          }`}
                         >
                           {item.badge}
                         </span>
@@ -213,11 +206,28 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   </React.Fragment>
                 )
               })}
+
+              <div className="pt-3 pb-1 px-3 text-[10px] font-mono uppercase tracking-[0.12em] text-[#626B64] dark:text-[#7B867F] border-t border-[#DDE2DC] dark:border-white/[0.06] mt-2">
+                <span>Help</span>
+              </div>
+              <button
+                onClick={() => handleNavClick('guide')}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors ${
+                  activeTab === 'guide'
+                    ? 'bg-[#101211] text-[#F3F5F1] dark:bg-white/[0.10] dark:text-[#F3F5F1] font-semibold'
+                    : 'text-[#555E58] dark:text-[#9AA69E] hover:bg-[#E7E9E5]/70 dark:hover:bg-white/[0.05] hover:text-[#101211] dark:hover:text-[#F3F5F1]'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" />
+                <span>User Guide</span>
+              </button>
             </div>
 
             <div className="p-3 border-t border-[#DDE2DC] dark:border-white/[0.08] space-y-2.5 bg-[#F2F3F0]/80 dark:bg-[#090B0A]/60">
               <div className="flex items-center justify-between text-[11px] text-[#555E58] dark:text-[#9AA69E] px-1">
-                <span>{storageStats.formatted_used} / {storageStats.formatted_quota}</span>
+                <span>
+                  {storageStats.formatted_used} / {storageStats.formatted_quota}
+                </span>
                 <span className="font-mono text-[#087F5B] dark:text-[#CFFF49]">{storageStats.percent_used}%</span>
               </div>
               <div className="w-full h-1.5 rounded-full bg-[#DDE2DC] dark:bg-white/[0.08] overflow-hidden">
@@ -227,10 +237,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 />
               </div>
               <button
-                onClick={() => {
-                  onSelectTab('settings')
-                  setMobileMenuOpen(false)
-                }}
+                onClick={() => handleNavClick('settings')}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-[#101211] dark:text-[#F3F5F1] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.06]"
               >
                 <Settings className="w-4 h-4 text-[#626B64] dark:text-[#9AA69E]" />
@@ -241,10 +248,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         </div>
       )}
 
-      {/* ─── Desktop Left Navigation Sidebar ─── */}
-      <aside className="hidden md:flex flex-col w-60 lg:w-64 shrink-0 border-r border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#131715] select-none">
-        {/* Brand & Logo Header */}
-        <div className="flex items-center justify-between px-4 lg:px-5 h-16 border-b border-[#DDE2DC] dark:border-white/[0.08]">
+      {/* ─── Desktop Left Navigation Sidebar (Minimal, Zero Repetition) ─── */}
+      <aside className="hidden md:flex flex-col w-60 lg:w-64 shrink-0 border-r border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#111416] select-none">
+        {/* Clean Brand Header */}
+        <div className="flex items-center px-5 h-16 border-b border-[#DDE2DC] dark:border-white/[0.08]">
           <Link href="/" className="flex items-center gap-2.5 group" title="Return to VectorGallery Website">
             <img
               src="/vectorgallery-icon.svg"
@@ -260,18 +267,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </span>
             </div>
           </Link>
-          <button
-            onClick={onOpenUpload}
-            title="Upload File (Cmd+U)"
-            aria-label="Quick upload file"
-            className="w-7 h-7 rounded-full border border-[#DDE2DC] dark:border-white/[0.12] bg-[#F2F3F0] dark:bg-white/[0.05] hover:bg-[#D4FF54] dark:hover:bg-[#CFFF49] text-[#101211] dark:text-[#F3F5F1] hover:text-[#101211] flex items-center justify-center transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
         </div>
 
-        {/* Minimal Desktop Navigation Links */}
-        <nav aria-label="Workspace navigation" className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 custom-scrollbar">
+        {/* Clean Single-Purpose Navigation Links */}
+        <nav aria-label="Workspace navigation" className="flex-1 overflow-y-auto px-3 py-3.5 space-y-0.5 custom-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = activeTab === item.key
@@ -279,33 +278,35 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             return (
               <React.Fragment key={item.key}>
                 {item.sectionLabel && (
-                  <div className="pt-3 pb-1 px-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.12em] text-[#626B64] dark:text-[#7B867F] border-t border-[#DDE2DC] dark:border-white/[0.06] mt-2">
+                  <div className="pt-3.5 pb-1.5 px-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.12em] text-[#626B64] dark:text-[#7B867F] border-t border-[#DDE2DC] dark:border-white/[0.06] mt-2.5">
                     <span>{item.sectionLabel}</span>
                   </div>
                 )}
                 <button
-                  onClick={() => handleNavClick(item)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[12.5px] font-medium transition-colors group ${
+                  onClick={() => handleNavClick(item.key)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-full text-[13px] font-medium transition-colors group ${
                     isActive
-                      ? 'bg-[#101211] text-[#F3F5F1] dark:bg-white/[0.10] dark:text-[#F3F5F1] font-semibold'
-                      : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5]/65 dark:hover:bg-white/[0.05]'
+                      ? 'bg-[#101211] text-[#F4F6F2] dark:bg-white/[0.11] dark:text-[#F4F6F2] font-semibold'
+                      : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.05]'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     <Icon
-                      className={`w-4 h-4 shrink-0 transition-colors ${isActive
-                        ? 'text-[#D4FF54] dark:text-[#CFFF49]'
-                        : 'text-[#626B64] dark:text-[#7B867F] group-hover:text-[#101211] dark:group-hover:text-[#F3F5F1]'
-                        }`}
+                      className={`w-4 h-4 shrink-0 transition-colors ${
+                        isActive
+                          ? 'text-[#D4FF54] dark:text-[#CDFF45]'
+                          : 'text-[#626B64] dark:text-[#7B867F] group-hover:text-[#101211] dark:group-hover:text-[#F4F6F2]'
+                      }`}
                     />
                     <span className="truncate">{item.label}</span>
                   </div>
                   {item.badge && (
                     <span
-                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${isActive
-                        ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]'
-                        : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
-                        }`}
+                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${
+                        isActive
+                          ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CDFF49]/20 dark:text-[#CDFF45]'
+                          : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
+                      }`}
                     >
                       {item.badge}
                     </span>
@@ -316,13 +317,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           })}
         </nav>
 
-        {/* Bottom Section: Storage, Devices, Settings, User Profile */}
+        {/* Bottom Storage, Settings & Account Tile */}
         <div className="p-3 border-t border-[#DDE2DC] dark:border-white/[0.08] space-y-2.5 bg-[#F2F3F0]/65 dark:bg-[#090B0A]/45">
-          {/* Storage Usage Bar */}
           <div className="px-2.5 py-2 rounded-xl bg-[#FFFFFF] dark:bg-white/[0.03] border border-[#DDE2DC] dark:border-white/[0.06]">
             <div className="flex items-center justify-between text-[11px] mb-1.5">
               <span className="flex items-center gap-1.5 text-[#555E58] dark:text-[#9AA69E] font-medium">
-                <HardDrive className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" /> Storage
+                <HardDrive className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CDFF45]" /> Storage
               </span>
               <span className="font-mono text-[#101211] dark:text-[#F3F5F1] text-[10.5px]">
                 {storageStats.formatted_used} / {storageStats.formatted_quota}
@@ -330,31 +330,30 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             </div>
             <div className="w-full h-1.5 rounded-full bg-[#E7E9E5] dark:bg-white/[0.08] overflow-hidden">
               <div
-                className="h-full bg-[#101211] dark:bg-[#CFFF49] transition-all duration-500 rounded-full"
+                className="h-full bg-[#101211] dark:bg-[#CDFF45] transition-all duration-500 rounded-full"
                 style={{ width: `${Math.max(2, Math.min(100, storageStats.percent_used))}%` }}
               />
             </div>
           </div>
 
-          {/* Device Sync Status */}
           <div className="flex items-center justify-between px-2 py-0.5 text-[11px] text-[#555E58] dark:text-[#9AA69E]">
             <span className="flex items-center gap-1.5">
               <Smartphone className="w-3.5 h-3.5" />
               {connectedDevicesCount > 0 ? `${connectedDevicesCount} Device${connectedDevicesCount > 1 ? 's' : ''}` : 'No devices'}
             </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#087F5B] dark:text-[#39D9A0]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#39D9A0]" /> Sync Ready
+            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#087F5B] dark:text-[#46D6A4]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#46D6A4]" /> Sync Ready
             </span>
           </div>
 
-          {/* Settings & User Profile Controls */}
           <div className="pt-1.5 flex items-center justify-between gap-1 border-t border-[#DDE2DC] dark:border-white/[0.06]">
             <button
-              onClick={() => onSelectTab('settings')}
-              className={`flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${activeTab === 'settings'
-                ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/15 dark:text-[#CFFF49] font-semibold'
-                : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5]/70 dark:hover:bg-white/[0.05]'
-                }`}
+              onClick={() => handleNavClick('settings')}
+              className={`flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                activeTab === 'settings'
+                  ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CDFF45]/15 dark:text-[#CDFF45] font-semibold'
+                  : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5]/70 dark:hover:bg-white/[0.05]'
+              }`}
             >
               <Settings className="w-3.5 h-3.5" />
               <span>Settings</span>
@@ -373,12 +372,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             </button>
           </div>
 
-          {/* User Profile Tile */}
           <Link
             href={user ? '/account' : '/login'}
             className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl bg-[#FFFFFF] dark:bg-white/[0.03] border border-[#DDE2DC] dark:border-white/[0.06] hover:border-[#101211]/30 dark:hover:border-white/[0.15] transition-colors"
           >
-            <div className="w-7 h-7 rounded-full bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49] flex items-center justify-center text-xs font-bold shrink-0">
+            <div className="w-7 h-7 rounded-full bg-[#101211] text-[#F3F5F1] dark:bg-[#CDFF45]/20 dark:text-[#CDFF45] flex items-center justify-center text-xs font-bold shrink-0">
               {userDisplayName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -391,8 +389,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
       {/* ─── Main Content Shell ─── */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Minimal Frosted Header */}
-        <header className="h-14 sm:h-16 border-b border-[#DDE2DC] dark:border-white/[0.08] px-3 sm:px-6 flex items-center justify-between bg-[#FFFFFF]/90 dark:bg-[#090B0A]/90 backdrop-blur-xl shrink-0 gap-2 sm:gap-3">
+        {/* Clean Minimal Google Photos Style Header */}
+        <header className="h-14 sm:h-16 border-b border-[#DDE2DC] dark:border-white/[0.08] px-3 sm:px-6 flex items-center justify-between bg-[#FFFFFF]/92 dark:bg-[#090B0D]/92 backdrop-blur-xl shrink-0 gap-2 sm:gap-3">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -407,13 +405,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </div>
 
           {/* Centered Clean Search Pill */}
-          <div className="flex-1 max-w-xl mx-1 sm:mx-4">
+          <div className="flex-1 min-w-0 max-w-xl mx-1 sm:mx-4">
             <button
               onClick={onOpenSearch}
               className="w-full flex items-center justify-between px-3.5 sm:px-4 py-2 rounded-full bg-[#F2F3F0] dark:bg-[#131715] hover:bg-[#E7E9E5]/80 dark:hover:bg-[#1A1F1D] border border-[#DDE2DC] dark:border-white/[0.10] text-xs transition-colors group"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <Search className="w-3.5 h-3.5 text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#101211] dark:group-hover:text-[#CFFF49] transition-colors shrink-0" />
+                <Search className="w-3.5 h-3.5 text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#101211] dark:group-hover:text-[#CDFF45] transition-colors shrink-0" />
                 <span className="truncate text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#101211] dark:group-hover:text-[#F3F5F1]">
                   Search photos, receipts &amp; notes...
                 </span>
@@ -424,38 +422,44 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             </button>
           </div>
 
-          {/* Right Action Tools */}
+          {/* Right Utility Actions (No duplicate Settings/Avatar on desktop) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={onOpenUpload}
-              className="vg-cta-lime flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#D4FF54] hover:bg-[#C6F43E] dark:bg-[#CFFF49] dark:hover:bg-[#DCFF73] text-[#101211] text-xs font-semibold transition-all shadow-sm"
+              className="vg-cta-lime flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#D4FF54] hover:bg-[#C6F43E] dark:bg-[#CDFF45] dark:hover:bg-[#DCFF73] text-[#101211] text-xs font-semibold transition-all shadow-sm"
             >
               <UploadCloud className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Upload</span>
             </button>
 
             <button
+              onClick={() => handleNavClick('guide')}
+              title="How to use VectorGallery (User Guide)"
+              aria-label="User Guide"
+              className={`hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-full border text-xs font-medium transition-colors ${
+                activeTab === 'guide'
+                  ? 'border-[#101211] bg-[#101211] text-[#F4F6F2] dark:border-[#CDFF45] dark:bg-[#CDFF45]/15 dark:text-[#CDFF45]'
+                  : 'border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CDFF45]'
+              }`}
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span className="hidden lg:inline">Guide</span>
+            </button>
+
+            <button
               onClick={toggleTheme}
               title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
               aria-label="Toggle color theme"
-              className="w-9 h-9 rounded-full border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] flex items-center justify-center text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CFFF49] transition-colors"
+              className="w-9 h-9 rounded-full border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] flex items-center justify-center text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CDFF45] transition-colors"
             >
               {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
 
-            <button
-              onClick={() => onSelectTab('settings')}
-              title="Settings & Storage"
-              aria-label="Settings and Storage"
-              className="hidden sm:flex w-9 h-9 rounded-full border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] items-center justify-center text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-
+            {/* Mobile-only compact account badge (since left sidebar is hidden on <md) */}
             <Link
               href={user ? '/account' : '/login'}
               title={user ? 'Account Settings' : 'Sign in to Sync'}
-              className="w-8 h-8 rounded-full bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/20 dark:border dark:border-[#CFFF49]/35 dark:text-[#CFFF49] text-xs font-bold flex items-center justify-center shrink-0"
+              className="md:hidden w-8 h-8 rounded-full bg-[#101211] text-[#F3F5F1] dark:bg-[#CDFF45]/20 dark:border dark:border-[#CDFF45]/35 dark:text-[#CDFF45] text-xs font-bold flex items-center justify-center shrink-0"
             >
               {userDisplayName.charAt(0).toUpperCase()}
             </Link>
@@ -463,12 +467,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         </header>
 
         {/* Scrollable View Content */}
-        <main className="flex-1 overflow-y-auto bg-[#F2F3F0] dark:bg-[#090B0A] custom-scrollbar">
+        <main className="flex-1 overflow-y-auto bg-[#F4F5F2] dark:bg-[#090B0D] custom-scrollbar">
           {children}
         </main>
 
         {/* ─── Mobile Bottom Navigation ─── */}
-        <nav className="md:hidden flex items-center justify-around h-16 border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF]/95 dark:bg-[#090B0A]/95 backdrop-blur-xl shrink-0 px-1 z-20">
+        <nav className="md:hidden flex items-center justify-around h-16 border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF]/95 dark:bg-[#090B0D]/95 backdrop-blur-xl shrink-0 px-1 z-20">
           {[
             { key: 'home' as NavItemKey, label: 'Overview', icon: Home },
             { key: 'photos' as NavItemKey, label: 'Photos', icon: ImageIcon },
@@ -481,10 +485,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <button
                 key={tab.key}
                 onClick={() => onSelectTab(tab.key)}
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${isActive
-                  ? 'text-[#101211] dark:text-[#CFFF49] font-semibold'
-                  : 'text-[#626B64] dark:text-[#9AA69E]'
-                  }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
+                  isActive ? 'text-[#101211] dark:text-[#CDFF45] font-semibold' : 'text-[#626B64] dark:text-[#9AA69E]'
+                }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-[10px]">{tab.label}</span>
@@ -493,7 +496,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           })}
           <button
             onClick={onOpenSearch}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CFFF49]"
+            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CDFF45]"
           >
             <Search className="w-5 h-5" />
             <span className="text-[10px]">Search</span>

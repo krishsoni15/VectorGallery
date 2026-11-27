@@ -9,6 +9,7 @@ import { AISearchModal } from '@/components/search/AISearchModal'
 import { AssistantView } from '@/components/assistant/AssistantView'
 import { CollectionsView } from '@/components/collections/CollectionsView'
 import { SettingsView } from '@/components/settings/SettingsView'
+import { UserGuideView } from '@/components/guide/UserGuideView'
 import { UploadModal } from '@/components/files/UploadModal'
 import { FilePreviewModal } from '@/components/files/FilePreviewModal'
 
@@ -451,6 +452,15 @@ export default function AppPage() {
             onAddFilesToCollection={handleAddFilesToCollection}
             onRemoveFileFromCollection={handleRemoveFileFromCollection}
             onDeleteCollection={handleDeleteCollection}
+          />
+        )}
+
+        {activeTab === 'guide' && (
+          <UserGuideView
+            inApp
+            onNavigateTab={(tab) => setActiveTab(tab)}
+            onOpenUpload={() => setUploadModalOpen(true)}
+            onOpenSearch={() => setSearchModalOpen(true)}
           />
         )}
 

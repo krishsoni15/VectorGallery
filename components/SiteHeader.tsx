@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Github, Menu, Smartphone, X } from 'lucide-react'
+import { ArrowRight, BookOpen, Github, Menu, Smartphone, X } from 'lucide-react'
 import { AccountMenu } from '@/components/AccountMenu'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
 import { VG_LAYOUT } from '@/components/landing/design-system'
@@ -77,6 +77,18 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
               >
                 <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CDFF45]" />
                 <span>Android App</span>
+              </Link>
+              <Link
+                href="/guide"
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12.5px] font-medium transition-colors whitespace-nowrap',
+                  router.pathname === '/guide'
+                    ? 'bg-[#E9EDE8] dark:bg-white/[0.15] text-[#101211] dark:text-[#F4F6F2] font-semibold border border-[#101211]/[0.06] dark:border-white/[0.12]'
+                    : 'text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2]'
+                )}
+              >
+                <BookOpen className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CDFF45]" />
+                <span>Guide</span>
               </Link>
             </nav>
           )}
@@ -154,6 +166,17 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
                   <span className="inline-flex items-center gap-2">
                     <Smartphone className="w-4 h-4" />
                     Download Android App
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/guide"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-between py-2 text-sm font-medium text-[#101211] dark:text-[#F4F6F2]"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-[#087F5B] dark:text-[#CDFF45]" />
+                    User Guide
                   </span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>

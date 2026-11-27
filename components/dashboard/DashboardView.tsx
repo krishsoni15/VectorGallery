@@ -115,10 +115,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
+            onClick={() => onNavigateTab('guide')}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#FFFFFF] dark:bg-[#191D20] border border-[#DBE0DA] dark:border-white/[0.10] hover:border-[#087F5B]/45 dark:hover:border-[#CDFF45]/45 text-xs sm:text-sm font-medium text-[#101211] dark:text-[#F3F5F1] transition-colors"
+          >
+            <span>User Guide</span>
+          </button>
+          <button
             onClick={() => onNavigateTab('assistant')}
             className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#101211] hover:bg-[#232825] dark:bg-white/[0.08] dark:hover:bg-white/[0.14] text-xs sm:text-sm font-medium text-[#F3F5F1] transition-colors"
           >
-            <Zap className="w-4 h-4 text-[#D4FF54] dark:text-[#CFFF49]" />
+            <Zap className="w-4 h-4 text-[#D4FF54] dark:text-[#CDFF45]" />
             <span>AI Assistant</span>
           </button>
         </div>
@@ -257,7 +263,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2.5">
             {stats.recent_files.map((file: any) => {
               const displayName = file.original_name || file.name || 'Vault memory'
               const thumbKey = String(file.thumbnail_url || file.id)
@@ -267,34 +273,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div
                   key={file.id}
                   onClick={() => onSelectFile(file)}
-                  className="group rounded-2xl overflow-hidden bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/40 dark:hover:border-[#CFFF49]/45 transition-all cursor-pointer flex flex-col shadow-[0_6px_20px_-14px_rgba(16,18,17,0.12)] dark:shadow-none"
+                  className="group relative aspect-square rounded-xl overflow-hidden bg-[#FFFFFF] dark:bg-[#111416] border border-[#DDE2DC]/70 dark:border-white/[0.07] hover:border-[#101211]/40 dark:hover:border-[#CDFF45]/45 transition-all cursor-pointer"
                 >
                   {canRenderImg ? (
                     <>
-                      <div className="relative aspect-square w-full overflow-hidden bg-[#E7E9E5] dark:bg-[#090B0A]">
-                        <img
-                          src={file.thumbnail_url}
-                          alt={displayName}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                          loading="lazy"
-                          onError={() =>
-                            setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
-                          }
-                        />
-                      </div>
-                      <div className="px-2.5 py-2 border-t border-[#DDE2DC] dark:border-white/[0.06]">
-                        <p className="text-[11px] font-medium text-[#101211] dark:text-[#F3F5F1] truncate">
-                          {displayName}
-                        </p>
-                        <p className="text-[9.5px] text-[#626B64] dark:text-[#9AA69E] font-mono mt-0.5">
+                      <img
+                        src={file.thumbnail_url}
+                        alt={displayName}
+                        className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+                        onError={() =>
+                          setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
+                        }
+                      />
+                      <div className="photo-overlay pointer-events-none absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/75 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <p className="text-[10.5px] font-medium text-white truncate">{displayName}</p>
+                        <p className="text-[9px] text-zinc-200 font-mono">
                           {new Date(file.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </>
                   ) : (
-                    <div className="w-full h-full min-h-[172px] flex flex-col justify-between p-3 bg-[#FFFFFF] dark:bg-[#131715]">
-                      <div className="flex-1 rounded-xl bg-[#F2F3F0] dark:bg-[#090B0A] flex items-center justify-center mb-2">
-                        <FileText className="w-7 h-7 text-[#555E58] dark:text-[#9AA69E] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] group-hover:scale-110 transition-all" />
+                    <div className="w-full h-full flex flex-col justify-between p-3 bg-[#FFFFFF] dark:bg-[#111416]">
+                      <div className="flex-1 rounded-lg bg-[#F2F3F0] dark:bg-[#191D20] flex items-center justify-center mb-2">
+                        <FileText className="w-6 h-6 text-[#087F5B] dark:text-[#CDFF45] group-hover:scale-110 transition-transform" />
                       </div>
                       <div>
                         <p className="text-[11px] font-medium text-[#101211] dark:text-[#F3F5F1] truncate">

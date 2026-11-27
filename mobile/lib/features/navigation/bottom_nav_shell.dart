@@ -14,21 +14,32 @@ class BottomNavShell extends StatefulWidget {
 
 class _BottomNavShellState extends State<BottomNavShell> {
   int _currentIndex = 0;
+  String _filesCategoryFilter = 'all';
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    FilesScreen(),
-    ChatScreen(),
-    SearchScreen(),
-    ProfileScreen(),
-  ];
+  void _openTabWithCategory(int tabIndex, [String category = 'all']) {
+    setState(() {
+      _currentIndex = tabIndex;
+      _filesCategoryFilter = category;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      HomeScreen(
+        onOpenCategory: (cat) => _openTabWithCategory(1, cat),
+        onOpenTab: (idx) => _openTabWithCategory(idx),
+      ),
+      FilesScreen(initialCategory: _filesCategoryFilter),
+      const ChatScreen(),
+      const SearchScreen(),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -36,27 +47,27 @@ class _BottomNavShellState extends State<BottomNavShell> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            activeIcon: Icon(Icons.home_rounded),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.folder_outlined),
-            activeIcon: Icon(Icons.folder),
-            label: 'Files',
+            icon: Icon(Icons.photo_library_outlined),
+            activeIcon: Icon(Icons.photo_library_rounded),
+            label: 'Library',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.auto_awesome_outlined),
             activeIcon: Icon(Icons.auto_awesome),
-            label: 'AI Chat',
+            label: 'Assistant',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
+            icon: Icon(Icons.search_rounded),
+            activeIcon: Icon(Icons.manage_search_rounded),
             label: 'Search',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
+            activeIcon: Icon(Icons.settings_rounded),
             label: 'Settings',
           ),
         ],
