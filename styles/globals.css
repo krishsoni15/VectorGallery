@@ -544,16 +544,16 @@ html.light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 .prose-chat ol { padding-left: 1.25em; margin-bottom: 0.5em; }
 .prose-chat li { margin-bottom: 0.25em; line-height: 1.6; }
 .prose-chat code {
-  background: rgba(11, 13, 12, 0.65);
+  background: var(--vm-surface-2);
   padding: 0.15em 0.4em;
   border-radius: 4px;
   font-size: 0.88em;
   font-family: var(--font-mono);
-  color: #C4EDE1;
+  color: var(--vm-text);
   border: 1px solid var(--vm-border);
 }
 .prose-chat pre {
-  background: #0B0D0C;
+  background: #101211;
   border: 1px solid var(--vm-border);
   border-radius: 8px;
   padding: 0.75em 1em;
@@ -564,16 +564,22 @@ html.light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: transparent;
   border: none;
   padding: 0;
-  color: #C4EDE1;
+  color: #E7E9E5;
 }
 .prose-chat strong {
-  color: #58D6A8;
+  color: #087F5B;
   font-weight: 700;
 }
+html.dark .prose-chat strong {
+  color: #CFFF49;
+}
 .prose-chat a {
-  color: #58D6A8;
+  color: #087F5B;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+html.dark .prose-chat a {
+  color: #39D9A0;
 }
 .prose-chat blockquote {
   border-left: 3px solid rgba(8, 127, 91, 0.4);
@@ -709,202 +715,22 @@ html.light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SCOPED APP & ACCOUNT LIGHT MODE (.vm-app-shell)
-   Strictly scoped to /app and /account so .vg-shell stays untouched
+   APP MEDIA OVERLAYS & LIGHTBOX UTILITIES (.vm-app-shell)
+   Components handle Liquid Silver (light) & Liquid Carbon (dark) directly.
    ═══════════════════════════════════════════════════════════ */
-html.light .vm-app-shell,
-html.light .vm-app-shell main,
-html.light .vm-app-shell [class*="bg-[#090B0A]"],
-html.light .vm-app-shell [class*="bg-[#090A0D]"],
-html.light .vm-app-shell [class*="bg-[#0A0C0F]"],
-html.light .vm-app-shell [class*="bg-[#0A0C10]"],
-html.light .vm-app-shell [class*="bg-[#0B0D12]"],
-html.light .vm-app-shell [class*="bg-slate-950"] {
-  background-color: var(--vm-bg) !important;
-  color: var(--vm-text) !important;
+.vm-app-shell .photo-overlay,
+.vm-app-shell .photo-overlay *,
+.vm-app-shell .photo-overlay-pill {
+  color: #FFFFFF;
 }
 
-html.light .vm-app-shell aside,
-html.light .vm-app-shell header,
-html.light .vm-app-shell nav,
-html.light .vm-app-shell [class*="bg-[#131715]"],
-html.light .vm-app-shell [class*="bg-[#181C1A]"],
-html.light .vm-app-shell [class*="bg-[#0E1015]"],
-html.light .vm-app-shell [class*="bg-[#0C0E14]"],
-html.light .vm-app-shell [class*="bg-[#0F1117]"],
-html.light .vm-app-shell [class*="bg-[#12141A]"],
-html.light .vm-app-shell [class*="bg-[#12141C]"],
-html.light .vm-app-shell [class*="bg-[#13151D]"],
-html.light .vm-app-shell [class*="bg-[#13161F]"],
-html.light .vm-app-shell [class*="bg-[#14161C]"],
-html.light .vm-app-shell [class*="bg-slate-900"],
-html.light .vm-app-shell [class*="bg-zinc-900"],
-html.light .vm-app-shell [class*="bg-zinc-950"] {
-  background-color: var(--vm-surface) !important;
-  border-color: var(--vm-border) !important;
-  color: var(--vm-text) !important;
+.vm-app-shell .vg-cta-lime {
+  background-color: #D4FF54;
+  color: #101211;
 }
-
-html.light .vm-app-shell [class*="bg-white/"],
-html.light .vm-app-shell [class*="bg-slate-800"],
-html.light .vm-app-shell [class*="bg-zinc-800"] {
-  background-color: var(--vm-surface-2) !important;
-  border-color: var(--vm-border) !important;
-}
-
-html.light .vm-app-shell [class*="hover:bg-white/"]:hover,
-html.light .vm-app-shell [class*="hover:bg-slate-800"]:hover,
-html.light .vm-app-shell [class*="hover:bg-slate-900"]:hover {
-  background-color: #E9EBE5 !important;
-}
-
-html.light .vm-app-shell [class*="from-emerald-950"] {
-  background: linear-gradient(90deg, #E9EBE5 0%, #F0F1EC 55%, #FAFAF7 100%) !important;
-  border-color: var(--vm-border) !important;
-}
-
-html.light .vm-app-shell [class*="border-white/"],
-html.light .vm-app-shell [class*="border-slate-800"],
-html.light .vm-app-shell [class*="border-slate-700"],
-html.light .vm-app-shell [class*="border-zinc-700"],
-html.light .vm-app-shell [class*="divide-white/"] > * + * {
-  border-color: var(--vm-border) !important;
-}
-
-html.light .vm-app-shell .text-white,
-html.light .vm-app-shell [class*="text-zinc-100"],
-html.light .vm-app-shell [class*="text-zinc-200"],
-html.light .vm-app-shell [class*="text-slate-100"],
-html.light .vm-app-shell [class*="text-slate-200"],
-html.light .vm-app-shell [class*="text-[#F4F5F7]"],
-html.light .vm-app-shell [class*="text-[#D4D4D8]"] {
-  color: var(--vm-text) !important;
-}
-
-html.light .vm-app-shell [class*="text-zinc-300"],
-html.light .vm-app-shell [class*="text-zinc-400"],
-html.light .vm-app-shell [class*="text-slate-300"],
-html.light .vm-app-shell [class*="text-slate-400"] {
-  color: var(--vm-text-muted) !important;
-}
-
-html.light .vm-app-shell [class*="text-zinc-500"],
-html.light .vm-app-shell [class*="text-zinc-600"],
-html.light .vm-app-shell [class*="text-slate-500"] {
-  color: var(--vm-text-dim) !important;
-}
-
-html.light .vm-app-shell [class*="text-emerald-300"],
-html.light .vm-app-shell [class*="text-emerald-400"],
-html.light .vm-app-shell [class*="text-teal-300"],
-html.light .vm-app-shell [class*="text-teal-400"] {
-  color: var(--vm-accent) !important;
-}
-
-html.light .vm-app-shell [class*="bg-emerald-500/"] {
-  background-color: rgba(8, 127, 91, 0.12) !important;
-}
-
-html.light .vm-app-shell [class*="border-emerald-500/"] {
-  border-color: rgba(8, 127, 91, 0.28) !important;
-}
-
-html.light .vm-app-shell [class*="from-white"][class*="bg-clip-text"] {
-  background-image: linear-gradient(to right, #181C19, #626B64, #087F5B) !important;
-  color: transparent !important;
-}
-
-html.light .vm-app-shell input,
-html.light .vm-app-shell textarea,
-html.light .vm-app-shell select {
-  background-color: var(--vm-surface-input) !important;
-  color: var(--vm-text) !important;
-  border-color: var(--vm-border) !important;
-}
-
-html.light .vm-app-shell input::placeholder,
-html.light .vm-app-shell textarea::placeholder {
-  color: var(--vm-text-dim) !important;
-}
-
-html.light .vm-app-shell kbd {
-  background-color: var(--vm-surface-2) !important;
-  border-color: var(--vm-border) !important;
-  color: var(--vm-text-muted) !important;
-}
-
-html.light .vm-app-shell header button[class*="rounded-full"]:not(.bg-emerald-600):not(.bg-emerald-500) {
-  background-color: var(--vm-surface-2) !important;
-  border-color: var(--vm-border) !important;
-  color: var(--vm-text-muted) !important;
-}
-
-html.light .vm-app-shell .vm-doc-fallback {
-  background-color: var(--vm-surface-2) !important;
-  background-image: none !important;
-  border-color: var(--vm-border) !important;
-  color: var(--vm-text) !important;
-}
-
-/* Protected solid CTAs, segment dots, photo overlays & dark lightbox */
-html.light .vm-app-shell .bg-emerald-600,
-html.light .vm-app-shell .bg-emerald-500,
-html.light .vm-app-shell .bg-red-600,
-html.light .vm-app-shell [class*="from-emerald-500"] {
-  background-color: #087F5B !important;
-  color: #FFFFFF !important;
-}
-html.light .vm-app-shell .bg-red-600 {
-  background-color: #DC2626 !important;
-}
-html.light .vm-app-shell .bg-emerald-600 *,
-html.light .vm-app-shell .bg-emerald-500 *,
-html.light .vm-app-shell .bg-red-600 *,
-html.light .vm-app-shell [class*="from-emerald-500"] * {
-  color: #FFFFFF !important;
-}
-
-html.light .vm-app-shell .vg-cta-lime,
-html.light .vm-app-shell .vg-cta-lime * {
-  background-color: #D4FF54 !important;
-  color: #101211 !important;
-}
-
-html.light .vm-app-shell .bg-rose-500 { background-color: #F43F5E !important; }
-html.light .vm-app-shell .bg-blue-500 { background-color: #3B82F6 !important; }
-html.light .vm-app-shell .bg-purple-500 { background-color: #8B5CF6 !important; }
-html.light .vm-app-shell .bg-pink-500 { background-color: #EC4899 !important; }
-html.light .vm-app-shell .bg-emerald-400 { background-color: #10B981 !important; }
-
-html.light .vm-app-shell .photo-overlay,
-html.light .vm-app-shell .photo-overlay *,
-html.light .vm-app-shell .photo-overlay-pill {
-  color: #FFFFFF !important;
-}
-
-html.light .vm-app-shell .fixed.inset-0[class*="bg-black/70"],
-html.light .vm-app-shell .fixed.inset-0[class*="bg-black/75"],
-html.light .vm-app-shell .fixed.inset-0[class*="bg-black/80"] {
-  background-color: rgba(24, 28, 25, 0.45) !important;
-}
-
-html.light .vm-app-shell .fixed.inset-0[class*="bg-black/90"],
-html.light .vm-app-shell .fixed.inset-0[class*="bg-black/95"] {
-  background-color: rgba(11, 13, 12, 0.92) !important;
-}
-html.light .vm-app-shell [class*="bg-black/90"] .text-white,
-html.light .vm-app-shell [class*="bg-black/95"] .text-white {
-  color: #F2F3EF !important;
-}
-html.light .vm-app-shell [class*="bg-black/90"] aside,
-html.light .vm-app-shell [class*="bg-black/95"] aside {
-  background-color: var(--vm-surface) !important;
-  color: var(--vm-text) !important;
-  border-color: var(--vm-border) !important;
-}
-html.light .vm-app-shell [class*="bg-black/90"] aside .text-white,
-html.light .vm-app-shell [class*="bg-black/95"] aside .text-white {
-  color: var(--vm-text) !important;
+html.dark .vm-app-shell .vg-cta-lime {
+  background-color: #CFFF49;
+  color: #090B0A;
 }
 
 /* Reduced Motion */

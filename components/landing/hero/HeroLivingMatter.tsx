@@ -92,23 +92,23 @@ export function HeroLivingMatter() {
         className="pointer-events-none absolute inset-0 z-[2] vg-grain opacity-30"
       />
 
-      {/* ZONE 1: Pure Studio Upper Horizon Shelf wrapping VECTORGALLERY. cleanly above all lower UI text */}
-      <div className="relative z-10 w-full rounded-b-[28px] sm:rounded-b-[40px] lg:rounded-b-[48px] bg-[#FFFFFF] dark:bg-[#090B0A] shadow-[0_18px_48px_-28px_rgba(16,18,17,0.12)] dark:shadow-[0_24px_56px_-26px_rgba(0,0,0,0.82)]">
+      {/* ZONE 1: Seamless Pure Studio Upper Horizon Shelf wrapping VECTORGALLERY. cleanly above all lower UI text */}
+      <div className="relative z-10 w-full rounded-b-[28px] sm:rounded-b-[38px] lg:rounded-b-[44px] bg-[#FFFFFF] dark:bg-[#090B0A] shadow-[0_12px_36px_-26px_rgba(16,18,17,0.08)] dark:shadow-[0_18px_42px_-24px_rgba(0,0,0,0.65)]">
         <div
-          className={`${VG_LAYOUT.containers.heroStage} relative pt-3 sm:pt-5 lg:pt-4 xl:pt-5 2xl:pt-7 pb-4 sm:pb-5 lg:pb-5 xl:pb-6 2xl:pb-7`}
+          className={`${VG_LAYOUT.containers.heroStage} relative pt-2 sm:pt-3 lg:pt-3 xl:pt-4 2xl:pt-6 pb-4 sm:pb-5 lg:pb-5 xl:pb-6 2xl:pb-7`}
         >
-          {/* Ambient optical caustic bounce & sculptural occlusion right behind where the sphere overlaps */}
+          {/* Minimalist ambient optical bounce directly behind overlapping sphere center */}
           <div
             aria-hidden="true"
-            className="pointer-events-none hidden lg:block absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[10%] w-[52%] h-[96%] z-[15] rounded-full blur-3xl opacity-85 dark:opacity-100"
+            className="pointer-events-none hidden lg:block absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[12%] w-[36%] h-[78%] z-[15] rounded-full blur-3xl opacity-55 dark:opacity-65"
             style={{
               background:
-                'radial-gradient(ellipse at 50% 70%, rgba(207,255,73,0.22) 0%, rgba(16,18,17,0.10) 42%, transparent 74%)',
+                'radial-gradient(ellipse at 50% 72%, rgba(207,255,73,0.14) 0%, rgba(16,18,17,0.05) 45%, transparent 74%)',
             }}
           />
 
           <motion.div
-            initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
+            initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.02, ease: VG_MOTION.ease }}
             style={reduced ? undefined : { x: wordShiftX, y: wordShiftY }}
@@ -123,14 +123,7 @@ export function HeroLivingMatter() {
                 letterSpacing: VG_TYPOGRAPHY.scale.monumentalWordmark.letterSpacing,
               }}
             >
-              {/* Soft recessed relief echo behind main wordmark for architectural Z-depth */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-0 translate-y-[4px] lg:translate-y-[6px] text-[#101211]/[0.07] dark:text-[#CFFF49]/[0.08] blur-[1px]"
-              >
-                VECTORGALLERY.
-              </span>
-              <span className="relative inline-block py-[0.04em] -my-[0.04em] bg-gradient-to-b from-[#080A09] via-[#151917] to-[#434C48] dark:from-[#FFFFFF] dark:via-[#E2E9E1] dark:to-[#6C7771] bg-clip-text text-transparent">
+              <span className="relative inline-block py-[0.04em] -my-[0.04em] bg-gradient-to-b from-[#0E100F] via-[#171B19] to-[#2B312E] dark:from-[#FFFFFF] dark:via-[#F3F5F1] dark:to-[#C6CFCA] bg-clip-text text-transparent">
                 VECTORGALLERY
               </span>
               <span className="relative text-[#101211] dark:text-[#CFFF49]">.</span>
@@ -139,39 +132,39 @@ export function HeroLivingMatter() {
         </div>
       </div>
 
-      {/* ZONE 2: Lower Atmospheric Stage — enlarged Memory Sphere rises over Zone 1 while text stays cleanly below seam */}
+      {/* ZONE 2: Lower Atmospheric Stage — Goldilocks Memory Sphere rising across Zone 1 while text stays cleanly balanced */}
       <div
         className={`${VG_LAYOUT.containers.heroStage} relative z-20 flex-1 flex flex-col justify-between pt-4 sm:pt-6 lg:pt-6 xl:pt-8 2xl:pt-10 pb-6 sm:pb-8 lg:pb-8 xl:pb-10 2xl:pb-12`}
       >
         {/* Mobile/Tablet Sphere placement cleanly bridging shelf horizon above stacked info */}
-        <div className="lg:hidden relative z-20 -mt-8 sm:-mt-12 mb-3 flex justify-center pointer-events-none">
+        <div className="lg:hidden relative z-20 -mt-7 sm:-mt-10 mb-3 flex justify-center pointer-events-none">
           <MemorySphereCanvas
             mode="hero"
             priority
-            className="w-[min(92vw,345px)] sm:w-[465px] md:w-[540px]"
+            className="w-[min(86vw,320px)] sm:w-[410px] md:w-[490px]"
           />
         </div>
 
-        {/* Desktop Monumental Floating Sculpture Layer — rises boldly across shelf seam into VECTORGALLERY. */}
+        {/* Desktop Balanced Floating Sculpture Layer — Goldilocks proportion with open whitespace around side UI */}
         <motion.div
           style={reduced ? undefined : { x: sphereShiftX, y: sphereShiftY }}
-          className="hidden lg:flex pointer-events-none absolute inset-x-0 top-0 -mt-[78px] xl:-mt-[96px] 2xl:-mt-[114px] justify-center z-20 will-change-transform"
+          className="hidden lg:flex pointer-events-none absolute inset-x-0 top-0 -mt-[56px] xl:-mt-[70px] 2xl:-mt-[88px] justify-center z-20 will-change-transform"
         >
           <MemorySphereCanvas
             mode="hero"
             priority
-            className="w-[clamp(540px,49vw,860px)]"
+            className="w-[clamp(440px,38vw,690px)]"
           />
         </motion.div>
 
         {/* Edge-Aligned Studio UI Quadrants safely flanking Sphere & cleanly clear of Zone 1 curve */}
-        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-stretch gap-7 sm:gap-8 lg:gap-4 lg:min-h-[340px] xl:min-h-[415px] 2xl:min-h-[490px]">
+        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-stretch gap-7 sm:gap-8 lg:gap-4 lg:min-h-[325px] xl:min-h-[375px] 2xl:min-h-[450px]">
           {/* LEFT QUADRANT: Core Product Provenance + Promise + Actions */}
           <motion.div
             initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08, ease: VG_MOTION.ease }}
-            className="lg:col-span-4 flex flex-col justify-between gap-6 sm:gap-8 lg:gap-12 xl:gap-16"
+            className="lg:col-span-4 flex flex-col justify-between gap-6 sm:gap-8 lg:gap-10 xl:gap-14"
           >
             {/* Provenance captures + clear product category */}
             <div className="flex items-center gap-3.5 xl:gap-4">

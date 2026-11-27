@@ -304,16 +304,17 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           </div>
         )}
 
-        {/* ─── Right Info Drawer (Google Photos style) ─── */}
+        {/* ─── Right Info Drawer ─── */}
         {showInfo && (
-          <aside className="absolute right-0 top-16 bottom-0 w-full sm:w-96 bg-[#0E1015]/95 border-l border-white/[0.08] backdrop-blur-2xl z-20 flex flex-col p-6 space-y-6 overflow-y-auto custom-scrollbar animate-slideInRight shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-              <span className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5 text-emerald-400" /> File Details & Memory
+          <aside className="absolute right-0 top-16 bottom-0 w-full sm:w-96 bg-[#FFFFFF] dark:bg-[#131715] border-l border-[#DDE2DC] dark:border-white/[0.08] z-30 flex flex-col p-6 space-y-6 overflow-y-auto custom-scrollbar animate-slideInRight shadow-2xl text-[#101211] dark:text-[#F3F5F1]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#DDE2DC] dark:border-white/[0.08]">
+              <span className="text-xs font-bold text-[#101211] dark:text-[#F3F5F1] uppercase tracking-wider flex items-center gap-1.5">
+                <Info className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" /> File Details &amp; Memory
               </span>
               <button
                 onClick={() => setShowInfo(false)}
-                className="p-1 text-zinc-400 hover:text-white transition-colors"
+                aria-label="Close file details"
+                className="p-1.5 rounded-full text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -321,16 +322,16 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 
             {/* Quick Ask AI CTA Card */}
             {onOpenAssistantWithFile && (
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-500/20 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+              <div className="p-4 rounded-2xl bg-[#F2F3F0] dark:bg-white/[0.04] border border-[#DDE2DC] dark:border-white/[0.08] space-y-2.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#087F5B] dark:text-[#CFFF49]">
                   <Zap className="w-3.5 h-3.5" /> AI Digital Memory
                 </div>
-                <p className="text-[11px] text-zinc-300 leading-relaxed">
-                  VectorGallery has indexed this file. You can ask questions about text, dates, prices, or content.
+                <p className="text-[11px] text-[#555E58] dark:text-[#9AA69E] leading-relaxed">
+                  VectorGallery has indexed this file. Ask questions about text, dates, prices, or content.
                 </p>
                 <button
                   onClick={() => onOpenAssistantWithFile(file)}
-                  className="w-full py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  className="vg-cta-lime w-full py-2 px-3 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <MessageSquare className="w-3.5 h-3.5" /> Chat with this file
                 </button>
@@ -340,17 +341,17 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             {/* Extracted Text / OCR Section */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-zinc-300 flex items-center gap-1">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Extracted OCR Text
+                <span className="text-xs font-bold text-[#101211] dark:text-[#F3F5F1] flex items-center gap-1.5">
+                  <CheckCircle className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" /> Extracted OCR Text
                 </span>
                 {file.extracted_text && (
                   <button
                     onClick={handleCopyOcr}
-                    className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors"
+                    className="flex items-center gap-1 text-[11px] text-[#626B64] dark:text-[#9AA69E] hover:text-[#087F5B] dark:hover:text-[#CFFF49] transition-colors"
                   >
                     {copiedText ? (
                       <>
-                        <Check className="w-3 h-3 text-emerald-400" /> Copied
+                        <Check className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" /> Copied
                       </>
                     ) : (
                       <>
@@ -361,7 +362,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                 )}
               </div>
 
-              <div className="p-3 rounded-xl bg-black/60 border border-white/[0.06] text-xs text-zinc-300 font-sans whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto custom-scrollbar">
+              <div className="p-3 rounded-xl bg-[#F2F3F0] dark:bg-[#090B0A] border border-[#DDE2DC] dark:border-white/[0.08] text-xs text-[#101211] dark:text-[#F3F5F1] font-sans whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto custom-scrollbar">
                 {file.extracted_text || 'No text extracted from this file.'}
               </div>
             </div>
@@ -369,34 +370,34 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             {/* AI Summary */}
             {file.metadata?.summary && (
               <div className="space-y-1.5">
-                <span className="text-xs font-bold text-zinc-300">AI Visual Summary</span>
-                <p className="text-xs text-zinc-400 bg-white/[0.02] p-3 rounded-xl border border-white/[0.04] leading-relaxed">
+                <span className="text-xs font-bold text-[#101211] dark:text-[#F3F5F1]">AI Visual Summary</span>
+                <p className="text-xs text-[#555E58] dark:text-[#9AA69E] bg-[#F2F3F0] dark:bg-white/[0.03] p-3 rounded-xl border border-[#DDE2DC] dark:border-white/[0.06] leading-relaxed">
                   {file.metadata.summary}
                 </p>
               </div>
             )}
 
             {/* Technical Metadata */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.06] text-xs">
-              <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span className="text-zinc-500">Category</span>
-                <span className="font-semibold text-zinc-200 capitalize">{file.category}</span>
+            <div className="space-y-3 pt-2 border-t border-[#DDE2DC] dark:border-white/[0.08] text-xs">
+              <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
+                <span className="text-[#626B64] dark:text-[#9AA69E]">Category</span>
+                <span className="font-semibold text-[#101211] dark:text-[#F3F5F1] capitalize">{file.category}</span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span className="text-zinc-500">MIME Type</span>
-                <span className="font-mono text-zinc-300 text-[11px]">{file.mime_type || 'image/jpeg'}</span>
+              <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
+                <span className="text-[#626B64] dark:text-[#9AA69E]">MIME Type</span>
+                <span className="font-mono text-[#101211] dark:text-[#F3F5F1] text-[11px]">{file.mime_type || 'image/jpeg'}</span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span className="text-zinc-500">File Size</span>
-                <span className="font-mono text-zinc-200">{formatSize(file.size_bytes)}</span>
+              <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
+                <span className="text-[#626B64] dark:text-[#9AA69E]">File Size</span>
+                <span className="font-mono text-[#101211] dark:text-[#F3F5F1]">{formatSize(file.size_bytes)}</span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
-                <span className="text-zinc-500">Uploaded</span>
-                <span className="font-mono text-zinc-300 text-[11px]">{new Date(file.created_at).toLocaleString()}</span>
+              <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
+                <span className="text-[#626B64] dark:text-[#9AA69E]">Uploaded</span>
+                <span className="font-mono text-[#101211] dark:text-[#F3F5F1] text-[11px]">{new Date(file.created_at).toLocaleString()}</span>
               </div>
               <div className="py-1">
-                <span className="text-zinc-500 block mb-1">SHA-256 Hash</span>
-                <span className="font-mono text-[10px] text-zinc-400 break-all bg-white/[0.02] p-2 rounded-lg border border-white/[0.04] block">
+                <span className="text-[#626B64] dark:text-[#9AA69E] block mb-1">SHA-256 Hash</span>
+                <span className="font-mono text-[10px] text-[#555E58] dark:text-[#9AA69E] break-all bg-[#F2F3F0] dark:bg-[#090B0A] p-2 rounded-lg border border-[#DDE2DC] dark:border-white/[0.06] block">
                   {file.sha256_hash || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'}
                 </span>
               </div>

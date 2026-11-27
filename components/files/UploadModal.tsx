@@ -112,15 +112,22 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#0E1015] border border-white/[0.12] p-6 shadow-2xl space-y-5 text-zinc-100">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <UploadCloud className="w-4 h-4 text-emerald-400" /> Upload to VectorGallery
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101211]/45 dark:bg-black/75 backdrop-blur-md animate-fadeIn"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.12] p-6 shadow-2xl space-y-5 text-[#101211] dark:text-[#F3F5F1]"
+      >
+        <div className="flex items-center justify-between pb-3 border-b border-[#DDE2DC] dark:border-white/[0.08]">
+          <h3 className="text-sm font-bold text-[#101211] dark:text-[#F3F5F1] flex items-center gap-2">
+            <UploadCloud className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" /> Upload to VectorGallery
           </h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+            aria-label="Close upload modal"
+            className="p-1.5 rounded-full text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -135,10 +142,10 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           onClick={() => fileInputRef.current?.click()}
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
             dragActive
-              ? 'border-emerald-400 bg-emerald-500/10'
+              ? 'border-[#087F5B] dark:border-[#CFFF49] bg-[#087F5B]/5 dark:bg-[#CFFF49]/10'
               : selectedFile
-              ? 'border-emerald-500/50 bg-[#12141C]'
-              : 'border-white/[0.1] bg-[#12141C]/60 hover:bg-[#12141C]'
+              ? 'border-[#087F5B]/60 dark:border-[#CFFF49]/60 bg-[#F2F3F0] dark:bg-[#181C1A]'
+              : 'border-[#C7CEC6] dark:border-white/[0.14] bg-[#F2F3F0]/65 dark:bg-[#090B0A]/60 hover:bg-[#F2F3F0] dark:hover:bg-[#181C1A]'
           }`}
         >
           <input
@@ -149,25 +156,25 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           />
 
           <div className="space-y-3">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-[#FFFFFF] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10] text-[#087F5B] dark:text-[#CFFF49] flex items-center justify-center mx-auto">
               <UploadCloud className="w-6 h-6" />
             </div>
 
             {selectedFile ? (
               <div>
-                <p className="text-sm font-semibold text-emerald-400 truncate max-w-xs mx-auto">
+                <p className="text-sm font-semibold text-[#087F5B] dark:text-[#CFFF49] truncate max-w-xs mx-auto">
                   {selectedFile.name}
                 </p>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • Ready to ingest
+                <p className="text-xs text-[#626B64] dark:text-[#9AA69E] mt-0.5">
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB · Ready to ingest
                 </p>
               </div>
             ) : (
               <div>
-                <p className="text-sm font-semibold text-zinc-200">
+                <p className="text-sm font-semibold text-[#101211] dark:text-[#F3F5F1]">
                   Drag and drop your file here, or browse
                 </p>
-                <p className="text-xs text-zinc-500 mt-1">
+                <p className="text-xs text-[#626B64] dark:text-[#9AA69E] mt-1">
                   Supports PDF, Word, Excel, CSV, Images, Screenshots, TXT, MD (Max 50MB)
                 </p>
               </div>
@@ -178,15 +185,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         {/* Upload Progress Bar */}
         {uploading && (
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
+            <div className="flex items-center justify-between text-xs text-[#555E58] dark:text-[#9AA69E]">
               <span className="flex items-center gap-1.5">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" /> Ingesting & indexing...
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#087F5B] dark:text-[#CFFF49]" /> Ingesting &amp; indexing...
               </span>
               <span className="font-mono">{progress}%</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-[#E7E9E5] dark:bg-white/[0.08] overflow-hidden">
               <div
-                className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
+                className="h-full bg-[#101211] dark:bg-[#CFFF49] transition-all duration-300 rounded-full"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -194,14 +201,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         )}
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-[#087F5B]/10 dark:bg-[#CFFF49]/15 border border-[#087F5B]/25 dark:border-[#CFFF49]/35 text-[#087F5B] dark:text-[#CFFF49] text-xs flex items-center gap-2">
             <CheckCircle className="w-4 h-4 shrink-0" />
             <span>File uploaded and indexed successfully!</span>
           </div>
@@ -212,14 +219,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           <button
             onClick={onClose}
             disabled={uploading}
-            className="px-4 py-2 rounded-xl text-xs text-zinc-400 hover:text-white transition-colors"
+            className="px-4 py-2 rounded-full text-xs text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleUpload}
             disabled={!selectedFile || uploading}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-white transition-all shadow-sm"
+            className="vg-cta-lime flex items-center gap-2 px-5 py-2 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-[#101211] transition-all shadow-sm"
           >
             {uploading ? (
               <>

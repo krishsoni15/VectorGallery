@@ -113,14 +113,17 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/70 backdrop-blur-md animate-fadeIn">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-20 px-4 bg-[#101211]/45 dark:bg-black/75 backdrop-blur-md animate-fadeIn"
+    >
       <div
-        className="relative w-full max-w-2xl rounded-2xl bg-[#0F1117] border border-white/[0.12] shadow-2xl overflow-hidden flex flex-col max-h-[80vh] text-zinc-100"
+        className="relative w-full max-w-2xl rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.12] shadow-2xl overflow-hidden flex flex-col max-h-[80vh] text-[#101211] dark:text-[#F3F5F1]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-white/[0.08] gap-3 bg-[#13151D]">
-          <Search className="w-5 h-5 text-emerald-400 shrink-0" />
+        <div className="flex items-center px-4 py-3.5 border-b border-[#DDE2DC] dark:border-white/[0.08] gap-3 bg-[#FFFFFF] dark:bg-[#181C1A]">
+          <Search className="w-5 h-5 text-[#087F5B] dark:text-[#CFFF49] shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -131,21 +134,22 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
               else setResults([])
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Ask or search: 'AWS screenshot', 'college admission', 'React notes'..."
-            className="flex-1 bg-transparent border-none text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none"
+            placeholder="Ask or search: 'AWS screenshot', 'receipt', 'React notes'..."
+            className="flex-1 bg-transparent border-none text-sm text-[#101211] dark:text-[#F3F5F1] placeholder-[#626B64] dark:placeholder-[#7B867F] focus:outline-none"
           />
-          {loading && <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />}
+          {loading && <Loader2 className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49] animate-spin" />}
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.06] transition-colors"
+            aria-label="Close search"
+            className="p-1.5 rounded-full text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Filter Badges */}
-        <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06] bg-[#0C0E14] text-[11px] overflow-x-auto">
-          <span className="text-zinc-500 font-medium">Filter:</span>
+        <div className="flex items-center gap-2 px-4 py-2 border-b border-[#DDE2DC] dark:border-white/[0.06] bg-[#F2F3F0] dark:bg-[#090B0A]/60 text-[11px] overflow-x-auto no-scrollbar">
+          <span className="text-[#626B64] dark:text-[#9AA69E] font-medium">Filter:</span>
           {['all', 'photos', 'documents', 'screenshots', 'videos'].map((cat) => (
             <button
               key={cat}
@@ -153,10 +157,10 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
                 setCategoryFilter(cat)
                 if (query.trim()) performSearch(query)
               }}
-              className={`px-2.5 py-1 rounded-md capitalize transition-colors ${
+              className={`px-3 py-1 rounded-full capitalize transition-colors ${
                 categoryFilter === cat
-                  ? 'bg-emerald-500/20 text-emerald-300 font-semibold'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]'
+                  ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49] dark:text-[#101211] font-semibold'
+                  : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.06]'
               }`}
             >
               {cat}
@@ -168,7 +172,7 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
         <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
           {results.length > 0 ? (
             <div className="space-y-1.5">
-              <p className="text-[11px] font-mono text-zinc-500 px-2 uppercase tracking-wider">
+              <p className="text-[11px] font-mono text-[#626B64] dark:text-[#9AA69E] px-2 uppercase tracking-wider">
                 Matching Files ({results.length})
               </p>
               {results.map((res) => (
@@ -178,10 +182,10 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
                     onSelectResult(res)
                     onClose()
                   }}
-                  className="flex items-start justify-between p-3 rounded-xl hover:bg-white/[0.05] border border-transparent hover:border-white/[0.08] transition-all cursor-pointer group"
+                  className="flex items-start justify-between p-3 rounded-xl hover:bg-[#F2F3F0] dark:hover:bg-white/[0.05] border border-transparent hover:border-[#DDE2DC] dark:hover:border-white/[0.08] transition-all cursor-pointer group"
                 >
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0 mt-0.5">
+                    <div className="p-2 rounded-lg bg-[#F2F3F0] dark:bg-white/[0.06] text-[#087F5B] dark:text-[#CFFF49] shrink-0 mt-0.5">
                       {res.category === 'photos' || res.category === 'screenshots' ? (
                         <ImageIcon className="w-4 h-4" />
                       ) : (
@@ -189,24 +193,24 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-zinc-200 group-hover:text-emerald-400 transition-colors truncate">
+                      <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors truncate">
                         {res.file_name}
                       </p>
-                      <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-2 leading-relaxed">
+                      <p className="text-[11px] text-[#555E58] dark:text-[#9AA69E] mt-0.5 line-clamp-2 leading-relaxed">
                         {res.snippet}
                       </p>
-                      <div className="flex items-center gap-2 mt-1.5 text-[10px] text-zinc-500">
-                        <span className="capitalize px-1.5 py-0.5 rounded bg-white/[0.04] text-zinc-400 font-medium">
+                      <div className="flex items-center gap-2 mt-1.5 text-[10px] text-[#626B64] dark:text-[#9AA69E]">
+                        <span className="capitalize px-2 py-0.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] font-medium">
                           {res.category}
                         </span>
-                        <span className="text-emerald-400/80 font-mono">
+                        <span className="text-[#087F5B] dark:text-[#CFFF49] font-mono">
                           {res.why_matched}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="shrink-0 flex items-center gap-1.5 text-zinc-600 group-hover:text-emerald-400 transition-colors ml-3 mt-1">
+                  <div className="shrink-0 flex items-center gap-1.5 text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors ml-3 mt-1">
                     <span className="text-[10px] font-mono font-bold">
                       {Math.round(res.relevance_score * 100)}%
                     </span>
@@ -216,14 +220,13 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
               ))}
             </div>
           ) : query.trim() && !loading ? (
-            <div className="p-8 text-center text-zinc-500 text-xs">
+            <div className="p-8 text-center text-[#626B64] dark:text-[#9AA69E] text-xs">
               No matching documents or screenshots found for &quot;{query}&quot;
             </div>
           ) : (
-            /* Suggested & Recent Searches */
             <div className="p-2 space-y-4">
               <div>
-                <p className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <p className="text-[11px] font-mono text-[#626B64] dark:text-[#9AA69E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <Clock className="w-3 h-3" /> Recent Searches
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -234,7 +237,7 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
                         setQuery(rq)
                         performSearch(rq)
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-xs text-zinc-300 border border-white/[0.06] transition-colors"
+                      className="px-3 py-1.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.12] text-xs text-[#101211] dark:text-[#F3F5F1] border border-[#DDE2DC] dark:border-white/[0.08] transition-colors"
                     >
                       {rq}
                     </button>
@@ -243,8 +246,8 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
               </div>
 
               <div>
-                <p className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 text-emerald-400" /> Try Asking
+                <p className="text-[11px] font-mono text-[#626B64] dark:text-[#9AA69E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <Zap className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" /> Try Asking
                 </p>
                 <div className="space-y-1.5">
                   {[
@@ -259,10 +262,10 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
                         setQuery(example)
                         performSearch(example)
                       }}
-                      className="w-full text-left px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-emerald-400 hover:bg-white/[0.04] transition-colors flex items-center justify-between group"
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.05] transition-colors flex items-center justify-between group"
                     >
                       <span>&quot;{example}&quot;</span>
-                      <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-emerald-400 transition-colors" />
+                      <ArrowRight className="w-3 h-3 text-[#626B64] dark:text-[#7B867F] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors" />
                     </button>
                   ))}
                 </div>
@@ -272,11 +275,11 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
         </div>
 
         {/* Footer shortcuts */}
-        <div className="px-4 py-2.5 border-t border-white/[0.06] bg-[#0C0E14] flex items-center justify-between text-[11px] text-zinc-500">
+        <div className="px-4 py-2.5 border-t border-[#DDE2DC] dark:border-white/[0.06] bg-[#F2F3F0] dark:bg-[#090B0A]/70 flex items-center justify-between text-[11px] text-[#626B64] dark:text-[#9AA69E]">
           <span className="flex items-center gap-1.5">
-            <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] font-mono text-zinc-400">Esc</kbd> to close
+            <kbd className="px-1.5 py-0.5 rounded bg-[#FFFFFF] dark:bg-white/[0.08] border border-[#DDE2DC] dark:border-white/[0.10] font-mono text-[#101211] dark:text-[#F3F5F1]">Esc</kbd> to close
           </span>
-          <span className="text-emerald-400/90 font-medium">Hybrid Keyword + Vector Retrieval</span>
+          <span className="text-[#087F5B] dark:text-[#CFFF49] font-medium">Hybrid Keyword + Vector Search</span>
         </div>
       </div>
     </div>

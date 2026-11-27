@@ -66,17 +66,19 @@ function resolveCollectionFiles(col: any, files: any[]): any[] {
   return files.filter((f) => !f.is_trashed).slice(0, 8)
 }
 
+function isCollectionRenderableImage(f: any): boolean {
+  return (
+    Boolean(f?.thumbnail_url) &&
+    (f.category === 'photos' ||
+      f.category === 'screenshots' ||
+      f.mime_type?.startsWith('image/') ||
+      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(f.original_name || ''))
+  )
+}
+
 function resolveCoverImage(col: any, colFiles: any[]): string | null {
   if (col.cover_image) return col.cover_image
-
-  const imageFile = colFiles.find(
-    (f) =>
-      f.thumbnail_url ||
-      f.category === 'photos' ||
-      f.category === 'screenshots' ||
-      /\.(jpg|jpeg|png|webp|gif)$/i.test(f.original_name || '')
-  )
-
+  const imageFile = colFiles.find((f) => isCollectionRenderableImage(f))
   return imageFile ? imageFile.thumbnail_url || null : null
 }
 
@@ -115,6 +117,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
 }) => {
   const [selectedCollection, setSelectedCollection] = useState<any | null>(null)
   const [copiedShare, setCopiedShare] = useState(false)
+  const [brokenCovers, setBrokenCovers] = useState<Record<string, boolean>>({})
 
   // Share collection handler
   const handleShare = async (col: any) => {
@@ -143,32 +146,31 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
     return resolveCollectionFiles(selectedCollection, files)
   }, [selectedCollection, files])
 
-  // ─── 1. ALBUM DETAIL VIEW (Interactive Google Photos Album) ───
+  // ─── 1. ALBUM DETAIL VIEW ───
   if (selectedCollection) {
     const Icon = getCollectionIcon(selectedCollection.type)
-    const _coverUrl = resolveCoverImage(selectedCollection, activeAlbumFiles)
 
     return (
       <div className="p-4 sm:p-6 md:p-8 max-w-7xl 2xl:max-w-[1700px] mx-auto space-y-6 animate-fadeIn">
         {/* Top Sticky Navigation */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] dark:border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-[#DDE2DC] dark:border-white/[0.08]">
           <button
             onClick={() => setSelectedCollection(null)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-semibold text-zinc-300 hover:text-white transition-all shadow-sm group"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] hover:border-[#101211]/35 dark:hover:border-white/[0.2] text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] transition-colors shadow-sm group"
           >
-            <ArrowLeft className="w-4 h-4 text-emerald-400 group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49] group-hover:-translate-x-0.5 transition-transform" />
             <span>Back to Albums</span>
           </button>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleShare(selectedCollection)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-emerald-500/15 border border-white/[0.08] hover:border-emerald-500/30 text-xs font-medium text-zinc-300 hover:text-emerald-300 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] hover:border-[#101211]/35 dark:hover:border-[#CFFF49]/40 text-xs font-medium text-[#101211] dark:text-[#F3F5F1] transition-colors shadow-sm"
             >
               {copiedShare ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-400">Link Copied</span>
+                  <Check className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
+                  <span className="text-[#087F5B] dark:text-[#CFFF49]">Link Copied</span>
                 </>
               ) : (
                 <>
@@ -181,31 +183,31 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
         </div>
 
         {/* Album Header Banner */}
-        <div className="relative rounded-3xl overflow-hidden p-6 sm:p-8 bg-gradient-to-r from-emerald-50 via-white to-teal-50/70 dark:from-emerald-950/40 dark:via-[#0E1015]/90 dark:to-[#0A0C10] border border-zinc-200 dark:border-white/[0.08] shadow-xl">
+        <div className="relative rounded-3xl overflow-hidden p-6 sm:p-8 bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] shadow-sm">
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  <Icon className="w-5 h-5" />
+                <div className="p-2 rounded-xl bg-[#F2F3F0] dark:bg-white/[0.06] text-[#087F5B] dark:text-[#CFFF49] border border-[#DDE2DC] dark:border-white/[0.10]">
+                  <Icon className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">
+                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#087F5B] dark:text-[#CFFF49] font-semibold">
                   {selectedCollection.is_smart ? 'Smart Memory Album' : 'Custom Collection'}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#101211] dark:text-[#F3F5F1] tracking-[-0.03em]">
                 {selectedCollection.name}
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#555E58] dark:text-[#9AA69E] max-w-2xl leading-relaxed">
                 {selectedCollection.description}
               </p>
             </div>
 
             <div className="sm:text-right shrink-0">
-              <div className="inline-block px-3.5 py-1.5 rounded-2xl bg-white/[0.06] border border-white/[0.1] backdrop-blur-md">
-                <span className="text-sm font-bold text-emerald-400 font-mono">
+              <div className="inline-block px-3.5 py-1.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10]">
+                <span className="text-sm font-bold text-[#101211] dark:text-[#CFFF49] font-mono">
                   {activeAlbumFiles.length}
                 </span>{' '}
-                <span className="text-xs text-zinc-300">
+                <span className="text-xs text-[#555E58] dark:text-[#9AA69E]">
                   {activeAlbumFiles.length === 1 ? 'file' : 'items'}
                 </span>
               </div>
@@ -215,43 +217,42 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
 
         {/* Photos Grid in Album */}
         {activeAlbumFiles.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-white/[0.02] border border-white/[0.06] space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+          <div className="p-12 text-center rounded-3xl bg-[#FFFFFF] dark:bg-[#131715] border border-dashed border-[#C7CEC6] dark:border-white/[0.12] space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-[#F2F3F0] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10] text-[#087F5B] dark:text-[#CFFF49] flex items-center justify-center mx-auto">
               <FolderHeart className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-zinc-200">No Items Found in this Album</h3>
-            <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+            <h3 className="text-base font-bold text-[#101211] dark:text-[#F3F5F1]">No Items Found in this Album</h3>
+            <p className="text-xs text-[#626B64] dark:text-[#9AA69E] max-w-sm mx-auto">
               Upload photos or files matching this album&apos;s tags to automatically populate this collection.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
             {activeAlbumFiles.map((file) => {
-              const isMedia =
-                file.thumbnail_url ||
-                file.category === 'photos' ||
-                file.category === 'screenshots' ||
-                /\.(jpg|jpeg|png|webp|gif)$/i.test(file.original_name || '')
+              const canRenderImg = isCollectionRenderableImage(file) && !brokenCovers[String(file.id)]
 
               return (
                 <div
                   key={file.id}
                   onClick={() => onSelectFile && onSelectFile(file)}
-                  className="group relative aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.08] hover:border-emerald-500/50 cursor-pointer transition-all shadow-md hover:shadow-xl hover:scale-[1.02]"
+                  className="group relative aspect-square rounded-2xl overflow-hidden bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/40 dark:hover:border-[#CFFF49]/50 cursor-pointer transition-all shadow-sm hover:shadow-lg"
                 >
-                  {isMedia && file.thumbnail_url ? (
+                  {canRenderImg ? (
                     <img
                       src={file.thumbnail_url}
                       alt={file.original_name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={() =>
+                        setBrokenCovers((prev) => ({ ...prev, [String(file.id)]: true }))
+                      }
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-[#13161F]">
-                      <FileText className="w-8 h-8 text-emerald-400 mb-2 opacity-80" />
-                      <p className="text-xs font-semibold text-zinc-200 truncate w-full px-2">
+                    <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-[#FFFFFF] dark:bg-[#131715]">
+                      <FileText className="w-8 h-8 text-[#087F5B] dark:text-[#CFFF49] mb-2" />
+                      <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] truncate w-full px-2">
                         {file.original_name}
                       </p>
-                      <span className="text-[10px] text-zinc-500 font-mono mt-1">
+                      <span className="text-[10px] text-[#626B64] dark:text-[#9AA69E] font-mono mt-1">
                         {(file.size_bytes / 1024).toFixed(0)} KB
                       </span>
                     </div>
@@ -295,33 +296,33 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
     )
   }
 
-  // ─── 2. COLLECTIONS / ALBUMS OVERVIEW GRID (Google Photos Style) ───
+  // ─── 2. COLLECTIONS / ALBUMS OVERVIEW GRID ───
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-7xl 2xl:max-w-[1700px] mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#DDE2DC] dark:border-white/[0.08]">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white flex items-center gap-2.5 tracking-tight">
-            <FolderHeart className="w-6 h-6 text-emerald-500" /> Albums & Collections
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-[#101211] dark:text-[#F3F5F1] flex items-center gap-2.5 tracking-[-0.03em]">
+            <FolderHeart className="w-5 h-5 text-[#087F5B] dark:text-[#CFFF49]" /> Albums &amp; Collections
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Browse memory albums, festive greetings, recent screenshots, and custom collections.
+          <p className="text-xs sm:text-sm text-[#555E58] dark:text-[#9AA69E] mt-1">
+            Browse memory albums, screenshots, receipts, and custom collections.
           </p>
         </div>
 
         {onCreateCollection && (
           <button
             onClick={onCreateCollection}
-            className="self-start sm:self-auto flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all shadow-[0_0_14px_rgba(16,185,129,0.25)] hover:scale-105"
+            className="vg-cta-lime self-start sm:self-auto flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] text-xs font-semibold transition-all shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>New Album</span>
           </button>
         )}
       </div>
 
       {/* Album Cards Responsive Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
         {collections.map((col) => {
           const colFiles = resolveCollectionFiles(col, files)
           const coverUrl = resolveCoverImage(col, colFiles)
@@ -331,37 +332,40 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
             <div
               key={col.id}
               onClick={() => setSelectedCollection(col)}
-              className="group flex flex-col rounded-3xl overflow-hidden bg-white dark:bg-[#0E1015]/85 border border-zinc-200 dark:border-white/[0.08] hover:border-emerald-500/50 transition-all cursor-pointer shadow-sm hover:shadow-xl hover:scale-[1.01] backdrop-blur-md"
+              className="group flex flex-col rounded-2xl overflow-hidden bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/40 dark:hover:border-[#CFFF49]/45 transition-all cursor-pointer shadow-sm hover:shadow-md"
             >
               {/* Cover Image Container */}
-              <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
-                {coverUrl ? (
+              <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#E7E9E5] dark:bg-[#090B0A] flex items-center justify-center">
+                {coverUrl && !brokenCovers[String(col.id)] ? (
                   <img
                     src={coverUrl}
                     alt={col.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={() =>
+                      setBrokenCovers((prev) => ({ ...prev, [String(col.id)]: true }))
+                    }
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-tr from-emerald-600/10 to-teal-500/10 p-4">
-                    <Icon className="w-10 h-10 text-emerald-500 opacity-80 group-hover:scale-110 transition-transform" />
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-[#F2F3F0] dark:bg-[#090B0A] p-4">
+                    <Icon className="w-9 h-9 text-[#087F5B] dark:text-[#CFFF49] opacity-85 group-hover:scale-110 transition-transform" />
                   </div>
                 )}
 
                 {/* Gradient vignette & Count Pill */}
                 <div className="photo-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-3 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <div className="photo-overlay-pill p-2 rounded-xl bg-black/40 backdrop-blur-md text-emerald-400 border border-white/10 shadow-sm">
-                      <Icon className="w-4 h-4" />
+                    <div className="photo-overlay-pill p-2 rounded-xl bg-black/45 backdrop-blur-md text-[#CFFF49] border border-white/10 shadow-sm">
+                      <Icon className="w-3.5 h-3.5" />
                     </div>
                     {col.is_smart && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/80 text-white font-mono font-bold shadow-sm">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/55 backdrop-blur-md text-[#CFFF49] border border-white/15 font-mono font-semibold">
                         Smart
                       </span>
                     )}
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="photo-overlay-pill text-[11px] font-medium text-white/95 px-2.5 py-0.5 rounded-full bg-black/50 backdrop-blur-md font-mono">
+                    <span className="photo-overlay-pill text-[11px] font-medium text-white px-2.5 py-0.5 rounded-full bg-black/55 backdrop-blur-md font-mono">
                       {colFiles.length} {colFiles.length === 1 ? 'item' : 'items'}
                     </span>
                   </div>
@@ -371,15 +375,15 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
               {/* Card Content */}
               <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
                 <div className="space-y-1">
-                  <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-500 transition-colors">
+                  <h3 className="text-sm sm:text-base font-bold text-[#101211] dark:text-[#F3F5F1] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors">
                     {col.name}
                   </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-[#555E58] dark:text-[#9AA69E] line-clamp-2 leading-relaxed">
                     {col.description}
                   </p>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400 border-t border-zinc-100 dark:border-white/[0.05]">
+                <div className="pt-2.5 flex items-center justify-between text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] border-t border-[#DDE2DC] dark:border-white/[0.06]">
                   <span>Explore album</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>

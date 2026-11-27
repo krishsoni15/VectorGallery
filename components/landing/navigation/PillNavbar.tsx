@@ -20,7 +20,6 @@ const NAV_LINKS = [
   { href: '#search', label: 'Search' },
   { href: '#showcase', label: 'Workspace' },
   { href: '#mobile', label: 'Mobile' },
-  { href: '#privacy', label: 'Open Source' },
 ]
 
 /**
@@ -52,17 +51,17 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300 backdrop-blur-2xl backdrop-saturate-150',
+        'sticky top-0 z-50 w-full transition-all duration-300',
         scrolled
-          ? 'bg-[#FFFFFF]/78 dark:bg-[#090B0A]/78 border-b border-[#101211]/[0.08] dark:border-white/[0.10] shadow-[0_8px_32px_-14px_rgba(16,18,17,0.14),inset_0_1px_0_rgba(255,255,255,0.75)] dark:shadow-[0_10px_34px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.07)]'
-          : 'bg-[#FFFFFF]/72 dark:bg-[#090B0A]/68 border-b border-[#101211]/[0.05] dark:border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
+          ? 'bg-[#FFFFFF]/82 dark:bg-[#090B0A]/82 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#101211]/[0.08] dark:border-white/[0.10] shadow-[0_8px_28px_-14px_rgba(16,18,17,0.12)] dark:shadow-[0_10px_32px_-14px_rgba(0,0,0,0.65)]'
+          : 'bg-[#FFFFFF] dark:bg-[#090B0A] border-b border-transparent'
       )}
     >
       <a href="#main-content" className="vg-skip-link">
         Skip to main content
       </a>
 
-      <div className={cn(VG_LAYOUT.containers.navbar, 'h-16 lg:h-[76px] flex items-center justify-between gap-4')}>
+      <div className={cn(VG_LAYOUT.containers.navbar, 'h-16 lg:h-[74px] flex items-center justify-between gap-4')}>
         {/* Left: Brand Logo (flush with monumental wordmark left rail) */}
         <Link
           href="/"
@@ -72,53 +71,52 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
           <VectorGalleryLogo variant="animated" size="md" />
         </Link>
 
-        {/* Center: Frosted Liquid-Glass Navigation Pill */}
+        {/* Center: Minimalist Floating Navigation Pill */}
         <nav
           aria-label="Primary navigation"
-          className="hidden lg:inline-flex items-center gap-0.5 xl:gap-1 px-2.5 py-1.5 rounded-full bg-[#FFFFFF]/60 dark:bg-white/[0.06] backdrop-blur-2xl backdrop-saturate-150 border border-[#101211]/[0.09] dark:border-white/[0.14] shadow-[0_6px_24px_-10px_rgba(16,18,17,0.10),inset_0_1px_1px_rgba(255,255,255,0.92)] dark:shadow-[0_8px_28px_-12px_rgba(0,0,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.12)]"
+          className="hidden lg:inline-flex items-center gap-0.5 px-2 py-1 rounded-full bg-[#F2F3F0]/90 dark:bg-white/[0.06] backdrop-blur-xl border border-[#101211]/[0.06] dark:border-white/[0.10]"
         >
           {NAV_LINKS.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              className={cn(VG_COMPONENTS.buttons.ghost, 'text-[13.5px] xl:text-[14px] px-3 xl:px-3.5 whitespace-nowrap')}
+              className={cn(VG_COMPONENTS.buttons.ghost, 'text-[13px] xl:text-[13.5px] px-3 xl:px-3.5 py-1.5 whitespace-nowrap')}
             >
               {item.label}
             </a>
           ))}
         </nav>
 
-        {/* Right Controls: Theme Toggle + Open-Source GitHub + Sign in + Primary CTA */}
-        <div className="flex items-center gap-2 sm:gap-2.5 xl:gap-3 shrink-0">
-          <ThemeSwitch />
-
+        {/* Right Controls: Restrained Utility Actions + Primary CTA */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <a
             href={REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={showStars ? `Open Source on GitHub (${stars} stars)` : 'Open Source Repository on GitHub'}
-            className="hidden md:inline-flex items-center gap-1.5 h-9 lg:h-10 px-3.5 rounded-full text-[12.5px] lg:text-[13px] font-medium bg-[#FFFFFF]/65 dark:bg-white/[0.06] backdrop-blur-xl text-[#101211] dark:text-[#F3F5F1] hover:bg-[#FFFFFF] dark:hover:bg-white/[0.12] border border-[#101211]/[0.10] dark:border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:shadow-none transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
+            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[12.5px] font-medium text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] border border-transparent hover:border-[#101211]/[0.08] dark:hover:border-white/[0.10] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
           >
             <Github className="w-3.5 h-3.5" />
             <span>GitHub</span>
             {showStars && (
-              <span className="inline-flex items-center gap-1 pl-1.5 ml-0.5 border-l border-[#101211]/15 dark:border-white/[0.15] font-mono text-[11.5px] text-[#087F5B] dark:text-[#CFFF49]">
-                <Star className="w-3 h-3 fill-current" />
+              <span className="font-mono text-[11px] text-[#087F5B] dark:text-[#CFFF49]">
                 {stars}
               </span>
             )}
           </a>
 
+          <ThemeSwitch />
+
           <Link
             href="/login"
-            className="hidden sm:inline-flex items-center h-9 lg:h-10 px-3.5 lg:px-4 rounded-full text-[13.5px] xl:text-[14px] font-medium text-[var(--vg-ink)] hover:bg-[#101211]/[0.05] dark:hover:bg-white/[0.08] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
+            className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-full text-[13px] font-medium text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
           >
             Sign in
           </Link>
 
           <Link
             href="/app"
-            className={cn(VG_COMPONENTS.buttons.primarySm, 'hidden sm:inline-flex whitespace-nowrap')}
+            className={cn(VG_COMPONENTS.buttons.primarySm, 'hidden sm:inline-flex h-9 lg:h-9 px-4 lg:px-5 whitespace-nowrap')}
           >
             <span>Get started</span>
             <ArrowRight className="w-3.5 h-3.5" />

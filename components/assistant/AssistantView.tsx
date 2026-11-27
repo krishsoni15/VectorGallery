@@ -47,6 +47,8 @@ interface Conversation {
 
 interface AssistantViewProps {
   onOpenFile: (fileId: string) => void
+  initialPrompt?: string | null
+  onConsumedPrompt?: () => void
 }
 
 /**
@@ -75,7 +77,7 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return (
-          <strong key={i} className="font-semibold text-emerald-300 dark:text-emerald-400">
+          <strong key={i} className="font-semibold text-[#087F5B] dark:text-[#CFFF49]">
             {part.slice(2, -2)}
           </strong>
         )
@@ -84,7 +86,7 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
         return (
           <code
             key={i}
-            className="px-1.5 py-0.5 rounded bg-black/25 dark:bg-white/10 text-emerald-400 font-mono text-[11px]"
+            className="px-1.5 py-0.5 rounded bg-[#F2F3F0] dark:bg-white/10 text-[#087F5B] dark:text-[#CFFF49] font-mono text-[11px]"
           >
             {part.slice(1, -1)}
           </code>
@@ -106,7 +108,7 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
     if (trimmed.startsWith('### ')) {
       flushList()
       elements.push(
-        <h4 key={`h4-${idx}`} className="font-bold text-sm text-emerald-400 mt-2 mb-1">
+        <h4 key={`h4-${idx}`} className="font-bold text-sm text-[#087F5B] dark:text-[#CFFF49] mt-2 mb-1">
           {renderInline(trimmed.slice(4))}
         </h4>
       )
@@ -115,7 +117,7 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
     if (trimmed.startsWith('## ')) {
       flushList()
       elements.push(
-        <h3 key={`h3-${idx}`} className="font-bold text-base text-zinc-100 mt-2.5 mb-1">
+        <h3 key={`h3-${idx}`} className="font-bold text-base text-[#101211] dark:text-[#F3F5F1] mt-2.5 mb-1">
           {renderInline(trimmed.slice(3))}
         </h3>
       )
@@ -138,7 +140,7 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
       flushList()
       elements.push(
         <div key={`num-${idx}`} className="flex items-start gap-2 text-xs sm:text-sm my-0.5 leading-relaxed">
-          <span className="font-mono text-emerald-400 font-bold shrink-0">{numMatch[1]}.</span>
+          <span className="font-mono text-[#087F5B] dark:text-[#CFFF49] font-bold shrink-0">{numMatch[1]}.</span>
           <div>{renderInline(numMatch[2])}</div>
         </div>
       )
@@ -154,10 +156,14 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
   })
 
   flushList()
-  return <div className="space-y-1.5 text-zinc-200">{elements}</div>
+  return <div className="space-y-1.5 text-[#101211] dark:text-[#F3F5F1]">{elements}</div>
 }
 
-export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
+export const AssistantView: React.FC<AssistantViewProps> = ({
+  onOpenFile,
+  initialPrompt,
+  onConsumedPrompt,
+}) => {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -185,9 +191,20 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
     fetchConversations()
   }, [])
 
-  // Auto-scroll on new messages or streaming
+  // Prefill prompt when launched directly from a file preview
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (initialPrompt) {
+      setInput(initialPrompt)
+      setTimeout(() => textareaRef.current?.focus(), 60)
+      onConsumedPrompt?.()
+    }
+  }, [initialPrompt, onConsumedPrompt])
+
+  // Auto-scroll only when a conversation has messages or is loading
+  useEffect(() => {
+    if (messages.length > 0 || loading) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages, loading])
 
   // 2. Load Conversation History
@@ -403,37 +420,37 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
   // Curated VectorGallery Starter Prompts
   const starterCards = [
     {
-      emoji: '🖼️',
+      tag: 'Photos',
       title: 'Explore Photo Moments',
       desc: 'Find photography and albums organized automatically by capture date',
       query: 'Find my recent high-resolution photos and visual highlights',
     },
     {
-      emoji: '📄',
+      tag: 'Docs',
       title: 'Summarize Documents',
       desc: 'Extract key insights, totals, and summaries from uploaded PDFs',
       query: 'Summarize my uploaded documents, reports, and receipts',
     },
     {
-      emoji: '📱',
+      tag: 'OCR',
       title: 'Recent Screenshots',
       desc: 'Search text, receipts, and phone captures indexed with OCR',
       query: 'Find my recent screenshots and photos containing extracted text',
     },
     {
-      emoji: '📊',
+      tag: 'Index',
       title: 'Library Overview',
       desc: 'Check storage usage, indexed files, and memory stats',
       query: 'What files are stored in my personal cloud memory?',
     },
     {
-      emoji: '🔤',
+      tag: 'Notes',
       title: 'Multilingual OCR Notes',
       desc: 'Search scanned handwritten notes and multilingual text documents',
       query: 'Find files containing scanned handwritten notes or multilingual text',
     },
     {
-      emoji: '🔒',
+      tag: 'Sync',
       title: 'Vault Security Status',
       desc: 'Review encrypted vault health and connected backup devices',
       query: 'Check my vault backup status, device sync, and storage quota',
@@ -441,29 +458,29 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
   ]
 
   const quickChips = [
-    { label: '🖼️ Recent Photos', query: 'Find my recent high-resolution photos and visual highlights' },
-    { label: '📄 Summarize Documents', query: 'Summarize my uploaded documents, reports, and receipts' },
-    { label: '📱 Search Screenshots', query: 'Find my recent screenshots and photos containing extracted text' },
-    { label: '📊 Storage Stats', query: 'What files are stored in my personal cloud memory?' },
+    { label: 'Recent Photos', query: 'Find my recent high-resolution photos and visual highlights' },
+    { label: 'Summarize Docs', query: 'Summarize my uploaded documents, reports, and receipts' },
+    { label: 'Search OCR', query: 'Find my recent screenshots and photos containing extracted text' },
+    { label: 'Storage Stats', query: 'What files are stored in my personal cloud memory?' },
   ]
 
   const activeConversationTitle = conversations.find((c) => c.id === activeConversationId)?.title
 
   return (
-    <div className="flex h-full w-full max-w-7xl 2xl:max-w-[1700px] mx-auto p-2 sm:p-4 md:p-6 gap-3 sm:gap-4 md:gap-6 overflow-hidden">
+    <div className="flex h-full w-full max-w-7xl 2xl:max-w-[1700px] mx-auto p-3 sm:p-5 md:p-6 gap-4 md:gap-6 overflow-hidden">
       {/* ─── Collapsible Left Sidebar: Saved Inquiries ─── */}
       <div
         className={`${
-          sidebarOpen ? 'w-64 sm:w-72 flex' : 'hidden'
-        } flex-col rounded-2xl bg-[#0E1015]/85 border border-white/[0.08] p-3 space-y-3 shrink-0 backdrop-blur-xl transition-all shadow-lg`}
+          sidebarOpen ? 'hidden md:flex w-64 lg:w-72' : 'hidden'
+        } flex-col rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] p-3 space-y-3 shrink-0 shadow-sm`}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between px-2 pt-1 pb-1 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-2 pt-1 pb-2 border-b border-[#DDE2DC] dark:border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs font-bold text-zinc-200 tracking-tight">Inquiries</span>
+            <MessageSquare className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" />
+            <span className="text-xs font-bold text-[#101211] dark:text-[#F3F5F1] tracking-tight">Inquiries</span>
             {conversations.length > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-mono">
+              <span className="px-1.5 py-0.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.08] text-[#101211] dark:text-[#CFFF49] text-[10px] font-mono">
                 {conversations.length}
               </span>
             )}
@@ -471,14 +488,14 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
           <div className="flex items-center gap-1">
             <button
               onClick={handleNewConversation}
-              className="p-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 transition-colors"
+              className="p-1.5 rounded-lg bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#D4FF54] dark:hover:bg-[#CFFF49] text-[#101211] dark:text-[#F3F5F1] dark:hover:text-[#101211] transition-colors"
               title="New Inquiry / Chat"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-1.5 rounded-lg hover:bg-white/[0.06] text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#F2F3F0] dark:hover:bg-white/[0.06] text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
               title="Collapse Inquiries Sidebar"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -489,21 +506,21 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
         {/* New Chat Primary Pill */}
         <button
           onClick={handleNewConversation}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-emerald-500/15 border border-white/[0.06] hover:border-emerald-500/30 text-xs font-semibold text-zinc-200 hover:text-emerald-300 transition-all shadow-sm group"
+          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.12] border border-[#DDE2DC] dark:border-white/[0.08] text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] transition-colors group"
         >
-          <Plus className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+          <Plus className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
           <span>New Chat</span>
         </button>
 
         {/* Conversations List */}
         <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar pr-1">
           {conversations.length === 0 ? (
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] text-center space-y-2 my-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="p-4 rounded-xl bg-[#F2F3F0]/70 dark:bg-white/[0.02] border border-[#DDE2DC] dark:border-white/[0.06] text-center space-y-2 my-2">
+              <div className="w-8 h-8 rounded-xl bg-[#FFFFFF] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10] text-[#087F5B] dark:text-[#CFFF49] flex items-center justify-center mx-auto">
                 <MessageSquare className="w-4 h-4" />
               </div>
-              <p className="text-xs font-semibold text-zinc-200">No Saved Inquiries</p>
-              <p className="text-[11px] text-zinc-400 leading-normal">
+              <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1]">No Saved Inquiries</p>
+              <p className="text-[11px] text-[#626B64] dark:text-[#9AA69E] leading-normal">
                 Your AI queries and vault searches will be saved here automatically.
               </p>
             </div>
@@ -515,19 +532,19 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
                 <div
                   key={c.id}
                   onClick={() => loadConversation(c.id)}
-                  className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all ${
+                  className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-colors ${
                     isActive
-                      ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border border-transparent'
+                      ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/15 dark:text-[#CFFF49] font-semibold'
+                      : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.05]'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1 mr-1">
-                    <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                    <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#D4FF54] dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#7B867F]'}`} />
                     <span className="truncate">{c.title}</span>
                   </div>
                   <button
                     onClick={(e) => handleDeleteConversation(c.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 text-zinc-500 hover:bg-red-500/10 rounded transition-all shrink-0"
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 text-[#626B64] dark:text-[#9AA69E] rounded transition-all shrink-0"
                     title="Delete Inquiry"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -539,39 +556,34 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
         </div>
 
         {/* Vault Engine Tag */}
-        <div className="pt-2 border-t border-white/[0.04] px-1 flex items-center justify-between text-[10px] text-zinc-500">
+        <div className="pt-2 border-t border-[#DDE2DC] dark:border-white/[0.06] px-1 flex items-center justify-between text-[10px] text-[#626B64] dark:text-[#9AA69E]">
           <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Grounded AI Vault
+            <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#CFFF49]" /> Grounded AI Vault
           </span>
-          <span>v2.0</span>
+          <span className="font-mono">v2.0</span>
         </div>
       </div>
 
       {/* ─── Right: Main Chat Canvas ─── */}
-      <div className="flex-1 flex flex-col h-full min-w-0 rounded-2xl bg-[#090A0D]/50 border border-white/[0.06] overflow-hidden backdrop-blur-md">
+      <div className="flex-1 flex flex-col h-full min-w-0 rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] overflow-hidden shadow-sm">
         {/* Header Toolbar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.07] bg-[#0E1015]/60 backdrop-blur-md shrink-0">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#131715] shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             {!sidebarOpen && (
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-medium text-zinc-300 transition-colors border border-white/[0.06]"
+                className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.12] text-xs font-medium text-[#101211] dark:text-[#F3F5F1] transition-colors border border-[#DDE2DC] dark:border-white/[0.08]"
                 title="Expand Inquiries History"
               >
-                <Sidebar className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="hidden sm:inline">Inquiries</span>
-                {conversations.length > 0 && (
-                  <span className="text-[10px] px-1 rounded-full bg-emerald-500/20 text-emerald-300">
-                    {conversations.length}
-                  </span>
-                )}
+                <Sidebar className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
+                <span>Inquiries</span>
               </button>
             )}
 
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <span className="text-xs sm:text-sm font-semibold text-zinc-100 truncate">
-                {activeConversationTitle || 'VectorGallery Personal Assistant'}
+              <div className="w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#CFFF49] shrink-0" />
+              <span className="text-xs sm:text-sm font-semibold text-[#101211] dark:text-[#F3F5F1] truncate">
+                {activeConversationTitle || 'VectorGallery Assistant'}
               </span>
             </div>
           </div>
@@ -580,7 +592,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
             {messages.length > 0 && (
               <button
                 onClick={handleNewConversation}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-medium transition-colors border border-emerald-500/20 shadow-sm"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.12] text-[#101211] dark:text-[#F3F5F1] text-xs font-medium transition-colors border border-[#DDE2DC] dark:border-white/[0.08]"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Inquiry</span>
@@ -589,63 +601,56 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
           </div>
         </div>
 
-        {/* ─── Messages Canvas or Hero Welcome State ─── */}
-        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-4 custom-scrollbar">
+        {/* ─── Messages Canvas or Minimal Welcome State ─── */}
+        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-4 bg-[#F2F3F0]/55 dark:bg-[#090B0A]/65 custom-scrollbar">
           {messages.length === 0 ? (
-            /* ── Google Photos / Gemini Style Welcome Hero (Single Centerpiece) ── */
-            <div className="h-full flex flex-col justify-center items-center py-6 sm:py-10 max-w-3xl mx-auto space-y-6 text-center animate-fadeIn">
-              {/* Glowing Ambient Brand Logo */}
-              <div className="relative">
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-600 opacity-35 blur-xl animate-pulse" />
-                <img
-                  src="/vectorgallery-icon.svg"
-                  alt="VectorGallery"
-                  className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-3xl shadow-2xl"
-                />
-              </div>
+            <div className="min-h-full flex flex-col justify-center items-center py-8 sm:py-12 max-w-3xl mx-auto space-y-6 text-center animate-fadeIn">
+              <img
+                src="/vectorgallery-icon.svg"
+                alt="VectorGallery"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shadow-sm"
+              />
 
-              {/* Title & Description */}
               <div className="space-y-2 px-2">
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                <h2 className="font-display text-xl sm:text-2xl font-bold tracking-[-0.03em] text-[#101211] dark:text-[#F3F5F1]">
                   Ask VectorGallery
                 </h2>
-                <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
-                  Your private AI digital memory. Search, summarize, and retrieve anything from your personal photos,
-                  handwritten notes, college documents, and screenshots.
+                <p className="text-xs sm:text-sm text-[#555E58] dark:text-[#9AA69E] max-w-xl mx-auto leading-relaxed">
+                  Private digital memory grounded strictly in your uploaded photos, handwritten notes, documents, and screenshots.
                 </p>
                 <div className="flex items-center justify-center flex-wrap gap-2 pt-1">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] text-zinc-300 font-mono">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Grounded in your files
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] text-[10px] text-[#555E58] dark:text-[#9AA69E] font-mono">
+                    <ShieldCheck className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" /> Grounded in your files
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] text-zinc-300 font-mono">
-                    <FileText className="w-3 h-3 text-teal-400" /> Multimodal OCR & Vision
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] text-[10px] text-[#555E58] dark:text-[#9AA69E] font-mono">
+                    <FileText className="w-3 h-3 text-[#087F5B] dark:text-[#39D9A0]" /> OCR &amp; Vision
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] text-zinc-300 font-mono">
-                    <CheckCircle className="w-3 h-3 text-emerald-400" /> Verified citations
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] text-[10px] text-[#555E58] dark:text-[#9AA69E] font-mono">
+                    <CheckCircle className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" /> Verified citations
                   </span>
                 </div>
               </div>
 
-              {/* 2x3 Interactive Starter Cards */}
+              {/* 2x3 Starter Prompts */}
               <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2 text-left">
                 {starterCards.map((card, idx) => (
                   <button
                     key={idx}
                     onClick={() => sendQuery(card.query)}
-                    className="flex flex-col justify-between p-3.5 rounded-2xl bg-white/[0.03] hover:bg-emerald-500/10 border border-white/[0.06] hover:border-emerald-500/30 transition-all group shadow-sm text-left hover:scale-[1.01]"
+                    className="flex flex-col justify-between p-4 rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/40 dark:hover:border-[#CFFF49]/45 transition-all group shadow-sm text-left"
                   >
                     <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{card.emoji}</span>
-                        <h4 className="text-xs font-semibold text-zinc-200 group-hover:text-emerald-400 transition-colors">
-                          {card.title}
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-zinc-400 leading-normal line-clamp-2">
+                      <span className="inline-block text-[10px] font-mono uppercase tracking-wider text-[#087F5B] dark:text-[#CFFF49]">
+                        {card.tag}
+                      </span>
+                      <h4 className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] transition-colors">
+                        {card.title}
+                      </h4>
+                      <p className="text-[11px] text-[#555E58] dark:text-[#9AA69E] leading-normal line-clamp-2">
                         {card.desc}
                       </p>
                     </div>
-                    <div className="pt-2 flex items-center gap-1 text-[10px] font-mono text-emerald-400 opacity-70 group-hover:opacity-100 transition-opacity">
+                    <div className="pt-2.5 flex items-center gap-1 text-[10px] font-mono text-[#555E58] dark:text-[#9AA69E] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors">
                       <span>Ask question</span>
                       <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                     </div>
@@ -667,10 +672,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
                 >
                   {/* Avatar */}
                   <div
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
                       isUser
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-gradient-to-tr from-emerald-600/30 to-teal-500/30 border border-emerald-500/40 text-emerald-400'
+                        ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49] dark:text-[#101211]'
+                        : 'bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.12] text-[#087F5B] dark:text-[#CFFF49]'
                     }`}
                   >
                     {isUser ? <User className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
@@ -678,34 +683,32 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
 
                   {/* Message Bubble */}
                   <div
-                    className={`relative max-w-[88%] sm:max-w-[82%] rounded-2xl px-4 sm:px-5 py-3.5 leading-relaxed space-y-2.5 shadow-md ${
+                    className={`relative max-w-[88%] sm:max-w-[82%] rounded-2xl px-4 sm:px-5 py-3.5 leading-relaxed space-y-2.5 shadow-sm ${
                       isUser
-                        ? 'bg-emerald-600 text-white rounded-tr-sm'
-                        : 'bg-[#12141A] border border-white/[0.08] text-zinc-200 rounded-tl-sm backdrop-blur-md'
+                        ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49] dark:text-[#101211] rounded-tr-sm'
+                        : 'bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] text-[#101211] dark:text-[#F3F5F1] rounded-tl-sm'
                     }`}
                   >
-                    {/* Rendered content */}
                     {isUser ? (
-                      <div className="whitespace-pre-wrap text-xs sm:text-sm">{msg.content}</div>
+                      <div className="whitespace-pre-wrap text-xs sm:text-sm font-medium">{msg.content}</div>
                     ) : (
                       <FormattedMessage content={msg.content} />
                     )}
 
-                    {/* Grounding Source Citations (Under Assistant Response) */}
+                    {/* Grounding Source Citations */}
                     {!isUser && msg.citations && msg.citations.length > 0 && (
-                      <div className="pt-3 mt-2 border-t border-white/[0.08] space-y-2.5">
+                      <div className="pt-3 mt-2 border-t border-[#DDE2DC] dark:border-white/[0.08] space-y-2.5">
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <CheckCircle className="w-3 h-3 text-emerald-400" /> Grounded in {msg.citations.length} Verified Vault File{msg.citations.length > 1 ? 's' : ''}
+                          <p className="text-[10px] font-mono text-[#626B64] dark:text-[#9AA69E] uppercase tracking-wider flex items-center gap-1.5">
+                            <CheckCircle className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" /> Grounded in {msg.citations.length} Verified File{msg.citations.length > 1 ? 's' : ''}
                           </p>
                           {msg.confidence && (
-                            <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 font-mono">
+                            <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10] text-[#087F5B] dark:text-[#CFFF49] font-mono">
                               {msg.confidence} Confidence
                             </span>
                           )}
                         </div>
 
-                        {/* Visual Image Cards if citations contain photos/screenshots */}
                         {msg.citations.some(
                           (c) =>
                             c.thumbnail_url ||
@@ -718,40 +721,37 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
                               <div
                                 key={cite.id}
                                 onClick={() => onOpenFile(cite.file_id)}
-                                className="group flex items-center gap-2.5 p-2 rounded-xl bg-white/[0.04] hover:bg-emerald-500/15 border border-white/[0.06] hover:border-emerald-500/30 transition-all cursor-pointer shadow-sm"
+                                className="group flex items-center gap-2.5 p-2 rounded-xl bg-[#F2F3F0] dark:bg-white/[0.04] border border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/35 dark:hover:border-[#CFFF49]/40 transition-all cursor-pointer"
                               >
-                                {/* Thumbnail */}
-                                <div className="w-12 h-12 rounded-lg bg-zinc-900 border border-white/[0.08] overflow-hidden flex items-center justify-center shrink-0">
+                                <div className="w-11 h-11 rounded-lg bg-[#E7E9E5] dark:bg-[#090B0A] overflow-hidden flex items-center justify-center shrink-0">
                                   {cite.thumbnail_url ? (
                                     <img
                                       src={cite.thumbnail_url}
                                       alt={cite.file_name}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                      className="w-full h-full object-cover"
                                     />
                                   ) : (
-                                    <ImageIcon className="w-5 h-5 text-zinc-500" />
+                                    <ImageIcon className="w-5 h-5 text-[#626B64] dark:text-[#9AA69E]" />
                                   )}
                                 </div>
 
-                                {/* Details */}
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-xs font-semibold text-zinc-200 truncate group-hover:text-emerald-400 transition-colors">
+                                  <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] truncate">
                                     {cite.file_name}
                                   </p>
-                                  <p className="text-[10px] text-zinc-400 truncate line-clamp-1">
+                                  <p className="text-[10px] text-[#626B64] dark:text-[#9AA69E] truncate">
                                     {cite.excerpt ? cite.excerpt.slice(0, 50) : 'Matching personal file'}
                                   </p>
                                 </div>
 
-                                {/* Action Buttons: Share & View */}
                                 <div className="flex items-center gap-1 shrink-0">
                                   <button
                                     onClick={(e) => handleShareCitation(cite, e)}
-                                    title="Share with friend"
-                                    className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-300 transition-colors"
+                                    title="Share link"
+                                    className="p-1.5 rounded-lg hover:bg-[#FFFFFF] dark:hover:bg-white/[0.08] text-[#626B64] dark:text-[#9AA69E] transition-colors"
                                   >
                                     {copiedId === `share-${cite.file_id}` ? (
-                                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                      <Check className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
                                     ) : (
                                       <Share2 className="w-3.5 h-3.5" />
                                     )}
@@ -759,7 +759,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
                                   <button
                                     onClick={() => onOpenFile(cite.file_id)}
                                     title="Open file preview"
-                                    className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
+                                    className="p-1.5 rounded-lg hover:bg-[#FFFFFF] dark:hover:bg-white/[0.08] text-[#626B64] dark:text-[#9AA69E] transition-colors"
                                   >
                                     <ExternalLink className="w-3.5 h-3.5" />
                                   </button>
@@ -768,15 +768,14 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
                             ))}
                           </div>
                         ) : (
-                          /* Compact pills for text docs */
                           <div className="flex flex-wrap gap-1.5">
                             {msg.citations.map((cite) => (
                               <button
                                 key={cite.id}
                                 onClick={() => onOpenFile(cite.file_id)}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-emerald-500/15 border border-white/[0.06] hover:border-emerald-500/30 text-xs text-zinc-300 hover:text-emerald-300 transition-all font-medium"
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.08] text-xs text-[#101211] dark:text-[#F3F5F1] hover:border-[#087F5B] dark:hover:border-[#CFFF49] transition-colors font-medium"
                               >
-                                <FileText className="w-3 h-3 text-emerald-400" />
+                                <FileText className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" />
                                 <span className="truncate max-w-[160px]">{cite.file_name}</span>
                                 <ExternalLink className="w-2.5 h-2.5 opacity-60" />
                               </button>
@@ -788,17 +787,17 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
 
                     {/* Footer Actions: Copy Message */}
                     {!isUser && (
-                      <div className="pt-1 flex items-center justify-between text-[10px] text-zinc-500">
+                      <div className="pt-1 flex items-center justify-between text-[10px] text-[#626B64] dark:text-[#9AA69E]">
                         <span className="font-mono">VectorGallery AI</span>
                         <button
                           onClick={() => handleCopy(msg.id, msg.content)}
                           title="Copy response"
-                          className="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-white/[0.06] text-zinc-400 hover:text-zinc-200 transition-colors"
+                          className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-[#F2F3F0] dark:hover:bg-white/[0.06] transition-colors"
                         >
                           {copiedId === msg.id ? (
                             <>
-                              <Check className="w-3 h-3 text-emerald-400" />
-                              <span className="text-emerald-400">Copied</span>
+                              <Check className="w-3 h-3 text-[#087F5B] dark:text-[#CFFF49]" />
+                              <span className="text-[#087F5B] dark:text-[#CFFF49]">Copied</span>
                             </>
                           ) : (
                             <>
@@ -817,12 +816,12 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
 
           {/* Assistant Loading State */}
           {loading && (
-            <div className="flex items-center gap-3 text-xs text-zinc-400 animate-fadeIn max-w-4xl mx-auto py-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <div className="flex items-center gap-3 text-xs text-[#555E58] dark:text-[#9AA69E] animate-fadeIn max-w-4xl mx-auto py-2">
+              <div className="w-8 h-8 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] text-[#087F5B] dark:text-[#CFFF49] flex items-center justify-center">
                 <Loader2 className="w-4 h-4 animate-spin" />
               </div>
-              <span className="font-medium text-zinc-300">
-                Searching your personal vault files and grounding response...
+              <span className="font-medium text-[#101211] dark:text-[#F3F5F1]">
+                Searching your vault files and grounding response...
               </span>
             </div>
           )}
@@ -830,17 +829,16 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ─── Bottom Area: Quick Action Chips & Modern Input Bar ─── */}
-        <div className="p-3 sm:p-4 border-t border-white/[0.07] bg-[#0E1015]/80 backdrop-blur-xl shrink-0">
+        {/* ─── Bottom Area: Quick Action Chips & Input Bar ─── */}
+        <div className="p-3 sm:p-4 border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF] dark:bg-[#131715] shrink-0">
           <div className="max-w-4xl mx-auto space-y-2.5">
-            {/* Quick Action Chips when conversation is active */}
             {messages.length > 0 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-xs">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
                 {quickChips.map((chip, i) => (
                   <button
                     key={i}
                     onClick={() => sendQuery(chip.query)}
-                    className="shrink-0 px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-emerald-500/15 border border-white/[0.06] hover:border-emerald-500/30 text-zinc-300 hover:text-emerald-300 transition-all font-medium text-[11px]"
+                    className="shrink-0 px-3 py-1 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.12] border border-[#DDE2DC] dark:border-white/[0.08] text-[#101211] dark:text-[#F3F5F1] transition-colors font-medium text-[11px]"
                   >
                     {chip.label}
                   </button>
@@ -849,32 +847,32 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
             )}
 
             {/* Input Container */}
-            <div className="relative rounded-2xl bg-[#12141A] border border-white/[0.1] focus-within:border-emerald-500/60 focus-within:ring-2 focus-within:ring-emerald-500/20 p-2 sm:p-2.5 transition-all shadow-xl">
+            <div className="relative rounded-2xl bg-[#F2F3F0] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] focus-within:border-[#087F5B] dark:focus-within:border-[#CFFF49] p-2 sm:p-2.5 transition-colors">
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={2}
-                placeholder="Ask VectorGallery (e.g., 'What was I researching about Docker?', 'Find AWS pricing', 'Happy new year wishes')..."
-                className="w-full bg-transparent resize-none text-xs sm:text-sm text-zinc-100 placeholder-zinc-400 px-3 py-1.5 focus:outline-none custom-scrollbar"
+                placeholder="Ask VectorGallery about photos, PDFs, receipts, or notes..."
+                className="w-full bg-transparent resize-none text-xs sm:text-sm text-[#101211] dark:text-[#F3F5F1] placeholder-[#626B64] dark:placeholder-[#7B867F] px-2.5 py-1.5 focus:outline-none custom-scrollbar"
               />
 
-              <div className="flex items-center justify-between pt-2 px-2 border-t border-white/[0.05]">
-                <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">
-                  Press Enter to send, Shift+Enter for new line
+              <div className="flex items-center justify-between pt-2 px-2 border-t border-[#DDE2DC] dark:border-white/[0.06]">
+                <span className="text-[10px] text-[#626B64] dark:text-[#9AA69E] font-mono hidden sm:inline">
+                  Press Enter to send · Shift+Enter for new line
                 </span>
-                <span className="text-[10px] text-zinc-500 font-mono sm:hidden">
+                <span className="text-[10px] text-[#626B64] dark:text-[#9AA69E] font-mono sm:hidden">
                   Grounded in your files
                 </span>
 
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || loading}
-                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     input.trim() && !loading
-                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_14px_rgba(16,185,129,0.35)] hover:scale-105 active:scale-95'
-                      : 'bg-white/[0.05] text-zinc-500 cursor-not-allowed'
+                      ? 'vg-cta-lime bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] shadow-sm'
+                      : 'bg-[#DDE2DC] dark:bg-white/[0.08] text-[#626B64] dark:text-[#7B867F] cursor-not-allowed'
                   }`}
                 >
                   <span>Ask</span>
@@ -883,10 +881,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ onOpenFile }) => {
               </div>
             </div>
 
-            {/* Grounding and Privacy Subtext */}
             <div className="text-center">
-              <p className="text-[10px] text-zinc-500 tracking-tight">
-                VectorGallery AI answers are strictly grounded in your private files • End-to-end encrypted
+              <p className="text-[10px] text-[#626B64] dark:text-[#7B867F] tracking-tight">
+                Answers are strictly grounded in your personal files.
               </p>
             </div>
           </div>

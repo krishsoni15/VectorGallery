@@ -24,6 +24,7 @@ export default function AppPage() {
   const [newCollectionModalOpen, setNewCollectionModalOpen] = useState(false)
   const [newCollectionName, setNewCollectionName] = useState('')
   const [newCollectionDesc, setNewCollectionDesc] = useState('')
+  const [assistantInitialPrompt, setAssistantInitialPrompt] = useState<string | null>(null)
 
   // Real backend statistics state
   const [stats, setStats] = useState({
@@ -116,15 +117,19 @@ export default function AppPage() {
     fetchCollections()
   }, [fetchStats, fetchCollections])
 
-  // Global Keyboard shortcuts: Cmd+K / Ctrl+K for Search, Escape to dismiss modals
+  // Global Keyboard shortcuts: Cmd+K (Search), Cmd+U (Upload), Escape (Dismiss modals)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         setSearchModalOpen((prev) => !prev)
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'u') {
+        e.preventDefault()
+        setUploadModalOpen((prev) => !prev)
       } else if (e.key === 'Escape') {
         setSearchModalOpen(false)
         setUploadModalOpen(false)
+        setNewCollectionModalOpen(false)
         setPreviewFile(null)
       }
     }
@@ -330,20 +335,20 @@ export default function AppPage() {
       >
         {/* Local Preview Banner for Unauthenticated Sessions */}
         {!user && (
-          <div className="bg-gradient-to-r from-emerald-950/80 via-teal-950/60 to-zinc-950 border-b border-emerald-500/20 px-4 py-2.5 text-xs flex flex-wrap items-center justify-between gap-2 text-zinc-300">
+          <div className="bg-[#FFFFFF]/90 dark:bg-[#131715]/90 border-b border-[#DDE2DC] dark:border-white/[0.08] px-4 sm:px-6 py-2 text-xs flex flex-wrap items-center justify-between gap-2 text-[#555E58] dark:text-[#9AA69E]">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <span className="font-semibold text-emerald-300">Local Sandbox Mode</span>
-              <span className="text-zinc-400 text-[11px] hidden sm:inline">
-                — Exploring local personal vault files, OCR indexing & grounded semantic search.
+              <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#CFFF49] shrink-0" />
+              <span className="font-medium text-[#101211] dark:text-[#F3F5F1]">Local Sandbox</span>
+              <span className="text-[#626B64] dark:text-[#9AA69E] text-[11px] hidden sm:inline">
+                — Files, OCR index &amp; AI chat run locally until you sign in.
               </span>
             </div>
             <div className="flex items-center gap-2 ml-auto">
               <Link
                 href="/login"
-                className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-sm"
+                className="px-3 py-1 rounded-full border border-[#DDE2DC] dark:border-white/[0.12] bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.12] text-[#101211] dark:text-[#F3F5F1] font-medium text-[11.5px] transition-colors"
               >
-                Sign In to Sync Device
+                Sign in to sync
               </Link>
             </div>
           </div>
@@ -362,7 +367,11 @@ export default function AppPage() {
         )}
 
         {activeTab === 'assistant' && (
-          <AssistantView onOpenFile={handleOpenFileById} />
+          <AssistantView
+            onOpenFile={handleOpenFileById}
+            initialPrompt={assistantInitialPrompt}
+            onConsumedPrompt={() => setAssistantInitialPrompt(null)}
+          />
         )}
 
         {['photos', 'videos', 'documents', 'audio', 'downloads', 'recent', 'favorites', 'trash'].includes(activeTab) && (
@@ -398,49 +407,55 @@ export default function AppPage() {
 
       {/* New Collection Modal */}
       {newCollectionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-md rounded-2xl bg-[#0E1015] border border-white/[0.12] p-6 space-y-4 shadow-2xl text-zinc-100">
-            <h3 className="text-base font-bold text-white">Create New Smart Album / Collection</h3>
-            <p className="text-xs text-zinc-400">Organize your files into a persistent digital memory album.</p>
+        <div
+          onClick={() => setNewCollectionModalOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101211]/45 dark:bg-black/80 backdrop-blur-md animate-fadeIn"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-md rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] p-6 space-y-4 shadow-2xl text-[#101211] dark:text-[#F3F5F1]"
+          >
+            <h3 className="text-base font-bold text-[#101211] dark:text-[#F3F5F1]">Create New Collection</h3>
+            <p className="text-xs text-[#626B64] dark:text-[#9AA69E]">Organize your files into a persistent digital memory album.</p>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-zinc-300 block mb-1">Collection Name</label>
+                <label className="text-xs font-medium text-[#101211] dark:text-[#F3F5F1] block mb-1">Collection Name</label>
                 <input
                   type="text"
                   value={newCollectionName}
                   onChange={(e) => setNewCollectionName(e.target.value)}
                   placeholder="e.g., Tax Returns 2026, Summer Trip..."
-                  className="w-full bg-[#14161C] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#101211] dark:text-[#F3F5F1] focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49]"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-zinc-300 block mb-1">Description (Optional)</label>
+                <label className="text-xs font-medium text-[#101211] dark:text-[#F3F5F1] block mb-1">Description (Optional)</label>
                 <textarea
                   value={newCollectionDesc}
                   onChange={(e) => setNewCollectionDesc(e.target.value)}
                   rows={2}
                   placeholder="Notes about what this collection holds..."
-                  className="w-full bg-[#14161C] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#101211] dark:text-[#F3F5F1] focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49]"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.06]">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#DDE2DC] dark:border-white/[0.08]">
               <button
                 onClick={() => setNewCollectionModalOpen(false)}
-                className="px-3.5 py-2 rounded-xl text-xs text-zinc-400 hover:text-white"
+                className="px-3.5 py-2 rounded-full text-xs text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateCollection}
                 disabled={!newCollectionName.trim()}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
                   newCollectionName.trim()
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
-                    : 'bg-white/[0.05] text-zinc-500 cursor-not-allowed'
+                    ? 'vg-cta-lime bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] shadow-sm'
+                    : 'bg-[#E7E9E5] dark:bg-white/[0.06] text-[#626B64] dark:text-[#7B867F] cursor-not-allowed'
                 }`}
               >
                 Create Collection
@@ -482,6 +497,8 @@ export default function AppPage() {
         filesList={files.length > 0 ? files : (stats.recent_files || [])}
         onNavigateFile={(nextFile) => setPreviewFile(nextFile)}
         onOpenAssistantWithFile={(targetFile) => {
+          const name = targetFile?.original_name || targetFile?.name || 'this file'
+          setAssistantInitialPrompt(`Summarize key details and extracted text from "${name}".`)
           setPreviewFile(null)
           setActiveTab('assistant')
         }}

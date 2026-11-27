@@ -86,107 +86,107 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }
 
   const categoryItems = [
-    { label: 'Photos', count: stats.counts.photos, icon: ImageIcon, dot: 'bg-rose-500', tab: 'photos' },
-    { label: 'Screenshots', count: stats.counts.screenshots, icon: Camera, dot: 'bg-emerald-400', tab: 'photos' },
-    { label: 'Documents', count: stats.counts.documents, icon: FileText, dot: 'bg-blue-500', tab: 'documents' },
-    { label: 'Videos', count: stats.counts.videos, icon: Video, dot: 'bg-purple-500', tab: 'videos' },
-    { label: 'Audio', count: stats.counts.audio, icon: Music, dot: 'bg-pink-500', tab: 'audio' },
+    { label: 'Photos', count: stats.counts.photos, icon: ImageIcon, dot: 'bg-[#101211] dark:bg-[#F3F5F1]', tab: 'photos' },
+    { label: 'Screenshots', count: stats.counts.screenshots, icon: Camera, dot: 'bg-[#C8F73E] dark:bg-[#CFFF49]', tab: 'photos' },
+    { label: 'Documents', count: stats.counts.documents, icon: FileText, dot: 'bg-[#087F5B] dark:bg-[#39D9A0]', tab: 'documents' },
+    { label: 'Videos', count: stats.counts.videos, icon: Video, dot: 'bg-[#626B64] dark:bg-[#9AA69E]', tab: 'videos' },
+    { label: 'Audio', count: stats.counts.audio, icon: Music, dot: 'bg-[#A8B3B2] dark:bg-[#626B64]', tab: 'audio' },
   ]
 
   return (
-    <div className="p-5 sm:p-8 lg:p-10 max-w-7xl 2xl:max-w-[1800px] w-full mx-auto space-y-10 animate-fadeIn">
-      {/* ─── 1. Project Living Matter Welcome Band ─── */}
-      <div className="relative pb-8 border-b border-white/[0.08] flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-        <div className="space-y-3 max-w-2xl">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.18em] text-[#087F5B] dark:text-[#CFFF49]">
-            <span className="w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#CFFF49]" />
+    <div className="p-4 sm:p-8 lg:p-10 max-w-7xl 2xl:max-w-[1800px] w-full mx-auto space-y-8 sm:space-y-10 animate-fadeIn">
+      {/* ─── 1. Minimal Living Matter Welcome Band ─── */}
+      <div className="relative pb-7 border-b border-[#DDE2DC] dark:border-white/[0.08] flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+        <div className="space-y-2.5 max-w-2xl">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.16em] text-[#555E58] dark:text-[#9AA69E]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#CFFF49]" />
             <span>VectorGallery Vault</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl xl:text-[2.65rem] font-bold tracking-[-0.036em] leading-[1.06] text-white">
+          <h2 className="font-display text-3xl sm:text-4xl xl:text-[2.6rem] font-bold tracking-[-0.036em] leading-[1.06] text-[#101211] dark:text-[#F3F5F1]">
             {getGreeting()},{' '}
-            <span className="text-[#087F5B] dark:text-[#CFFF49]">
+            <span className="text-[#555E58] dark:text-[#9AA69E] font-semibold">
               {userName}
             </span>
           </h2>
-          <p className="text-sm sm:text-[15px] text-zinc-400 leading-relaxed">
-            Your personal archive is synchronized. Ask questions across your documents, optical OCR captures, or browse your camera timeline.
+          <p className="text-sm sm:text-[15px] text-[#555E58] dark:text-[#9AA69E] leading-relaxed">
+            Your personal archive is synchronized. Ask questions across your documents, OCR screenshots, or camera timeline.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
             onClick={onOpenSearch}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.12] text-sm font-medium text-white transition-all group"
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#FFFFFF] dark:bg-[#131715] hover:border-[#101211]/35 dark:hover:border-white/[0.2] border border-[#DDE2DC] dark:border-white/[0.10] text-xs sm:text-sm font-medium text-[#101211] dark:text-[#F3F5F1] transition-colors group shadow-sm"
           >
-            <Search className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49] group-hover:scale-110 transition-transform" />
+            <Search className="w-4 h-4 text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors" />
             <span>Ask vault anything...</span>
-            <kbd className="text-[11px] bg-black/40 px-2 py-0.5 rounded-full font-mono text-zinc-400 ml-1">
+            <kbd className="text-[10.5px] bg-[#F2F3F0] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10] px-2 py-0.5 rounded-full font-mono text-[#626B64] dark:text-[#9AA69E] ml-1">
               ⌘K
             </kbd>
           </button>
 
           <button
-            onClick={onOpenUpload}
-            className="vg-cta-lime flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#CFFF49] hover:bg-[#DCFF73] text-sm font-semibold text-[#090B0A] transition-all shadow-sm"
+            onClick={() => onNavigateTab('assistant')}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#101211] hover:bg-[#232825] dark:bg-white/[0.08] dark:hover:bg-white/[0.14] text-xs sm:text-sm font-medium text-[#F3F5F1] transition-colors"
           >
-            <UploadCloud className="w-4 h-4" />
-            <span>Upload Files</span>
+            <Zap className="w-4 h-4 text-[#D4FF54] dark:text-[#CFFF49]" />
+            <span>AI Assistant</span>
           </button>
         </div>
       </div>
 
-      {/* ─── 2. Unified Telemetry Strip (Hairline Divided, Not Nested Cards) ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-8 border-b border-white/[0.08]">
+      {/* ─── 2. Clean Telemetry Strip (Liquid Silver / Carbon Surface) ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 pb-7 border-b border-[#DDE2DC] dark:border-white/[0.08]">
         {/* Storage & Typographic Category Breakdown */}
         <div className="lg:col-span-8 space-y-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-zinc-400">
-              <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#555E58] dark:text-[#9AA69E]">
+              <HardDrive className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
               <span>Archive Storage</span>
             </div>
-            <span className="text-xs text-zinc-300 font-mono">
+            <span className="text-xs text-[#101211] dark:text-[#F3F5F1] font-mono">
               {stats.storage.formatted_used} / {stats.storage.formatted_quota} ({stats.storage.percent_used}%)
             </span>
           </div>
 
-          <div className="w-full h-2.5 rounded-full bg-zinc-800/90 overflow-hidden flex items-center p-0.5 gap-0.5">
+          <div className="w-full h-2.5 rounded-full bg-[#E7E9E5] dark:bg-white/[0.08] overflow-hidden flex items-center p-0.5 gap-0.5">
             {(stats.storage.category_bytes?.photos || 0) > 0 && (
               <div
                 title={`Photos: ${stats.storage.formatted_category_bytes?.photos || '0 B'}`}
                 style={{ width: `${Math.max(2, ((stats.storage.category_bytes?.photos || 0) / (stats.storage.total_bytes_quota || 16106127360)) * 100 * 25)}%` }}
-                className="h-full bg-rose-500 rounded-full transition-all duration-700"
+                className="h-full bg-[#101211] dark:bg-[#F3F5F1] rounded-full transition-all duration-700"
               />
             )}
             {(stats.storage.category_bytes?.screenshots || 0) > 0 && (
               <div
                 title={`Screenshots: ${stats.storage.formatted_category_bytes?.screenshots || '0 B'}`}
                 style={{ width: `${Math.max(1.5, ((stats.storage.category_bytes?.screenshots || 0) / (stats.storage.total_bytes_quota || 16106127360)) * 100 * 25)}%` }}
-                className="h-full bg-emerald-400 rounded-full transition-all duration-700"
+                className="h-full bg-[#C8F73E] dark:bg-[#CFFF49] rounded-full transition-all duration-700"
               />
             )}
             {(stats.storage.category_bytes?.documents || 0) > 0 && (
               <div
                 title={`Documents: ${stats.storage.formatted_category_bytes?.documents || '0 B'}`}
                 style={{ width: `${Math.max(1.5, ((stats.storage.category_bytes?.documents || 0) / (stats.storage.total_bytes_quota || 16106127360)) * 100 * 25)}%` }}
-                className="h-full bg-blue-500 rounded-full transition-all duration-700"
+                className="h-full bg-[#087F5B] dark:bg-[#39D9A0] rounded-full transition-all duration-700"
               />
             )}
-            <div className="flex-1 h-full bg-zinc-800/50 rounded-full" />
+            <div className="flex-1 h-full bg-transparent rounded-full" />
           </div>
 
-          {/* Inline Category Specs instead of 5 little box cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 pt-2">
+          {/* Minimal Typographic Category Spec Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 pt-1">
             {categoryItems.map((cat) => (
               <button
                 key={cat.label}
                 onClick={() => onNavigateTab(cat.tab)}
-                className="group text-left py-1.5 border-l-2 border-white/[0.08] hover:border-emerald-400 pl-3 transition-colors"
+                className="group text-left py-1.5 border-l-2 border-[#DDE2DC] dark:border-white/[0.10] hover:border-[#101211] dark:hover:border-[#CFFF49] pl-3 transition-colors"
               >
-                <div className="flex items-center gap-1.5 text-xs text-zinc-400 group-hover:text-zinc-200">
+                <div className="flex items-center gap-1.5 text-xs text-[#555E58] dark:text-[#9AA69E] group-hover:text-[#101211] dark:group-hover:text-[#F3F5F1]">
                   <span className={`w-2 h-2 rounded-full ${cat.dot}`} />
                   <span>{cat.label}</span>
                 </div>
-                <p className="text-lg font-semibold text-zinc-100 font-mono mt-0.5">
+                <p className="text-lg font-semibold text-[#101211] dark:text-[#F3F5F1] font-mono mt-0.5">
                   {cat.count}
                 </p>
               </button>
@@ -195,35 +195,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Android Sync Telemetry Column */}
-        <div className="lg:col-span-4 lg:pl-8 lg:border-l border-white/[0.08] flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-4 lg:pl-8 lg:border-l border-[#DDE2DC] dark:border-white/[0.08] flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-zinc-400">
-              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#555E58] dark:text-[#9AA69E]">
+              <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
               Android Sync
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+            <span className="inline-flex items-center gap-1.5 text-[11px] text-[#087F5B] dark:text-[#39D9A0] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#39D9A0]" /> Live
             </span>
           </div>
 
           <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between text-zinc-400">
+            <div className="flex items-center justify-between text-[#555E58] dark:text-[#9AA69E]">
               <span>Devices</span>
-              <span className="font-medium text-zinc-200">
+              <span className="font-medium text-[#101211] dark:text-[#F3F5F1]">
                 {stats.backup_health.connected_devices} Registered
               </span>
             </div>
-            <div className="flex items-center justify-between text-zinc-400">
+            <div className="flex items-center justify-between text-[#555E58] dark:text-[#9AA69E]">
               <span>Last Backup</span>
-              <span className="font-mono text-zinc-300">
+              <span className="font-mono text-[#101211] dark:text-[#F3F5F1]">
                 {stats.backup_health.last_sync_at
                   ? new Date(stats.backup_health.last_sync_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                   : 'Just now'}
               </span>
             </div>
-            <div className="flex items-center justify-between text-zinc-400">
+            <div className="flex items-center justify-between text-[#555E58] dark:text-[#9AA69E]">
               <span>Deduplication</span>
-              <span className="inline-flex items-center gap-1 text-emerald-400 font-mono">
+              <span className="inline-flex items-center gap-1 text-[#087F5B] dark:text-[#39D9A0] font-mono">
                 <CheckCircle className="w-3.5 h-3.5" /> SHA-256
               </span>
             </div>
@@ -231,7 +231,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           <Link
             href="/install"
-            className="inline-flex items-center justify-between py-2 text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors border-t border-white/[0.06] pt-3"
+            className="inline-flex items-center justify-between py-2 text-xs font-medium text-[#101211] dark:text-[#F3F5F1] hover:text-[#087F5B] dark:hover:text-[#CFFF49] transition-colors border-t border-[#DDE2DC] dark:border-white/[0.08] pt-3"
           >
             <span>Install or Pair Android App</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -239,30 +239,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* ─── 3. Edge-to-Edge Borderless Recent Memories ─── */}
+      {/* ─── 3. Clean Editorial Recent Memories Grid ─── */}
       <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-emerald-400" /> Recent Memories
+          <h3 className="text-base font-semibold text-[#101211] dark:text-[#F3F5F1] flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" /> Recent Memories
           </h3>
           <button
             onClick={() => onNavigateTab('documents')}
-            className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
+            className="text-xs text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CFFF49] transition-colors flex items-center gap-1 font-medium"
           >
             View all files <ArrowRight className="w-3 h-3" />
           </button>
         </div>
 
         {stats.recent_files.length === 0 ? (
-          <div className="py-16 text-center space-y-3 border-y border-dashed border-white/[0.08]">
-            <UploadCloud className="w-6 h-6 text-emerald-400 mx-auto opacity-85" />
-            <p className="text-sm font-medium text-zinc-200">No files uploaded yet</p>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+          <div className="py-16 text-center space-y-3 rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-dashed border-[#C7CEC6] dark:border-white/[0.12]">
+            <UploadCloud className="w-6 h-6 text-[#087F5B] dark:text-[#CFFF49] mx-auto" />
+            <p className="text-sm font-medium text-[#101211] dark:text-[#F3F5F1]">No files uploaded yet</p>
+            <p className="text-xs text-[#626B64] dark:text-[#9AA69E] max-w-sm mx-auto">
               Upload photos, screenshots, or invoices to begin building your searchable memory archive.
             </p>
             <button
               onClick={onOpenUpload}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-colors"
+              className="vg-cta-lime inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-xs font-semibold text-[#101211] transition-colors"
             >
               Upload First File
             </button>
@@ -278,11 +278,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div
                   key={file.id}
                   onClick={() => onSelectFile(file)}
-                  className="group rounded-2xl overflow-hidden bg-[#131715] border border-white/[0.08] hover:border-[#CFFF49]/40 transition-colors cursor-pointer flex flex-col"
+                  className="group rounded-2xl overflow-hidden bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] hover:border-[#101211]/40 dark:hover:border-[#CFFF49]/45 transition-all cursor-pointer flex flex-col shadow-[0_6px_20px_-14px_rgba(16,18,17,0.12)] dark:shadow-none"
                 >
                   {canRenderImg ? (
                     <>
-                      <div className="relative aspect-square w-full overflow-hidden bg-[#090B0A]">
+                      <div className="relative aspect-square w-full overflow-hidden bg-[#E7E9E5] dark:bg-[#090B0A]">
                         <img
                           src={file.thumbnail_url}
                           alt={displayName}
@@ -293,25 +293,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           }
                         />
                       </div>
-                      <div className="px-2.5 py-2 border-t border-white/[0.06]">
-                        <p className="text-[11px] font-medium text-zinc-100 truncate">
+                      <div className="px-2.5 py-2 border-t border-[#DDE2DC] dark:border-white/[0.06]">
+                        <p className="text-[11px] font-medium text-[#101211] dark:text-[#F3F5F1] truncate">
                           {displayName}
                         </p>
-                        <p className="text-[9.5px] text-zinc-400 font-mono mt-0.5">
+                        <p className="text-[9.5px] text-[#626B64] dark:text-[#9AA69E] font-mono mt-0.5">
                           {new Date(file.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </>
                   ) : (
-                    <div className="vm-doc-fallback w-full h-full min-h-[180px] flex flex-col justify-between p-3 bg-gradient-to-br from-[#131715] to-[#090B0A]">
-                      <div className="flex-1 flex items-center justify-center">
-                        <FileText className="w-8 h-8 text-[#087F5B] dark:text-[#CFFF49]/85 group-hover:scale-110 transition-transform" />
+                    <div className="w-full h-full min-h-[172px] flex flex-col justify-between p-3 bg-[#FFFFFF] dark:bg-[#131715]">
+                      <div className="flex-1 rounded-xl bg-[#F2F3F0] dark:bg-[#090B0A] flex items-center justify-center mb-2">
+                        <FileText className="w-7 h-7 text-[#555E58] dark:text-[#9AA69E] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] group-hover:scale-110 transition-all" />
                       </div>
-                      <div className="pt-2 border-t border-white/[0.06]">
-                        <p className="text-[11px] font-medium text-zinc-100 truncate">
+                      <div>
+                        <p className="text-[11px] font-medium text-[#101211] dark:text-[#F3F5F1] truncate">
                           {displayName}
                         </p>
-                        <p className="text-[9.5px] text-zinc-400 font-mono mt-0.5">
+                        <p className="text-[9.5px] text-[#626B64] dark:text-[#9AA69E] font-mono mt-0.5">
                           {new Date(file.created_at).toLocaleDateString()}
                         </p>
                       </div>
