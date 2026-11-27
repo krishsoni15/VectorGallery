@@ -1,5 +1,6 @@
 import React, { useId } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
 import { cn } from '@/lib/utils'
 
 interface LogoProps {
@@ -34,7 +35,7 @@ export function VectorGalleryLogo({
   className,
   showWordmark = true,
 }: LogoProps) {
-  const prefersReduced = useReducedMotion()
+  const prefersReduced = useClientReducedMotion()
   const rawId = useId().replace(/:/g, '')
   const dims = SIZE_MAP[size]
   const isMono = variant === 'monochrome'

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Github, Menu, Star, X } from 'lucide-react'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
 import { VG_COMPONENTS } from '@/components/landing/design-system'
+import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
 import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
 import { REPO_URL } from '@/components/landing/tokens'
 import { cn } from '@/lib/utils'
@@ -27,7 +28,7 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
   void hasLocalApk
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 18)

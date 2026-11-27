@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { VG_SPHERE_THEME_SPEC } from '@/components/landing/design-system'
+import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
 import { cn } from '@/lib/utils'
 
 interface MemorySphereCanvasProps {
@@ -39,7 +40,7 @@ export function MemorySphereCanvas({
   const themeRef = useRef<'light' | 'dark'>(resolvedTheme)
   themeRef.current = resolvedTheme
 
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
 
   // Smooth spring tilt following mouse cursor in 3D space
   const tiltXRaw = useMotionValue(0)

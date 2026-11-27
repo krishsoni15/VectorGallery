@@ -1,8 +1,21 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { VG_COMPONENTS, VG_MOTION } from '@/components/landing/design-system'
 import { cn } from '@/lib/utils'
+
+/**
+ * SSR-safe reduced motion hook that prevents React #418/#425 hydration mismatches
+ * when Chromium or OS has prefers-reduced-motion: reduce enabled on first load.
+ */
+export function useClientReducedMotion(): boolean {
+  const prefers = useReducedMotion()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  return mounted && Boolean(prefers)
+}
 
 interface MagneticCircleButtonProps {
   label: string
@@ -26,7 +39,7 @@ export function MagneticCircleButton({
   size = 'lg',
 }: MagneticCircleButtonProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
   const rawX = useMotionValue(0)
   const rawY = useMotionValue(0)
   const x = useSpring(rawX, VG_MOTION.springMagnetic)
@@ -117,7 +130,7 @@ export function SplitTextReveal({
   delay = 0,
   as = 'p',
 }: SplitTextRevealProps) {
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
   const Component = as
 
   if (reduced) {

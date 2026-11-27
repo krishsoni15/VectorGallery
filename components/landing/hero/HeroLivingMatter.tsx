@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowRight, Smartphone } from 'lucide-react'
 import { VG_LAYOUT, VG_MOTION, VG_TYPOGRAPHY } from '@/components/landing/design-system'
 import {
   InteractiveTriadIndex,
   MagneticCircleButton,
+  useClientReducedMotion,
   type TriadItem,
 } from '@/components/landing/motion/LivingMotionPrimitives'
 import { MemorySphereCanvas } from '@/components/landing/sculpture/MemorySphereCanvas'
@@ -32,7 +33,7 @@ const STACKED_THUMBNAILS = [
  * - Balanced lower-left manifesto + dotted rule & lower-right numbered triad + magnetic circular lime CTA
  */
 export function HeroLivingMatter() {
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
   const [activeTriad, setActiveTriad] = useState(0)
 
   return (

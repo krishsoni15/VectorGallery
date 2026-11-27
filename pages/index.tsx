@@ -6,6 +6,7 @@ import { HeroSection } from '@/components/landing/HeroSection'
 import { InteractiveSearchDemo } from '@/components/landing/InteractiveSearchDemo'
 import { LandingNavbar } from '@/components/landing/LandingNavbar'
 import { MobileSection } from '@/components/landing/MobileSection'
+import { MemoryUnfoldSection } from '@/components/landing/scroll-scenes/MemoryUnfoldSection'
 import {
   PrivacySection,
   type GitHubRepoStats,
@@ -116,6 +117,7 @@ export default function HomePage() {
 
         <main id="main-content" className="flex-1">
           <HeroSection />
+          <MemoryUnfoldSection />
           <InteractiveSearchDemo />
           <ProductShowcaseSection />
           <MobileSection apkSizeLabel={apkSizeLabel} />

@@ -2,10 +2,10 @@ import React from 'react'
 import {
   motion,
   MotionConfig,
-  useReducedMotion,
   type HTMLMotionProps,
 } from 'framer-motion'
 import { VG_MOTION } from '@/components/landing/design-system'
+import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
 
 export const VG_EASE: [number, number, number, number] = VG_MOTION.ease
 export const VG_SPRING_SNAPPY = VG_MOTION.springSnappy
@@ -37,7 +37,7 @@ export function MotionReveal({
   immediate = false,
   ...props
 }: MotionRevealProps) {
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
 
   if (reduced) {
     return <div className={className}>{children}</div>
@@ -94,7 +94,7 @@ export function MaskedReveal({
   className,
   ...props
 }: MaskedRevealProps) {
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
 
   if (reduced) {
     return <div className={className}>{children}</div>
@@ -144,7 +144,7 @@ export function StaggerGrid({
   className?: string
   stagger?: number
 }) {
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
 
   if (reduced) {
     return <div className={className}>{children}</div>
@@ -175,7 +175,7 @@ export function StaggerTile({
   children: React.ReactNode
   className?: string
 }) {
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
 
   if (reduced) {
     return <div className={className}>{children}</div>
@@ -213,7 +213,7 @@ export function MotionPathTrace({
   delay?: number
   duration?: number
 }) {
-  const reduced = useReducedMotion()
+  const reduced = useClientReducedMotion()
 
   if (reduced) {
     return (
