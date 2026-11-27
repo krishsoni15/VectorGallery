@@ -485,7 +485,11 @@ export function MemoryUnfoldSection() {
               <img
                 src={VG_SPHERE_THEME_SPEC.heroAnimWebp}
                 alt="Unfolding Memory Sphere core"
-                className="w-full h-full object-contain scale-[1.06]"
+                style={{
+                  maskImage: VG_COMPONENTS.media.sculptureMask,
+                  WebkitMaskImage: VG_COMPONENTS.media.sculptureMask,
+                }}
+                className="w-full h-full object-contain scale-[1.08]"
               />
             </div>
 

@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, Download, Github, Plus } from 'lucide-react'
+import { ArrowRight, Download, FileText, Github, Plus, Search, ShieldCheck, Smartphone } from 'lucide-react'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
-import { VG_COMPONENTS, VG_LAYOUT, VG_SPHERE_THEME_SPEC } from '@/components/landing/design-system'
+import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
 import { SplitTextReveal } from '@/components/landing/motion/LivingMotionPrimitives'
 import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
+import { MemorySphereCanvas } from '@/components/landing/sculpture/MemorySphereCanvas'
 import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
 import {
   CONTRIBUTING_URL,
@@ -20,45 +21,33 @@ import { Container } from '@/components/landing/ui'
 import { useAuth } from '@/lib/AuthContext'
 import { cn } from '@/lib/utils'
 
-const CONVERGING_MEMORIES = [
+const CLOSING_PILLARS = [
   {
-    src: '/landing/photos/aura-celebration-toast.webp',
-    alt: 'Terrace celebration toast memory',
-    label: 'Celebration',
-    x: -245,
-    y: -62,
-    rotate: -8,
+    icon: Search,
+    title: 'Visual & OCR Recall',
+    detail: 'Search scenes, tickets & receipts in plain words.',
   },
   {
-    src: '/landing/photos/aura-ticket-coastal.webp',
-    alt: 'Coastal rail boarding pass',
-    label: 'Pass',
-    x: -225,
-    y: 66,
-    rotate: 6,
+    icon: FileText,
+    title: 'Grounded Answers',
+    detail: 'Cited directly from your documents and scans.',
   },
   {
-    src: '/landing/photos/aura-deadline-notes.webp',
-    alt: 'Handwritten deadline notes',
-    label: 'Notes',
-    x: 235,
-    y: -58,
-    rotate: 7,
+    icon: Smartphone,
+    title: 'Android Auto-Sync',
+    detail: 'Read-only Wi-Fi backup that preserves phone originals.',
   },
   {
-    src: '/landing/photos/aura-personal-travel.webp',
-    alt: 'Summer harbor walk memory',
-    label: 'Travel',
-    x: 245,
-    y: 66,
-    rotate: -7,
+    icon: ShieldCheck,
+    title: 'Open & Local-First',
+    detail: 'Run offline on your disk or own S3/Supabase keys.',
   },
 ]
 
 /**
- * Chapter 07 — Final Brand Conclusion ("EVERYTHING WORTH KEEPING.")
- * Avoids muddy olive background wash via Obsidian Volt #090B0D, cool titanium-silver studio aura,
- * and converging memory fragments re-uniting into the iconic studio Memory Sphere.
+ * Chapter 07 — Apple-Caliber Obsidian Volt Closing Sanctuary ("EVERYTHING. REMEMBERED.")
+ * Creates purposeful double-color architectural contrast between the bright Liquid Titanium page
+ * and a monumental dark Obsidian sanctuary stage framing the Memory Sphere sculpture.
  */
 export function FinalBrandMomentSection() {
   const reduced = useReducedMotion()
@@ -67,135 +56,137 @@ export function FinalBrandMomentSection() {
   return (
     <section
       aria-labelledby="final-moment-heading"
-      className="relative overflow-hidden bg-gradient-to-b from-[#E9EDE8]/45 via-[#F4F5F2] to-[#FFFFFF] dark:from-[#090B0D] dark:via-[#090B0D] dark:to-[#090B0D] text-[#101211] dark:text-[#F4F6F2] border-y border-[var(--vg-border)] py-16 sm:py-20 lg:py-24"
+      className="relative bg-[#F4F5F2] dark:bg-[#090B0D] py-12 sm:py-16 lg:py-20 border-t border-[var(--vg-border)]"
     >
-      {/* Clean Titanium & Silver Studio Field (Light + Dark coherent) */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 dark:hidden"
-        style={{
-          background:
-            'radial-gradient(ellipse 56% 52% at 50% 52%, rgba(205,255,69,0.12), rgba(227,232,234,0.45) 48%, transparent 78%)',
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 hidden dark:block"
-        style={{
-          background:
-            'radial-gradient(ellipse 56% 48% at 50% 52%, rgba(184,197,204,0.10), rgba(70,214,164,0.05) 42%, #090B0D 76%)',
-        }}
-      />
+      <Container wide>
+        <div className="relative overflow-hidden rounded-[2.2rem] sm:rounded-[2.6rem] bg-[#0B0E11] text-[#F4F6F2] border border-[#101211]/15 dark:border-white/[0.12] shadow-[0_48px_120px_-28px_rgba(9,11,13,0.48)] px-6 sm:px-10 lg:px-14 py-14 sm:py-18 lg:py-20">
+          {/* Luminous Obsidian-Silver & Emerald Studio Field */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse 62% 52% at 50% 44%, rgba(205,255,69,0.12) 0%, rgba(70,214,164,0.08) 38%, rgba(25,29,32,0.42) 66%, transparent 100%)',
+            }}
+          />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 vg-grain opacity-30" />
 
-      <Container wide className="relative z-10">
-        <div className="max-w-6xl mx-auto text-center space-y-5 sm:space-y-6">
-          <div>
-            <p className="text-[13px] font-medium text-[#087F5B] dark:text-[#46D6A4] mb-3">
-              Begin With Your Archive
-            </p>
+          <div className="relative z-10 max-w-6xl mx-auto">
+            {/* Top Monumental Display Typography */}
+            <div className="text-center max-w-4xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.06] border border-white/[0.12] text-[12px] font-medium text-[#CDFF45] mb-5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#CDFF45]" />
+                <span>Begin With Your Archive</span>
+              </div>
 
-            <h2
-              id="final-moment-heading"
-              className="font-display font-bold uppercase tracking-[-0.05em] leading-[0.91] text-[#101211] dark:text-[#F4F6F2]"
-              style={{ fontSize: 'clamp(2.35rem, 7.2vw, 6.8rem)' }}
-            >
-              EVERYTHING. REMEMBERED<span className="text-[#101211] dark:text-[#CDFF45]">.</span>
-            </h2>
-          </div>
-
-          {/* Reconverging Memory Constellation & Reformed Sculpture Stage */}
-          <div className="relative mx-auto flex items-center justify-center py-4 sm:py-6 min-h-[210px] sm:min-h-[250px]">
-            {/* Converging Curved Orbital Guides */}
-            <svg
-              aria-hidden="true"
-              viewBox="-360 -130 720 260"
-              className="hidden md:block pointer-events-none absolute inset-0 w-full h-full"
-            >
-              <ellipse
-                rx="220"
-                ry="84"
-                fill="none"
-                stroke="currentColor"
-                className="text-[#101211]/15 dark:text-[#B8C5CC]/[0.18]"
-                strokeWidth="1"
-              />
-              <path
-                d="M -220 -55 Q -95 0 0 0 M -205 60 Q -85 10 0 0 M 220 -50 Q 95 0 0 0 M 205 60 Q 85 10 0 0"
-                fill="none"
-                stroke="currentColor"
-                className="text-[#087F5B]/30 dark:text-[#CDFF45]/[0.30]"
-                strokeWidth="1.1"
-              />
-            </svg>
-
-            {/* Surrounding Archival Fragments Gently Converging Toward Core */}
-            <div className="hidden md:block absolute inset-0 pointer-events-none">
-              {CONVERGING_MEMORIES.map((frag, idx) => (
-                <motion.div
-                  key={frag.label}
-                  initial={
-                    reduced
-                      ? undefined
-                      : { x: frag.x * 1.32, y: frag.y * 1.2, opacity: 0.45, scale: 0.92 }
-                  }
-                  whileInView={
-                    reduced
-                      ? undefined
-                      : { x: frag.x, y: frag.y, opacity: 0.92, scale: 1 }
-                  }
-                  viewport={{ once: true, amount: 0.35 }}
-                  transition={{ duration: 0.85, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ left: '50%', top: '50%', rotate: frag.rotate }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 w-28 xl:w-32 rounded-2xl overflow-hidden border border-[var(--vg-border-strong)] bg-[var(--vg-surface)] shadow-xl"
-                >
-                  <div className="aspect-[4/3] w-full overflow-hidden">
-                    <img src={frag.src} alt={frag.alt} className="w-full h-full object-cover" />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Restored Centerpiece Memory Sphere Core */}
-            <div className="relative z-10 w-[190px] h-[190px] sm:w-[225px] sm:h-[225px] xl:w-[250px] xl:h-[250px] shrink-0">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-6 rounded-full blur-3xl opacity-55"
-                style={{
-                  background:
-                    'radial-gradient(circle, rgba(205,255,69,0.22) 0%, rgba(70,214,164,0.12) 45%, transparent 72%)',
-                }}
-              />
-              <img
-                src={reduced ? VG_SPHERE_THEME_SPEC.heroVideoPoster : VG_SPHERE_THEME_SPEC.heroAnimWebp}
-                alt="VectorGallery Memory Sphere reformed core"
-                className="relative z-10 w-full h-full object-contain scale-[1.06]"
-              />
-            </div>
-          </div>
-
-          <div className="max-w-xl mx-auto space-y-5">
-            <p className="text-[16.5px] sm:text-[18px] leading-[1.6] text-[var(--vg-ink-2)]">
-              One intelligent home for your digital life.
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-1">
-              <Link href={user ? '/app' : '/signup'} className={VG_COMPONENTS.buttons.limePill}>
-                <span>{user ? 'Open Web Vault' : 'Get started'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link href="/install" className={VG_COMPONENTS.buttons.secondary}>
-                <Download className="w-4 h-4" />
-                <span>Download Android</span>
-              </Link>
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 h-11 px-4 rounded-full text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2] transition-colors"
+              <h2
+                id="final-moment-heading"
+                className="font-display font-bold uppercase tracking-[-0.052em] leading-[0.9] text-[#F4F6F2]"
+                style={{ fontSize: 'clamp(2.2rem, 6.4vw, 5.75rem)' }}
               >
-                <Github className="w-4 h-4" />
-                <span>GitHub</span>
-              </a>
+                EVERYTHING.
+                <br />
+                REMEMBERED<span className="text-[#CDFF45]">.</span>
+              </h2>
+            </div>
+
+            {/* Centerpiece Studio Sculpture Flanked by Balanced Capability Pills */}
+            <div className="mt-8 sm:mt-10 grid grid-cols-1 lg:grid-cols-12 items-center gap-6 lg:gap-4">
+              {/* Left 2 Capability Specs */}
+              <div className="lg:col-span-4 space-y-3 order-2 lg:order-1">
+                {CLOSING_PILLARS.slice(0, 2).map((item, idx) => {
+                  const Icon = item.icon
+                  return (
+                    <motion.div
+                      key={item.title}
+                      initial={reduced ? undefined : { opacity: 0.85, x: -12 }}
+                      whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
+                      viewport={{ once: true, amount: 0.35 }}
+                      transition={{ duration: 0.5, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                      className="p-4 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.10] backdrop-blur-md transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="w-8 h-8 rounded-xl bg-[#CDFF45]/15 border border-[#CDFF45]/25 flex items-center justify-center text-[#CDFF45] shrink-0">
+                          <Icon className="w-4 h-4" />
+                        </span>
+                        <div>
+                          <p className="text-[13.5px] font-semibold text-[#F4F6F2]">{item.title}</p>
+                          <p className="text-[12.5px] text-[#A4AEA9] leading-snug mt-0.5">{item.detail}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+
+              {/* Center Transformed Volumetric Sculpture */}
+              <div className="lg:col-span-4 flex items-center justify-center order-1 lg:order-2">
+                <div className="relative w-[220px] sm:w-[265px] lg:w-[295px] flex items-center justify-center">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-4 rounded-full border border-white/[0.08]"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-10 rounded-full border border-[#CDFF45]/20"
+                  />
+                  <MemorySphereCanvas mode="closing" themeMode="dark" priority={false} className="w-full" />
+                </div>
+              </div>
+
+              {/* Right 2 Capability Specs */}
+              <div className="lg:col-span-4 space-y-3 order-3">
+                {CLOSING_PILLARS.slice(2, 4).map((item, idx) => {
+                  const Icon = item.icon
+                  return (
+                    <motion.div
+                      key={item.title}
+                      initial={reduced ? undefined : { opacity: 0.85, x: 12 }}
+                      whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
+                      viewport={{ once: true, amount: 0.35 }}
+                      transition={{ duration: 0.5, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                      className="p-4 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.10] backdrop-blur-md transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="w-8 h-8 rounded-xl bg-[#46D6A4]/15 border border-[#46D6A4]/25 flex items-center justify-center text-[#46D6A4] shrink-0">
+                          <Icon className="w-4 h-4" />
+                        </span>
+                        <div>
+                          <p className="text-[13.5px] font-semibold text-[#F4F6F2]">{item.title}</p>
+                          <p className="text-[12.5px] text-[#A4AEA9] leading-snug mt-0.5">{item.detail}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Apple Sanctuary Action Dock */}
+            <div className="mt-10 sm:mt-12 pt-8 border-t border-white/[0.10] flex flex-col sm:flex-row items-center justify-between gap-5">
+              <p className="text-[15.5px] sm:text-[17px] text-[#B8C5CC] text-center sm:text-left">
+                One intelligent sanctuary for your digital life.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+                <Link href={user ? '/app' : '/signup'} className={VG_COMPONENTS.buttons.forestPrimary}>
+                  <span>{user ? 'Open Web Vault' : 'Get started'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link href="/install" className={VG_COMPONENTS.buttons.forestSecondary}>
+                  <Download className="w-4 h-4" />
+                  <span>Download Android</span>
+                </Link>
+                <a
+                  href={REPO_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 h-12 px-4 rounded-full text-[14px] font-medium text-[#A4AEA9] hover:text-[#F4F6F2] transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                  <span>GitHub</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

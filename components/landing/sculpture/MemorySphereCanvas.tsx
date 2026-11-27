@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { Pause, Play } from 'lucide-react'
-import { VG_SPHERE_THEME_SPEC } from '@/components/landing/design-system'
+import { VG_COMPONENTS, VG_SPHERE_THEME_SPEC } from '@/components/landing/design-system'
 import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { cn } from '@/lib/utils'
 
@@ -117,11 +117,11 @@ export function MemorySphereCanvas({
           reduced || paused
             ? undefined
             : {
-                transformPerspective: 1200,
-                rotateX: tiltX,
-                rotateY: tiltY,
-                scale: entranceScale,
-              }
+              transformPerspective: 1200,
+              rotateX: tiltX,
+              rotateY: tiltY,
+              scale: entranceScale,
+            }
         }
         className="relative z-10 w-full aspect-[1.44/1] overflow-visible transition-transform duration-300"
       >
@@ -147,6 +147,10 @@ export function MemorySphereCanvas({
           alt="VectorGallery translucent acid-lime and liquid-titanium Memory Sphere sculpture"
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
+          style={{
+            maskImage: VG_COMPONENTS.media.sculptureMask,
+            WebkitMaskImage: VG_COMPONENTS.media.sculptureMask,
+          }}
           className={cn(
             'w-[126%] max-w-none aspect-square object-contain absolute left-1/2 top-1/2 -translate-x-[48.8%] -translate-y-1/2 transition-opacity duration-300',
             animReady && !useStaticPoster ? 'opacity-0' : 'opacity-100'
@@ -160,6 +164,10 @@ export function MemorySphereCanvas({
             loading={priority ? 'eager' : 'lazy'}
             decoding="async"
             onLoad={() => setAnimReady(true)}
+            style={{
+              maskImage: VG_COMPONENTS.media.sculptureMask,
+              WebkitMaskImage: VG_COMPONENTS.media.sculptureMask,
+            }}
             className={cn(
               'w-[126%] max-w-none aspect-square object-contain absolute left-1/2 top-1/2 -translate-x-[48.8%] -translate-y-1/2 transition-opacity duration-300',
               animReady ? 'opacity-100' : 'opacity-0'

@@ -448,7 +448,10 @@ cd mobile && flutter analyze && flutter test
 
 ## 📚 Engineering Documentation
 
-Technical specifications are organized in [`docs/`](docs/):
+Technical specifications, hosting guides, data storage maps, and interview walkthroughs are organized in [`docs/`](docs/):
+- [`docs/HOSTING_AND_DEPLOYMENT_STEPS.md`](docs/HOSTING_AND_DEPLOYMENT_STEPS.md) — Step-by-step Vercel + Supabase Cloud, VPS Self-Hosting & Android APK distribution guide.
+- [`docs/HOW_EVERYTHING_WORKS_AND_DATA_STORAGE.md`](docs/HOW_EVERYTHING_WORKS_AND_DATA_STORAGE.md) — Plain-English map of where all user data lives and how OCR, chunking, RRF search & mobile sync work.
+- [`docs/INTERVIEW_QA_AND_ARCHITECTURE.md`](docs/INTERVIEW_QA_AND_ARCHITECTURE.md) — Recruiter & technical interview Q&A, architecture pitch, algorithms & scaling answers.
 - [`docs/API_DESIGN.md`](docs/API_DESIGN.md) & [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) — REST & SSE API contracts.
 - [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md) & [`docs/DATABASE_SETUP.md`](docs/DATABASE_SETUP.md) — ER diagrams and PostgreSQL + pgvector schemas.
 - [`docs/ENVIRONMENT_SETUP.md`](docs/ENVIRONMENT_SETUP.md) & [`docs/LOCAL_SERVER_SETUP.md`](docs/LOCAL_SERVER_SETUP.md) — Environment configuration and local development.

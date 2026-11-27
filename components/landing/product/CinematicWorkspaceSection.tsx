@@ -115,27 +115,29 @@ export function CinematicWorkspaceSection() {
         {/* Sculpted Beveled Studio Hardware Presentation */}
         <MotionReveal>
           <StudioGlareFrame className="rounded-[2rem] border border-[var(--vg-border-strong)] bg-[#FFFFFF] dark:bg-[#111416] shadow-[var(--vg-shadow-hero)] ring-1 ring-inset ring-black/[0.03] dark:ring-white/[0.06]">
-            {/* Minimal Workspace Window Bar */}
-            <div className="px-5 sm:px-6 py-3.5 border-b border-[var(--vg-border)] bg-[#F4F5F2]/80 dark:bg-[#090B0D]/85 flex flex-wrap items-center justify-between gap-4">
+            {/* Minimal Obsidian Hardware Window Bar (Double-Color Architectural Depth) */}
+            <div className="px-5 sm:px-6 py-3.5 border-b border-white/[0.08] bg-[#101211] dark:bg-[#090B0D] text-[#F4F6F2] flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#BCC5C8] dark:bg-white/25" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#BCC5C8] dark:bg-white/25" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#BCC5C8] dark:bg-white/25" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/25" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/25" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#CDFF45]/75" />
                 </div>
-                <span className="text-[12.5px] font-medium text-[var(--vg-ink-2)]">
+                <span className="text-[12.5px] font-medium text-[#B8C5CC]">
                   VectorGallery Vault —{' '}
-                  {tab === 'library'
-                    ? 'Timeline Library'
-                    : tab === 'search'
-                      ? 'Document & Receipt Recall'
-                      : 'Grounded AI Assistant'}
+                  <span className="text-[#F4F6F2]">
+                    {tab === 'library'
+                      ? 'Timeline Library'
+                      : tab === 'search'
+                        ? 'Document & Receipt Recall'
+                        : 'Grounded AI Assistant'}
+                  </span>
                 </span>
               </div>
 
               <Link
                 href={user ? '/app' : '/signup'}
-                className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-[12.5px] font-semibold bg-[#CDFF45] text-[#101211] hover:bg-[#D8FF69] transition-colors shadow-sm"
+                className="vg-cta-lime inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-[12.5px] font-semibold bg-[#CDFF45] text-[#101211] hover:bg-[#D8FF69] transition-colors shadow-sm"
               >
                 <span>{user ? 'Open Web Vault' : 'Get started'}</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />

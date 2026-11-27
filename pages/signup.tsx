@@ -139,30 +139,47 @@ export default function SignUpPage() {
             initial={{ opacity: 0.92, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full max-w-[410px] mx-auto py-8 sm:py-10"
+            className="w-full max-w-[420px] mx-auto py-8 sm:py-9"
           >
+            {/* Segmented Mode Switcher (Sign In / Create Account) */}
+            <div className="mb-7 inline-flex p-1 rounded-full bg-[#E9EDE8] dark:bg-[#191D20] border border-[var(--vg-border)] w-full">
+              <Link
+                href="/login"
+                className="flex-1 py-2 text-center rounded-full text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-colors"
+              >
+                Sign in
+              </Link>
+              <span className="flex-1 py-2 text-center rounded-full text-[13px] font-semibold bg-[#101211] text-[#F4F6F2] dark:bg-[#CDFF45] dark:text-[#090B0D] shadow-sm">
+                Create account
+              </span>
+            </div>
+
             {/* Mobile Mini Sculpture Anchor */}
-            <div className="lg:hidden flex items-center gap-3.5 mb-7 p-3.5 rounded-2xl bg-[var(--vg-bg)] border border-[var(--vg-border)]">
+            <div className="lg:hidden flex items-center gap-3.5 mb-7 p-3.5 rounded-2xl bg-[#0B0E11] text-[#F4F6F2] border border-white/[0.10]">
               <img
                 src={VG_SPHERE_THEME_SPEC.heroVideoPoster}
                 alt="VectorGallery Memory Sphere"
+                style={{
+                  maskImage: VG_COMPONENTS.media.sculptureMask,
+                  WebkitMaskImage: VG_COMPONENTS.media.sculptureMask,
+                }}
                 className="w-12 h-12 object-contain shrink-0"
               />
               <div>
-                <p className="font-display text-sm font-bold text-[var(--vg-ink)]">Personal AI Cloud</p>
-                <p className="text-xs text-[var(--vg-ink-2)]">Open-source memory vault &amp; sync</p>
+                <p className="font-display text-sm font-bold text-[#F4F6F2]">Personal AI Cloud</p>
+                <p className="text-xs text-[#A4AEA9]">Open-source memory vault &amp; sync</p>
               </div>
             </div>
 
-            <div className="space-y-2 mb-8">
-              <div className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#087F5B] dark:text-[#CFFF49]">
+            <div className="space-y-2 mb-7">
+              <div className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#087F5B] dark:text-[#CDFF45]">
                 <span className="w-1.5 h-1.5 rounded-full bg-current" />
                 <span>Create Space</span>
               </div>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.036em] text-[var(--vg-ink)]">
+              <h1 className="font-display text-3xl sm:text-[2.2rem] font-bold tracking-[-0.036em] text-[var(--vg-ink)]">
                 Create your vault
               </h1>
-              <p className="text-[14.5px] text-[var(--vg-ink-2)]">
+              <p className="text-[14px] leading-relaxed text-[var(--vg-ink-2)]">
                 Keep photos, scanned documents, and mobile backups connected in one private space.
               </p>
             </div>
@@ -286,23 +303,13 @@ export default function SignUpPage() {
             <button
               type="button"
               onClick={handleGuestAccess}
-              className="w-full h-11 px-5 rounded-full border border-[#DDE2DC] dark:border-white/[0.12] bg-[#F2F3F0] dark:bg-[#202522] hover:bg-[#E7E9E5] dark:hover:bg-[#2A302C] text-[#101211] dark:text-[#F3F5F1] text-[13.5px] font-medium flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+              className="w-full h-12 px-5 rounded-full border border-[#DBE0DA] dark:border-white/[0.12] bg-[#F4F5F2] dark:bg-[#191D20] hover:bg-[#E9EDE8] dark:hover:bg-[#23292E] text-[#101211] dark:text-[#F4F6F2] text-[13.5px] font-medium flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
             >
-              <Zap className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" />
+              <Zap className="w-4 h-4 text-[#087F5B] dark:text-[#CDFF45]" />
               <span>Continue in Local Sandbox</span>
             </button>
-            <p className="mt-2 text-[11.5px] text-center text-[var(--vg-ink-muted)]">
-              Explore locally on this device without creating an account.
-            </p>
-
-            <p className="mt-6 text-[13.5px] text-[var(--vg-ink-2)] text-center">
-              Already have an account?{' '}
-              <Link
-                href="/login"
-                className="font-semibold text-[#087F5B] dark:text-[#CFFF49] hover:underline underline-offset-4"
-              >
-                Sign in
-              </Link>
+            <p className="mt-2.5 text-[11.5px] text-center text-[var(--vg-ink-2)]">
+              Instant offline workspace on this device — no sign-up needed.
             </p>
           </motion.div>
 

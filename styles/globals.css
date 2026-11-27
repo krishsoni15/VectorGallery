@@ -193,7 +193,8 @@ html.dark .vg-shell {
 }
 
 /* Acid-lime CTA ink guard (high contrast across light & dark) */
-.vg-cta-lime {
+.vg-cta-lime,
+.vg-cta-lime * {
   color: #101211 !important;
 }
 
@@ -205,11 +206,9 @@ html.dark .vg-cta {
   color: #071912;
 }
 
-/* Photo overlay captions & dark terminal blocks preserve crisp light ink across themes */
+/* Photo overlay captions & dark terminal blocks preserve crisp light ink across themes without overriding badge fills */
 .photo-overlay,
-.photo-overlay *,
-.vg-photo-caption,
-.vg-photo-caption * {
+.vg-photo-caption {
   color: #F2F3EF;
 }
 

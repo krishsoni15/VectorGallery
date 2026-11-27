@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none">
-  <rect x="2" y="2" width="44" height="44" rx="12" fill="#FFFFFF" stroke="#E0E4DD" stroke-width="1.5" />
-  <rect x="4" y="4" width="40" height="40" rx="10" fill="#FAFAF7" />
-  <path d="M19.46 12.66 L28.54 12.66 L24 25.72 Z" fill="#E9EBE5" />
-  <path
-    d="M12.59 13.55 L17.81 11.76 Q20.15 10.94 21.11 13.27 L27.16 29.77 Q28.12 32.39 25.65 33.35 L21.39 35.0 Q18.77 35.96 17.81 33.49 L11.21 17.12 Q10.25 14.51 12.59 13.55 Z"
-    fill="#A6D9D0"
-    fill-opacity="0.82"
-    stroke="#087F5B"
-    stroke-opacity="0.35"
-    stroke-width="0.9"
-  />
-  <path
-    d="M30.19 11.76 L35.41 13.55 Q37.75 14.51 36.79 17.12 L30.19 33.49 Q29.23 35.96 26.61 35.0 L22.35 33.35 Q19.88 32.39 20.84 29.77 L26.89 13.27 Q27.85 10.94 30.19 11.76 Z"
-    fill="#087F5B"
-    fill-opacity="0.94"
-    stroke="#C4EDE1"
-    stroke-opacity="0.55"
-    stroke-width="1"
-  />
-  <path d="M24 25.51 L26.2 29.5 L24 33.21 L21.8 29.5 Z" fill="#C4EDE1" fill-opacity="0.95" />
-  <text x="58" y="31" fill="#181C19" font-family="Manrope, Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">VectorGallery</text>
+  <defs>
+    <linearGradient id="vg-ll-bg" x1="4" y1="2" x2="44" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#171C21" />
+      <stop offset="100%" stop-color="#090B0D" />
+    </linearGradient>
+    <linearGradient id="vg-ll-tit" x1="10" y1="12" x2="26" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F7F9FA" />
+      <stop offset="100%" stop-color="#9CA8AF" />
+    </linearGradient>
+    <linearGradient id="vg-ll-volt" x1="22" y1="12" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D9FF66" />
+      <stop offset="50%" stop-color="#CDFF45" />
+      <stop offset="100%" stop-color="#087F5B" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#vg-ll-bg)" stroke="#E3E8EA" stroke-opacity="0.22" stroke-width="1.3" />
+  <ellipse cx="24" cy="24.5" rx="16.5" ry="6.2" transform="rotate(-24 24 24.5)" stroke="#E3E8EA" stroke-opacity="0.34" stroke-width="1" />
+  <path d="M12.2 13.8 L17.6 11.8 Q20.0 10.9 21.0 13.4 L26.9 29.8 Q27.8 32.4 25.3 33.4 L21.0 35.0 Q18.4 35.9 17.5 33.4 L10.9 17.2 Q9.9 14.6 12.2 13.8 Z" fill="url(#vg-ll-tit)" />
+  <path d="M30.4 11.8 L35.8 13.8 Q38.1 14.6 37.1 17.2 L30.5 33.4 Q29.6 35.9 27.0 35.0 L22.7 33.4 Q20.2 32.4 21.1 29.8 L27.0 13.4 Q28.0 10.9 30.4 11.8 Z" fill="url(#vg-ll-volt)" />
+  <path d="M24.0 25.0 L26.7 29.6 L24.0 34.1 L21.3 29.6 Z" fill="#ECFF9E" />
+  <text x="58" y="31" fill="#101211" font-family="Space Grotesk, Manrope, Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">VectorGallery</text>
 </svg>

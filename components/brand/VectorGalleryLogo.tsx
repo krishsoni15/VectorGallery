@@ -58,27 +58,28 @@ export function VectorGalleryLogo({
       >
         <defs>
           <linearGradient id={darkGradId} x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#131715" />
-            <stop offset="100%" stopColor="#202522" />
+            <stop offset="0%" stopColor="#171C21" />
+            <stop offset="100%" stopColor="#090B0D" />
           </linearGradient>
           <linearGradient id={silverGradId} x1="12" y1="14" x2="36" y2="48" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#E7E9E5" />
-            <stop offset="100%" stopColor="#A8B3B2" />
+            <stop offset="0%" stopColor="#F7F9FA" />
+            <stop offset="55%" stopColor="#DCE3E6" />
+            <stop offset="100%" stopColor="#8C99A0" />
           </linearGradient>
           <linearGradient id={limeGradId} x1="28" y1="14" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#D4FF54" />
-            <stop offset="55%" stopColor="#8DE838" />
+            <stop offset="0%" stopColor="#D9FF66" />
+            <stop offset="48%" stopColor="#CDFF45" />
             <stop offset="100%" stopColor="#087F5B" />
           </linearGradient>
         </defs>
 
-        {/* Precision Titanium Bevel Container */}
+        {/* Precision Obsidian-Titanium Squircle Emblem */}
         {isMono ? (
           <rect
-            x="1"
-            y="1"
-            width="62"
-            height="62"
+            x="1.5"
+            y="1.5"
+            width="61"
+            height="61"
             rx="16"
             fill="currentColor"
             fillOpacity="0.12"
@@ -86,55 +87,29 @@ export function VectorGalleryLogo({
             strokeOpacity="0.24"
             strokeWidth="1.5"
           />
-        ) : isOnDark ? (
+        ) : (
           <rect
-            x="1"
-            y="1"
-            width="62"
-            height="62"
+            x="1.5"
+            y="1.5"
+            width="61"
+            height="61"
             rx="16"
             fill={`url(#${darkGradId})`}
-            stroke="#CFFF49"
-            strokeOpacity="0.24"
+            stroke={isOnDark ? '#CDFF45' : '#BCC5C8'}
+            strokeOpacity={isOnDark ? '0.32' : '0.42'}
             strokeWidth="1.5"
           />
-        ) : (
-          <>
-            <rect
-              x="1"
-              y="1"
-              width="62"
-              height="62"
-              rx="16"
-              className="fill-[#FFFFFF] dark:fill-[#131715] stroke-[#DDE2DC] dark:stroke-white/[0.14]"
-              strokeWidth="1.5"
-            />
-            <rect
-              x="3.5"
-              y="3.5"
-              width="57"
-              height="57"
-              rx="13.5"
-              className="fill-[#F2F3F0] dark:fill-[#191E1B]"
-            />
-          </>
         )}
 
         {/* Delicate Tilted Orbital Hairline */}
         <ellipse
           cx="32"
-          cy="32"
-          rx="23.5"
-          ry="8.8"
-          transform="rotate(-26 32 32)"
-          className={cn(
-            isMono
-              ? 'stroke-current opacity-35'
-              : isOnDark
-                ? 'stroke-[#B9C5C5]/40'
-                : 'stroke-[#A8B3B2]/55 dark:stroke-[#B9C5C5]/35'
-          )}
-          strokeWidth="1.1"
+          cy="33"
+          rx="22.5"
+          ry="8.4"
+          transform="rotate(-24 32 33)"
+          className={cn(isMono ? 'stroke-current opacity-35' : 'stroke-[#E3E8EA]/35')}
+          strokeWidth="1.25"
         />
 
         {/* Folded Silver & Translucent Acid-Lime Planes */}

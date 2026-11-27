@@ -130,20 +130,20 @@ export function HeroLivingMatter() {
           />
         </div>
 
-        {/* BOTTOM FLANKING QUADRANTS: Balanced Editorial Copy + Primary Actions + Triad + Magnetic CTA */}
-        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-end gap-6 sm:gap-8 lg:gap-4 lg:pt-[205px] xl:pt-[245px] 2xl:pt-[290px]">
-          {/* LEFT QUADRANT: Product Descriptor + Main Promise + Action Row */}
+        {/* BOTTOM FLANKING QUADRANTS: Apple-Caliber Double-Tone Editorial Composition */}
+        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-end gap-6 sm:gap-8 lg:gap-4 lg:pt-[205px] xl:pt-[245px] 2xl:pt-[285px]">
+          {/* LEFT QUADRANT: Refined Provenance Pill + Editorial Statement + Single-Row Action Bar */}
           <div
             ref={copyRef}
-            className="lg:col-span-4 flex flex-col justify-between gap-6 lg:gap-10"
+            className="lg:col-span-5 flex flex-col justify-between gap-5 lg:gap-7"
           >
-            {/* Compact Product Provenance */}
-            <div className="flex items-center gap-3.5">
-              <div className="flex -space-x-2.5 shrink-0">
+            {/* Tactile Provenance Capsule */}
+            <div className="inline-flex items-center gap-3 self-start pl-1.5 pr-4 py-1.5 rounded-full bg-[#FFFFFF]/82 dark:bg-[#111416]/88 backdrop-blur-xl border border-[var(--vg-border)] shadow-sm">
+              <div className="flex -space-x-2 shrink-0">
                 {PROVENANCE_CAPTURES.map((item) => (
                   <div
                     key={item.src}
-                    className="w-9 h-9 xl:w-10 xl:h-10 rounded-full overflow-hidden border-2 border-[#FFFFFF] dark:border-[#090B0D] shadow-sm bg-[var(--vg-surface-2)]"
+                    className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#FFFFFF] dark:border-[#090B0D] bg-[var(--vg-surface-2)]"
                   >
                     <img
                       src={item.src}
@@ -154,35 +154,26 @@ export function HeroLivingMatter() {
                 ))}
               </div>
               <div className="leading-tight">
-                <p className="text-[14px] xl:text-[15px] font-semibold tracking-[-0.018em] text-[#101211] dark:text-[#F4F6F2]">
+                <p className="text-[13px] font-semibold tracking-[-0.015em] text-[#101211] dark:text-[#F4F6F2]">
                   Personal AI Cloud
                 </p>
-                <p className="text-[12.5px] text-[var(--vg-ink-2)] mt-0.5">
-                  Photos, documents &amp; Android sync
+                <p className="text-[11.5px] text-[var(--vg-ink-2)]">
+                  Photos, OCR docs &amp; Android sync
                 </p>
               </div>
             </div>
 
-            {/* Editorial Manifesto Copy */}
-            <div className="max-w-[430px] lg:max-w-[335px] xl:max-w-[390px] 2xl:max-w-[450px]">
-              <p className="font-display text-[22px] sm:text-[24px] lg:text-[23px] xl:text-[27px] 2xl:text-[31px] font-bold leading-[1.12] tracking-[-0.03em] text-[#101211] dark:text-[#F4F6F2]">
-                EVERYTHING WORTH KEEPING.
+            {/* Minimal Apple Editorial Statement */}
+            <div className="max-w-[440px] lg:max-w-[390px] xl:max-w-[440px]">
+              <h2 className="font-display text-[24px] sm:text-[26px] lg:text-[25px] xl:text-[29px] 2xl:text-[32px] font-bold leading-[1.08] tracking-[-0.032em] text-[#101211] dark:text-[#F4F6F2]">
+                Everything worth keeping.
+              </h2>
+
+              <p className="mt-2.5 text-[14.5px] sm:text-[15.5px] leading-[1.52] text-[var(--vg-ink-2)]">
+                Photos, receipts, and personal notes — ask naturally without remembering where you saved them.
               </p>
 
-              <p className="mt-2.5 text-[14.5px] sm:text-[15.5px] font-medium leading-[1.45] text-[#101211]/85 dark:text-[#F4F6F2]/90">
-                Photos, files and memories — intelligently connected.
-              </p>
-
-              <div
-                aria-hidden="true"
-                className="my-3 xl:my-4 w-full border-b border-[#101211]/[0.18] dark:border-white/[0.15]"
-              />
-
-              <p className="text-[13.5px] sm:text-[14.5px] leading-[1.56] text-[var(--vg-ink-2)]">
-                Find what you remember, without remembering where you saved it.
-              </p>
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
+              <div className="mt-5 flex flex-wrap items-center gap-2.5">
                 <Link
                   href={user ? '/app' : '/signup'}
                   className={VG_COMPONENTS.buttons.limePill}
@@ -190,32 +181,29 @@ export function HeroLivingMatter() {
                   <span>{user ? 'Open Web Vault' : 'Get started'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
-                <a
-                  href="#scroll-story"
-                  className="inline-flex items-center gap-1.5 h-12 px-4 rounded-full text-[13.5px] font-medium text-[var(--vg-ink)] hover:bg-[#FFFFFF]/70 dark:hover:bg-white/[0.08] border border-[var(--vg-border)] transition-[background-color,border-color]"
-                >
-                  <span>Explore the experience</span>
-                </a>
                 <Link
                   href="/install"
-                  className="inline-flex items-center gap-1.5 h-10 px-2.5 text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#CDFF45] transition-colors"
+                  className="inline-flex items-center gap-2 h-12 px-5 rounded-full text-[14px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F4F6F2] dark:bg-[#191D20] dark:hover:bg-[#23292E] border border-[#101211]/10 dark:border-white/[0.14] shadow-sm transition-colors whitespace-nowrap"
                 >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>Download Android</span>
+                  <Smartphone className="w-4 h-4 text-[#CDFF45]" />
+                  <span>Android App</span>
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* RIGHT QUADRANT: Interactive Triad + Magnetic Circular Volt-Lime CTA */}
-          <div className="lg:col-span-4 lg:col-start-9 flex flex-row lg:flex-col items-end justify-between lg:h-full gap-6">
-            <div ref={triadRef} className="flex flex-col lg:items-end gap-2">
+          {/* RIGHT QUADRANT: Frosted Triad Telemetry Dock + Sculpted Obsidian Story Button */}
+          <div className="lg:col-span-4 lg:col-start-9 flex flex-row lg:flex-col items-end justify-between lg:h-full gap-5">
+            <div
+              ref={triadRef}
+              className="w-full max-w-[260px] p-4 rounded-2xl bg-[#FFFFFF]/76 dark:bg-[#111416]/82 backdrop-blur-xl border border-[var(--vg-border)] shadow-sm flex flex-col lg:items-end gap-2"
+            >
               <InteractiveTriadIndex
                 items={HERO_TRIAD}
                 activeIndex={activeTriad}
                 onSelect={setActiveTriad}
               />
-              <p className="hidden sm:block text-[12px] text-[var(--vg-ink-2)] lg:text-right max-w-[230px] leading-snug">
+              <p className="hidden sm:block text-[11.5px] text-[var(--vg-ink-2)] lg:text-right leading-snug pt-1 border-t border-[var(--vg-border)] w-full">
                 {HERO_TRIAD[activeTriad]?.hint}
               </p>
             </div>
