@@ -48,8 +48,9 @@ Open **Vercel Dashboard → `vectorgallery` project → Settings → Environment
 | Variable Name | Value / Where to Get It | Required? |
 | :--- | :--- | :--- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project Settings → API → Project URL | **Yes** |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Project Settings → API → `anon` key | **Yes** |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Project Settings → API → `service_role` key | **Yes** |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase API Keys → Publishable key (`sb_publishable_...`) | **Yes** |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same Publishable/`anon` key (for full compatibility) | Recommended |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase API Keys → Secret / `service_role` key *(keep server-only)* | **Yes** |
 | `STORAGE_DRIVER` | `supabase` | **Yes** |
 | `SUPABASE_STORAGE_BUCKET` | `documents` | **Yes** |
 | `CREDENTIAL_ENCRYPTION_KEY` | Your 64-hex string from `openssl rand -hex 32` | **Yes** |

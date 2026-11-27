@@ -18,8 +18,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signUp: async () => ({ data: null, error: null }),
   signIn: async () => ({ data: null, error: null }),
-  signOut: async () => { },
-  refreshSession: async () => { },
+  signOut: async () => {},
+  refreshSession: async () => {},
 })
 
 function syncBrowserUserCache(currentUser: User | null, token?: string | null) {
@@ -28,7 +28,9 @@ function syncBrowserUserCache(currentUser: User | null, token?: string | null) {
     localStorage.setItem('vm_user_email', currentUser.email)
     localStorage.setItem(
       'vm_user_name',
-      currentUser.user_metadata?.full_name || currentUser.email.split('@')[0]
+      currentUser.user_metadata?.full_name ||
+        (currentUser as any).name ||
+        currentUser.email.split('@')[0]
     )
     if (token) {
       document.cookie = `sb-access-token=${token}; path=/; max-age=604800; SameSite=Lax`
@@ -49,30 +51,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hydrateSession = useCallback(async () => {
     try {
-      if (!supabaseEnabled) {
-        const res = await fetch('/api/auth/session')
-        if (res.ok) {
-          const json = await res.json()
-          const currentUser = json?.user ?? null
-          const currentSession = json?.session ?? null
-          setUser(currentUser)
-          setSession(currentSession)
-          syncBrowserUserCache(currentUser, currentSession?.access_token)
-        } else {
-          setUser(null)
-          setSession(null)
+      // Server /api/auth/session respects server mode (Local Disk vs Supabase Service Role)
+      const res = await fetch('/api/auth/session')
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.user && json?.session) {
+          setUser(json.user)
+          setSession(json.session)
+          syncBrowserUserCache(json.user, json.session?.access_token)
+          return
         }
-        return
       }
 
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession()
-      setSession(currentSession)
-      setUser(currentSession?.user ?? null)
-      if (currentSession?.access_token) {
-        syncBrowserUserCache(currentSession.user, currentSession.access_token)
+      if (supabaseEnabled) {
+        const healthRes = await fetch('/api/health').catch(() => null)
+        const healthJson = healthRes?.ok ? await healthRes.json().catch(() => null) : null
+        if (healthJson?.database?.configured) {
+          const {
+            data: { session: currentSession },
+          } = await supabase.auth.getSession()
+          setSession(currentSession)
+          setUser(currentSession?.user ?? null)
+          if (currentSession?.access_token) {
+            syncBrowserUserCache(currentSession.user, currentSession.access_token)
+          }
+          return
+        }
       }
+
+      setUser(null)
+      setSession(null)
     } catch (err) {
       console.error('Error getting auth session:', err)
     } finally {
@@ -84,25 +92,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hydrateSession()
 
     if (!supabaseEnabled) {
-      const onAuthChanged = () => {
-        // Re-sync cleanly when auth events fire across tabs or profile updates
-      }
+      const onAuthChanged = () => {}
       window.addEventListener('vectormind_auth_change', onAuthChanged)
       return () => window.removeEventListener('vectormind_auth_change', onAuthChanged)
     }
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      setSession(currentSession)
-      setUser(currentSession?.user ?? null)
-      setLoading(false)
-
-      if (currentSession?.access_token) {
-        syncBrowserUserCache(currentSession.user, currentSession.access_token)
-      } else {
-        document.cookie = 'sb-access-token=; path=/; max-age=0'
+    } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      if (event === 'SIGNED_OUT') {
+        setSession(null)
+        setUser(null)
+        document.cookie = 'sb-access-token=; path=/; max-age=0; SameSite=Lax'
         syncBrowserUserCache(null)
+        return
+      }
+      if (currentSession?.access_token) {
+        setSession(currentSession)
+        setUser(currentSession.user)
+        setLoading(false)
+        syncBrowserUserCache(currentSession.user, currentSession.access_token)
       }
     })
 
@@ -140,43 +149,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const signIn = async (email: string, password: string) => {
-    if (!supabaseEnabled) {
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        })
-        const json = await res.json()
-        if (!res.ok) {
-          return { data: null, error: { message: json.error || 'Invalid email or password.' } }
-        }
-        setSession(json.session)
-        setUser(json.user)
-        syncBrowserUserCache(json.user, json.session?.access_token)
-        return { data: json, error: null }
-      } catch (err: any) {
-        return { data: null, error: { message: err.message || 'Network error during sign in' } }
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        return { data: null, error: { message: json.error || 'Invalid email or password.' } }
       }
+      if (supabaseEnabled && json?.session?.access_token && json?.session?.refresh_token) {
+        await supabase.auth
+          .setSession({
+            access_token: json.session.access_token,
+            refresh_token: json.session.refresh_token,
+          })
+          .catch(() => {})
+      }
+      setSession(json.session)
+      setUser(json.user)
+      syncBrowserUserCache(json.user, json.session?.access_token)
+      return { data: json, error: null }
+    } catch (err: any) {
+      return { data: null, error: { message: err.message || 'Network error during sign in' } }
     }
-
-    const res = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (res.data?.session) {
-      setSession(res.data.session)
-      setUser(res.data.session.user)
-      syncBrowserUserCache(res.data.session.user, res.data.session.access_token)
-    }
-    return res
   }
 
   const signOut = async () => {
-    if (!supabaseEnabled) {
-      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => { })
-    } else {
-      await supabase.auth.signOut().catch(() => { })
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+    if (supabaseEnabled) {
+      await supabase.auth.signOut().catch(() => {})
     }
     setSession(null)
     setUser(null)
