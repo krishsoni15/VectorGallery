@@ -27,8 +27,13 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const { signUp, signIn } = useAuth()
+  const { user, signUp } = useAuth()
   const router = useRouter()
+
+  const getSafeRedirect = () => {
+    const raw = typeof router.query.redirect === 'string' ? router.query.redirect : '/app'
+    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/app'
+  }
 
   const safeNavigate = (target: string) => {
     if (router.pathname !== target) {
@@ -40,6 +45,12 @@ export default function SignUpPage() {
     e.preventDefault()
     setError(null)
 
+    const cleanEmail = email.trim()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setError('Please enter a valid email address.')
+      return
+    }
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters long.')
       return
@@ -48,68 +59,22 @@ export default function SignUpPage() {
     setLoading(true)
 
     try {
-      const cleanEmail = email.trim()
       const cleanName = name.trim() || cleanEmail.split('@')[0]
-
-      const { data, error: signUpError } = await signUp(
-        cleanEmail,
-        password,
-        cleanName
-      )
+      const { error: signUpError } = await signUp(cleanEmail, password, cleanName)
 
       if (signUpError) {
         const errStr = (signUpError.message || '').toLowerCase()
-
         if (
           errStr.includes('already registered') ||
           errStr.includes('already exists') ||
           errStr.includes('user_already_exists')
         ) {
-          const { error: signInErr } = await signIn(cleanEmail, password)
-          if (!signInErr) {
-            localStorage.setItem('vm_user_name', cleanName)
-            localStorage.setItem('vm_user_email', cleanEmail)
-            window.dispatchEvent(new Event('vectormind_auth_change'))
-            safeNavigate('/app')
-            return
-          }
-          setError(
-            'An account with this email already exists. Please sign in with your password.'
-          )
+          setError('An account with this email already exists. Please sign in instead.')
           return
         }
-
-        if (
-          errStr.includes('rate limit') ||
-          errStr.includes('smtp') ||
-          errStr.includes('email rate limit')
-        ) {
-          const { error: signInErr } = await signIn(cleanEmail, password)
-          if (!signInErr) {
-            localStorage.setItem('vm_user_name', cleanName)
-            localStorage.setItem('vm_user_email', cleanEmail)
-            window.dispatchEvent(new Event('vectormind_auth_change'))
-            safeNavigate('/app')
-            return
-          }
-          localStorage.setItem('vm_user_name', cleanName)
-          localStorage.setItem('vm_user_email', cleanEmail)
-          document.cookie =
-            'sb-access-token=local-user-session; path=/; max-age=604800; SameSite=Lax'
-          window.dispatchEvent(new Event('vectormind_auth_change'))
-          safeNavigate('/app')
-          return
-        }
-
-        setError(signUpError.message)
+        setError(signUpError.message || 'Unable to create account. Please try again.')
       } else {
-        localStorage.setItem('vm_user_name', cleanName)
-        localStorage.setItem('vm_user_email', cleanEmail)
-        if (data?.session?.access_token) {
-          document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=604800; SameSite=Lax`
-        }
-        window.dispatchEvent(new Event('vectormind_auth_change'))
-        safeNavigate('/app')
+        safeNavigate(getSafeRedirect())
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred during signup.')
@@ -201,6 +166,20 @@ export default function SignUpPage() {
                 Keep photos, scanned documents, and mobile backups connected in one private space.
               </p>
             </div>
+
+            {user && (
+              <div className="mb-6 p-3.5 rounded-xl bg-[#087F5B]/10 dark:bg-[#CFFF49]/10 border border-[#087F5B]/25 dark:border-[#CFFF49]/25 flex items-center justify-between gap-3">
+                <p className="text-xs text-[var(--vg-ink)] truncate">
+                  Signed in as <span className="font-semibold">{user.email}</span>
+                </p>
+                <Link
+                  href="/app"
+                  className="text-xs font-semibold text-[#087F5B] dark:text-[#CFFF49] hover:underline shrink-0"
+                >
+                  Open Vault →
+                </Link>
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 py-3 px-4 rounded-xl bg-rose-500/10 border-l-2 border-rose-500 text-rose-700 dark:text-rose-300 text-[13px]">

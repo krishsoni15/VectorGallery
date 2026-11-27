@@ -1,26 +1,17 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient, User } from '@supabase/supabase-js'
 import type { NextApiRequest } from 'next'
+import { isLocalTokenFormat, verifyLocalSessionToken, GUEST_USER_ID } from './localAuthStore'
+import {
+  isSupabaseConfigured,
+  safeSupabaseAnonKey,
+  safeSupabaseUrl,
+  supabase,
+} from './supabaseClient'
+
+export { isSupabaseConfigured, safeSupabaseAnonKey, safeSupabaseUrl, supabase }
 
 const rawSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const rawSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 const rawSupabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-// Safe fallbacks to prevent `@supabase/supabase-js` from crashing static build evaluation
-const safeSupabaseUrl = (rawSupabaseUrl && rawSupabaseUrl !== 'your_supabase_url') 
-  ? rawSupabaseUrl 
-  : 'https://placeholder.supabase.co'
-const safeSupabaseAnonKey = (rawSupabaseAnonKey && rawSupabaseAnonKey !== 'your_supabase_anon_key') 
-  ? rawSupabaseAnonKey 
-  : 'placeholder-anon-key'
-
-export function isSupabaseConfigured(): boolean {
-  return !!(
-    rawSupabaseUrl && 
-    rawSupabaseUrl !== 'your_supabase_url' && 
-    rawSupabaseAnonKey && 
-    rawSupabaseAnonKey !== 'your_supabase_anon_key'
-  )
-}
 
 export function isServiceRoleConfigured(): boolean {
   return !!(
@@ -30,12 +21,6 @@ export function isServiceRoleConfigured(): boolean {
     rawSupabaseServiceKey !== 'your_supabase_service_role_key'
   )
 }
-
-// Client-side browser Supabase instance
-export const supabase: SupabaseClient = createClient(
-  safeSupabaseUrl,
-  safeSupabaseAnonKey
-)
 
 // Server-side admin Supabase instance (bypasses RLS for backend operations)
 export const getAdminSupabase = (): SupabaseClient => {
@@ -50,24 +35,48 @@ export const getAdminSupabase = (): SupabaseClient => {
   })
 }
 
+export function extractAuthToken(req: NextApiRequest): string | null {
+  const authHeader = req.headers.authorization
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7).trim()
+  }
+  if (req.cookies?.['sb-access-token']) {
+    return req.cookies['sb-access-token']
+  }
+  return null
+}
+
+/** True when a caller sent an explicit session/bearer credential other than the guest sandbox marker. */
+export function hasExplicitCredential(req: NextApiRequest): boolean {
+  const token = extractAuthToken(req)
+  return Boolean(token && token !== 'guest-session-token')
+}
+
 // Helper to extract the authenticated user from Next.js API requests
-export async function getServerUser(req: NextApiRequest) {
+export async function getServerUser(req: NextApiRequest): Promise<User | null> {
   try {
-    const authHeader = req.headers.authorization
-    let token: string | null = null
+    const token = extractAuthToken(req)
 
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7)
-    } else if (req.cookies['sb-access-token']) {
-      token = req.cookies['sb-access-token']
-    }
-
-    if (!token || token.startsWith('guest-') || token.startsWith('local-')) {
+    if (!token || token.startsWith('guest-')) {
       return null
     }
 
-    if (!isServiceRoleConfigured() && !isSupabaseConfigured()) {
-      return null
+    // Verify signed local session tokens when running in local mode
+    if (!isServiceRoleConfigured()) {
+      if (!isLocalTokenFormat(token)) {
+        return null
+      }
+      const localUser = verifyLocalSessionToken(token)
+      if (!localUser) return null
+      return {
+        id: localUser.id,
+        aud: 'authenticated',
+        role: 'authenticated',
+        email: localUser.email,
+        created_at: localUser.created_at,
+        app_metadata: { provider: 'local' },
+        user_metadata: { full_name: localUser.name },
+      } as unknown as User
     }
 
     const adminSupabase = getAdminSupabase()
@@ -102,12 +111,12 @@ export async function getServerUserInfo(req: NextApiRequest): Promise<ServerUser
         isGuest: false,
       }
     }
-  } catch (e) {
+  } catch {
     // Fallback to guest
   }
 
   return {
-    id: '00000000-0000-0000-0000-000000000000',
+    id: GUEST_USER_ID,
     email: 'guest@vectorgallery.app',
     name: 'Guest User',
     isGuest: true,

@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
 import { getLocalFiles } from '@/lib/localMetadataStore'
+import { listLocalDevices } from '@/lib/localAppStore'
+import { GUEST_USER_ID } from '@/lib/localAuthStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -10,15 +12,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
-    const userId = user?.id || '00000000-0000-0000-0000-000000000000'
+    const userId = user?.id || GUEST_USER_ID
 
-    const totalQuotaBytes = 15 * 1024 * 1024 * 1024 // 15 GB free personal tier
+    const totalQuotaBytes = 15 * 1024 * 1024 * 1024
 
     if (!isServiceRoleConfigured()) {
-      const localFiles = getLocalFiles().filter(f => !f.is_trashed)
+      const localFiles = getLocalFiles(userId).filter((f) => !f.is_trashed)
+      const devices = listLocalDevices(userId)
+
       let totalBytesUsed = 0
       let photosBytes = 0
       let videosBytes = 0
@@ -43,6 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const percentUsed = Math.min(100, Number(((totalBytesUsed / totalQuotaBytes) * 100).toFixed(2)))
+      const lastDeviceSync = devices[0]?.last_sync_at || null
 
       return res.status(200).json({
         storage: {
@@ -75,11 +80,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           screenshots: screenshotsCount,
         },
         backup_health: {
-          connected_devices: 1,
-          last_sync_at: localFiles.length > 0 ? localFiles[0].created_at : new Date().toISOString(),
-          sync_status: 'ACTIVE',
+          connected_devices: devices.length > 0 ? devices.length : userId === GUEST_USER_ID ? 1 : 0,
+          last_sync_at: lastDeviceSync || (localFiles.length > 0 ? localFiles[0].created_at : null),
+          sync_status: devices.length > 0 || userId === GUEST_USER_ID ? 'ACTIVE' : 'IDLE',
         },
-        recent_files: localFiles.slice(0, 10).map(f => ({
+        recent_files: localFiles.slice(0, 10).map((f) => ({
           id: f.id,
           name: f.original_name,
           original_name: f.original_name,
@@ -99,7 +104,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const supabase = getAdminSupabase()
 
-    // 1. Calculate actual file counts and total byte usage
     const { data: files } = await supabase
       .from('files')
       .select('id, original_name, category, size_bytes, created_at, mime_type, thumbnail_url, extracted_text, is_favorite, sha256_hash')
@@ -131,7 +135,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       else if (f.category === 'screenshots') { screenshotsCount++; screenshotsBytes += sz }
     }
 
-    // 2. Fetch connected devices
     const { data: devices } = await supabase
       .from('devices')
       .select('id, device_name, platform, last_sync_at, sync_status')
@@ -171,9 +174,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         screenshots: screenshotsCount,
       },
       backup_health: {
-        connected_devices: (devices || []).length || 1,
-        last_sync_at: lastSyncAt || new Date().toISOString(),
-        sync_status: devices && devices.length > 0 ? devices[0].sync_status : 'ACTIVE',
+        connected_devices: (devices || []).length,
+        last_sync_at: lastSyncAt,
+        sync_status: devices && devices.length > 0 ? devices[0].sync_status : 'IDLE',
       },
       recent_files: fileList.slice(0, 8),
     })
@@ -190,4 +193,3 @@ function formatBytes(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
 }
-

@@ -361,7 +361,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             </button>
 
             <button
-              onClick={() => signOut()}
+              onClick={async () => {
+                await signOut()
+                router.push('/login')
+              }}
               title="Sign Out"
               aria-label="Sign out"
               className="p-1.5 rounded-lg text-[#626B64] dark:text-[#9AA69E] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors"

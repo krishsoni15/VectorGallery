@@ -9,6 +9,7 @@ import {
   UNFOLD_SCENES,
 } from '@/components/landing/scroll-scenes/SphereUnfoldTimeline'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/lib/AuthContext'
 
 interface StoryArtifact {
   id: string
@@ -123,6 +124,7 @@ export function MemoryUnfoldSection() {
   const stRef = useRef<{ start: number; end: number } | null>(null)
 
   const reduced = useReducedMotion()
+  const { user } = useAuth()
   const [isDark, setIsDark] = useState(false)
   const [progress, setProgress] = useState(0)
   const [manualSceneIdx, setManualSceneIdx] = useState<number | null>(null)
@@ -307,8 +309,8 @@ export function MemoryUnfoldSection() {
                 <span>Skip story</span>
                 <ArrowDown className="w-3.5 h-3.5" />
               </a>
-              <Link href="/app" className={cn(VG_COMPONENTS.buttons.primarySm, 'whitespace-nowrap')}>
-                <span>Open Vault</span>
+              <Link href={user ? '/app' : '/signup'} className={cn(VG_COMPONENTS.buttons.primarySm, 'whitespace-nowrap')}>
+                <span>{user ? 'Open Vault' : 'Get started'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

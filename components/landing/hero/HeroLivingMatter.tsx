@@ -11,6 +11,7 @@ import {
 import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { MemorySphereCanvas } from '@/components/landing/sculpture/MemorySphereCanvas'
 import { LivingAuraCanvas } from '@/components/landing/shaders/LivingAuraCanvas'
+import { useAuth } from '@/lib/AuthContext'
 
 const HERO_TRIAD: TriadItem[] = [
   {
@@ -47,6 +48,7 @@ const PROVENANCE_CAPTURES = [
  */
 export function HeroLivingMatter() {
   const reduced = useReducedMotion()
+  const { user } = useAuth()
   const [activeTriad, setActiveTriad] = useState(0)
   const [entranceProgress, setEntranceProgress] = useState(0)
 
@@ -182,10 +184,10 @@ export function HeroLivingMatter() {
 
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Link
-                  href="/app"
+                  href={user ? '/app' : '/signup'}
                   className={VG_COMPONENTS.buttons.limePill}
                 >
-                  <span>Get started</span>
+                  <span>{user ? 'Open Web Vault' : 'Get started'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <a

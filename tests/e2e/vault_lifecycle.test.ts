@@ -6,18 +6,31 @@ import { analyzeScreenshot } from '../../lib/intelligence/screenshot'
 import { parseDocument } from '../../lib/intelligence/documentParser'
 import { LocalStorageDriver } from '../../lib/storage/localStorage'
 import { saveLocalFile, updateLocalFile, deleteLocalFile, findLocalFileById } from '../../lib/localMetadataStore'
+import { removeLocalVectorChunks } from '../../lib/localVectorStore'
 import { rankFilesByRelevance } from '../../lib/search/smartMatcher'
 
 describe('Vault Lifecycle — Ingestion, Indexing, Retrieval & Trash Restoration', () => {
   const fixtureRoot = path.join(process.cwd(), 'tests', 'fixtures', 'e2e_uploads')
   const testStorage = new LocalStorageDriver(fixtureRoot)
   const tempFileIds: string[] = []
+  const tempUploadKeys: string[] = []
 
   afterAll(() => {
+    if (tempFileIds.length > 0) {
+      removeLocalVectorChunks(tempFileIds)
+    }
     for (const id of tempFileIds) {
       deleteLocalFile(id, true)
     }
+    for (const key of tempUploadKeys) {
+      try {
+        const full = path.join(process.cwd(), 'public', 'uploads', key)
+        if (fs.existsSync(full)) fs.unlinkSync(full)
+      } catch {}
+    }
     try {
+      const userUploadDir = path.join(process.cwd(), 'public', 'uploads', 'vitest-e2e-user')
+      if (fs.existsSync(userUploadDir)) fs.rmSync(userUploadDir, { recursive: true, force: true })
       if (fs.existsSync(fixtureRoot)) {
         fs.rmSync(fixtureRoot, { recursive: true, force: true })
       }
@@ -38,6 +51,10 @@ describe('Vault Lifecycle — Ingestion, Indexing, Retrieval & Trash Restoration
       mimeType: 'text/plain',
       userId: 'vitest-e2e-user',
     })
+    if (processed.fileId) tempFileIds.push(processed.fileId)
+    if (processed.storageUrl?.startsWith('/uploads/')) {
+      tempUploadKeys.push(processed.storageUrl.replace('/uploads/', ''))
+    }
     expect(processed.category).toBe('documents')
     expect(processed.status).toBe('READY')
   })

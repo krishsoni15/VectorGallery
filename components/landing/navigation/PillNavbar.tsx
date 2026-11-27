@@ -7,6 +7,7 @@ import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
 import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
 import { REPO_URL } from '@/components/landing/tokens'
+import { useAuth } from '@/lib/AuthContext'
 import { cn } from '@/lib/utils'
 
 interface PillNavbarProps {
@@ -28,6 +29,7 @@ const NAV_LINKS = [
  */
 export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
   void hasLocalApk
+  const { user } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [hiddenOnDown, setHiddenOnDown] = useState(false)
   const [activeId, setActiveId] = useState<string>('')
@@ -178,20 +180,41 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
 
           <ThemeSwitch className="w-8 h-8" />
 
-          <Link
-            href="/login"
-            className="hidden sm:inline-flex items-center h-8 px-3 rounded-full text-[12.5px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#FFFFFF]/75 dark:hover:bg-white/[0.08] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
-          >
-            Sign in
-          </Link>
+          {user ? (
+            <>
+              <Link
+                href="/account"
+                className="hidden sm:inline-flex items-center h-8 px-3 rounded-full text-[12.5px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#FFFFFF]/75 dark:hover:bg-white/[0.08] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
+              >
+                Account
+              </Link>
 
-          <Link
-            href="/app"
-            className={cn(VG_COMPONENTS.buttons.primarySm, 'hidden sm:inline-flex h-8 lg:h-8 px-3.5 lg:px-4 text-[12.5px] whitespace-nowrap')}
-          >
-            <span>Get started</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+              <Link
+                href="/app"
+                className={cn(VG_COMPONENTS.buttons.primarySm, 'hidden sm:inline-flex h-8 lg:h-8 px-3.5 lg:px-4 text-[12.5px] whitespace-nowrap')}
+              >
+                <span>Open Vault</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden sm:inline-flex items-center h-8 px-3 rounded-full text-[12.5px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#FFFFFF]/75 dark:hover:bg-white/[0.08] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
+              >
+                Sign in
+              </Link>
+
+              <Link
+                href="/signup"
+                className={cn(VG_COMPONENTS.buttons.primarySm, 'hidden sm:inline-flex h-8 lg:h-8 px-3.5 lg:px-4 text-[12.5px] whitespace-nowrap')}
+              >
+                <span>Get started</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </>
+          )}
 
           <button
             type="button"
@@ -241,18 +264,18 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
               </a>
               <div className="pt-3 mt-2 border-t border-[var(--vg-border)] flex items-center gap-2.5">
                 <Link
-                  href="/login"
+                  href={user ? '/account' : '/login'}
                   onClick={() => setMobileOpen(false)}
                   className="flex-1 h-10 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface-2)] flex items-center justify-center text-[13.5px] font-medium"
                 >
-                  Sign in
+                  {user ? 'Account' : 'Sign in'}
                 </Link>
                 <Link
-                  href="/app"
+                  href={user ? '/app' : '/signup'}
                   onClick={() => setMobileOpen(false)}
                   className={cn(VG_COMPONENTS.buttons.limePill, 'flex-1 h-10 px-4 text-[13.5px]')}
                 >
-                  <span>Get started</span>
+                  <span>{user ? 'Open Vault' : 'Get started'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>

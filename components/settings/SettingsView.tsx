@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import {
   User,
   Shield,
   Cpu,
   HardDrive,
   Sun,
-  Lock,
   Smartphone,
   Save,
   Trash2,
@@ -13,23 +14,40 @@ import {
   CheckCircle,
   ExternalLink,
   Monitor,
+  AlertCircle,
+  LogOut,
+  X,
 } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
 
 type SettingsSection = 'account' | 'backup' | 'ai' | 'storage' | 'appearance' | 'privacy'
 
 export const SettingsView: React.FC = () => {
-  const { user } = useAuth()
+  const { user, signOut, refreshSession } = useAuth()
+  const router = useRouter()
   const [activeSection, setActiveSection] = useState<SettingsSection>('account')
+
+  // Account & Profile state
+  const [displayName, setDisplayName] = useState('')
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
+  const [profileError, setProfileError] = useState<string | null>(null)
 
   // State for AI keys
   const [geminiKey, setGeminiKey] = useState('')
   const [groqKey, setGroqKey] = useState('')
   const [cohereKey, setCohereKey] = useState('')
   const [openaiKey, setOpenaiKey] = useState('')
-  const [existingKeys, setExistingKeys] = useState<Record<string, string>>({})
-  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [existingKeys, setExistingKeys] = useState<Record<string, { last4: string; source: 'personal' | 'env' }>>({})
+  const [envProviders, setEnvProviders] = useState<Record<string, boolean>>({})
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [backupSaved, setBackupSaved] = useState(false)
+
+  // Delete / purge account state
+  const [confirmPurge, setConfirmPurge] = useState(false)
+  const [purging, setPurging] = useState(false)
+  const [purgeNotice, setPurgeNotice] = useState<string | null>(null)
 
   // Backup settings state
   const [wifiOnly, setWifiOnly] = useState(true)
@@ -44,26 +62,44 @@ export const SettingsView: React.FC = () => {
     audio: false,
   })
 
-  // Load configured keys and user profile on mount
-  useEffect(() => {
-    // 1. Fetch provider keys
-    fetch('/api/auth/provider-keys')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.keys && Array.isArray(data.keys)) {
-          const map: Record<string, string> = {}
-          data.keys.forEach((k: any) => {
-            map[k.provider] = k.key_last4 || 'Configured'
-          })
-          setExistingKeys(map)
+  const refreshProviderKeys = useCallback(async () => {
+    if (!user) {
+      setExistingKeys({})
+      try {
+        const hRes = await fetch('/api/health')
+        if (hRes.ok) {
+          const hData = await hRes.json()
+          setEnvProviders(hData?.aiProviders || {})
         }
-      })
-      .catch(() => {})
+      } catch {}
+      return
+    }
 
-    // 2. Fetch profile & backup settings
+    try {
+      const res = await fetch('/api/auth/provider-keys')
+      if (res.ok) {
+        const data = await res.json()
+        const map: Record<string, { last4: string; source: 'personal' | 'env' }> = {}
+        ;(data?.keys || []).forEach((k: any) => {
+          map[k.provider] = {
+            last4: k.key_last4 || 'Configured',
+            source: k.source === 'env' ? 'env' : 'personal',
+          }
+        })
+        setExistingKeys(map)
+      }
+    } catch {}
+  }, [user])
+
+  useEffect(() => {
+    refreshProviderKeys()
+
     fetch('/api/v2/auth/profile')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        if (data?.profile?.full_name) {
+          setDisplayName(data.profile.full_name)
+        }
         const settings = data?.profile?.backup_settings
         if (settings) {
           if (typeof settings.wifi_only === 'boolean') setWifiOnly(settings.wifi_only)
@@ -80,71 +116,120 @@ export const SettingsView: React.FC = () => {
         }
       })
       .catch(() => {})
-    // 3. Fetch storage stats
+
     fetch('/api/v2/dashboard/stats')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) setStorageStats(data)
       })
       .catch(() => {})
-    // 4. Initialize Theme
+
     if (typeof window !== 'undefined') {
       const savedTheme = (localStorage.getItem('vm_theme') as 'dark' | 'light') || 'dark'
       setCurrentTheme(savedTheme)
     }
-  }, [])
+  }, [refreshProviderKeys, user?.id])
 
   const handleSetTheme = (theme: 'dark' | 'light') => {
     setCurrentTheme(theme)
     if (typeof window !== 'undefined') {
       localStorage.setItem('vm_theme', theme)
-      if (theme === 'light') {
-        document.documentElement.classList.add('light')
-        document.documentElement.classList.remove('dark')
-      } else {
-        document.documentElement.classList.add('dark')
-        document.documentElement.classList.remove('light')
-      }
       window.dispatchEvent(new Event('vm_theme_change'))
+    }
+    fetch('/api/v2/auth/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ theme }),
+    }).catch(() => {})
+  }
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || !displayName.trim()) return
+    setProfileSaving(true)
+    setProfileError(null)
+    setProfileSaved(false)
+    try {
+      const res = await fetch('/api/v2/auth/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: displayName.trim() }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setProfileError(json.error || 'Failed to update profile')
+      } else {
+        setProfileSaved(true)
+        await refreshSession()
+        setTimeout(() => setProfileSaved(false), 3000)
+      }
+    } catch (err: any) {
+      setProfileError(err.message || 'Network error while updating profile')
+    } finally {
+      setProfileSaving(false)
     }
   }
 
   const handleSaveKeys = async () => {
-    try {
-      const keysToSave = [
-        { provider: 'gemini', key: geminiKey },
-        { provider: 'groq', key: groqKey },
-        { provider: 'cohere', key: cohereKey },
-        { provider: 'openai', key: openaiKey },
-      ].filter((k) => k.key.trim().length > 0)
+    setSaveError(null)
+    setSaveSuccess(null)
+    if (!user) {
+      setSaveError('Please sign in or create an account to save personal API keys.')
+      return
+    }
 
+    const keysToSave = [
+      { provider: 'gemini', key: geminiKey },
+      { provider: 'groq', key: groqKey },
+      { provider: 'cohere', key: cohereKey },
+      { provider: 'openai', key: openaiKey },
+    ].filter((k) => k.key.trim().length > 0)
+
+    if (keysToSave.length === 0) {
+      setSaveError('Enter at least one API key before saving.')
+      return
+    }
+
+    try {
       for (const item of keysToSave) {
-        await fetch('/api/auth/provider-keys', {
+        const res = await fetch('/api/auth/provider-keys', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ provider: item.provider, apiKey: item.key }),
         })
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          throw new Error(json.error || `Failed to save ${item.provider} key`)
+        }
       }
 
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
+      setSaveSuccess('API key(s) encrypted and saved!')
+      setGeminiKey('')
+      setGroqKey('')
+      setCohereKey('')
+      setOpenaiKey('')
+      await refreshProviderKeys()
+      setTimeout(() => setSaveSuccess(null), 3500)
+    } catch (e: any) {
+      setSaveError(e.message || 'Error saving keys')
+    }
+  }
 
-      // Refresh keys
-      const res = await fetch('/api/auth/provider-keys')
+  const handleRemovePersonalKey = async (providerId: string) => {
+    setSaveError(null)
+    try {
+      const res = await fetch('/api/auth/provider-keys', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: providerId }),
+      })
       if (res.ok) {
-        const data = await res.json()
-        const map: Record<string, string> = {}
-        data.keys?.forEach((k: any) => {
-          map[k.provider] = k.key_last4 || 'Configured'
-        })
-        setExistingKeys(map)
-        setGeminiKey('')
-        setGroqKey('')
-        setCohereKey('')
-        setOpenaiKey('')
+        setSaveSuccess(`Removed personal ${providerId.toUpperCase()} key.`)
+        await refreshProviderKeys()
+        setTimeout(() => setSaveSuccess(null), 3000)
       }
-    } catch (e) {
-      console.error('Error saving keys:', e)
+    } catch (e: any) {
+      setSaveError(e.message || 'Failed to delete key')
     }
   }
 
@@ -154,7 +239,7 @@ export const SettingsView: React.FC = () => {
         .filter(([_, enabled]) => enabled)
         .map(([name]) => name)
 
-      await fetch('/api/v2/auth/profile', {
+      const res = await fetch('/api/v2/auth/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -165,9 +250,10 @@ export const SettingsView: React.FC = () => {
           },
         }),
       })
-
-      setBackupSaved(true)
-      setTimeout(() => setBackupSaved(false), 3000)
+      if (res.ok) {
+        setBackupSaved(true)
+        setTimeout(() => setBackupSaved(false), 3000)
+      }
     } catch (e) {
       console.error('Error saving backup preferences:', e)
     }
@@ -180,7 +266,7 @@ export const SettingsView: React.FC = () => {
         const data = await res.json()
         const manifest = {
           export_timestamp: new Date().toISOString(),
-          user: user?.email || 'user',
+          user: user?.email || 'sandbox',
           total_files: data.total || (data.files || []).length,
           files: data.files || [],
         }
@@ -196,6 +282,26 @@ export const SettingsView: React.FC = () => {
       }
     } catch (e) {
       console.error('Export error:', e)
+    }
+  }
+
+  const handlePurgeAccount = async () => {
+    if (!user) return
+    setPurging(true)
+    setPurgeNotice(null)
+    try {
+      const res = await fetch('/api/v2/auth/profile', { method: 'DELETE' })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        setPurgeNotice(err.error || 'Failed to delete account.')
+        setPurging(false)
+        return
+      }
+      await signOut()
+      router.push('/signup')
+    } catch (e: any) {
+      setPurgeNotice(e.message || 'Deletion failed')
+      setPurging(false)
     }
   }
 
@@ -220,7 +326,6 @@ export const SettingsView: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-start">
-        {/* Navigation Sidebar */}
         <div className="rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] p-2 space-y-1 shadow-sm">
           {sections.map((sec) => {
             const Icon = sec.icon
@@ -243,34 +348,126 @@ export const SettingsView: React.FC = () => {
           })}
         </div>
 
-        {/* Section Content Area */}
         <div className="md:col-span-3 rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.08] p-5 sm:p-6 space-y-6 shadow-sm">
           {/* 1. Account Settings */}
           {activeSection === 'account' && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-[#101211] dark:text-[#F3F5F1] pb-2 border-b border-[#DDE2DC] dark:border-white/[0.06]">
-                Account &amp; Identity
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-[#555E58] dark:text-[#9AA69E] block mb-1">Email Address</label>
-                  <input
-                    type="text"
-                    disabled
-                    value={user?.email || 'guest@vectorgallery.app'}
-                    className="w-full bg-[#F2F3F0] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#555E58] dark:text-[#9AA69E] font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-[#555E58] dark:text-[#9AA69E] block mb-1">User ID</label>
-                  <input
-                    type="text"
-                    disabled
-                    value={user?.id || '00000000-0000-0000-0000-000000000000'}
-                    className="w-full bg-[#F2F3F0] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#626B64] dark:text-[#9AA69E] font-mono"
-                  />
-                </div>
+            <div className="space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[#DDE2DC] dark:border-white/[0.06]">
+                <h3 className="text-sm font-bold text-[#101211] dark:text-[#F3F5F1]">
+                  Account &amp; Identity
+                </h3>
+                <span
+                  className={`text-[10.5px] px-2.5 py-0.5 rounded-full font-mono font-semibold border ${
+                    user
+                      ? 'bg-[#087F5B]/10 dark:bg-[#CFFF49]/15 text-[#087F5B] dark:text-[#CFFF49] border-[#087F5B]/25 dark:border-[#CFFF49]/30'
+                      : 'bg-[#F2F3F0] dark:bg-white/[0.06] text-[#555E58] dark:text-[#9AA69E] border-[#DDE2DC] dark:border-white/[0.10]'
+                  }`}
+                >
+                  {user ? 'Authenticated Account' : 'Local Sandbox Session'}
+                </span>
               </div>
+
+              {user ? (
+                <form onSubmit={handleSaveProfile} className="space-y-4">
+                  <div>
+                    <label htmlFor="settings-display-name" className="text-xs font-medium text-[#555E58] dark:text-[#9AA69E] block mb-1">
+                      Display Name
+                    </label>
+                    <input
+                      id="settings-display-name"
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Your display name"
+                      className="w-full bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.12] rounded-xl px-3 py-2 text-xs text-[#101211] dark:text-[#F3F5F1] focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-[#555E58] dark:text-[#9AA69E] block mb-1">Email Address</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={user.email || ''}
+                      className="w-full bg-[#F2F3F0] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#555E58] dark:text-[#9AA69E] font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-[#555E58] dark:text-[#9AA69E] block mb-1">User ID</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={user.id}
+                      className="w-full bg-[#F2F3F0] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#626B64] dark:text-[#9AA69E] font-mono"
+                    />
+                  </div>
+
+                  {profileError && (
+                    <p className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5" /> {profileError}
+                    </p>
+                  )}
+
+                  <div className="pt-2 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href="/account"
+                        className="px-3.5 py-2 rounded-full border border-[#DDE2DC] dark:border-white/[0.10] text-xs font-medium text-[#101211] dark:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.06] transition-colors"
+                      >
+                        Manage API Key Portal
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await signOut()
+                          router.push('/login')
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[#DDE2DC] dark:border-white/[0.10] text-xs font-medium text-[#555E58] dark:text-[#9AA69E] hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                      >
+                        <LogOut className="w-3.5 h-3.5" /> Sign out
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {profileSaved && (
+                        <span className="text-xs text-[#087F5B] dark:text-[#CFFF49] flex items-center gap-1 font-medium">
+                          <CheckCircle className="w-3.5 h-3.5" /> Profile updated!
+                        </span>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={profileSaving || !displayName.trim()}
+                        className="vg-cta-lime flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>{profileSaving ? 'Saving...' : 'Save Profile'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              ) : (
+                <div className="p-4 rounded-xl bg-[#F2F3F0]/75 dark:bg-white/[0.03] border border-[#DDE2DC] dark:border-white/[0.08] space-y-3">
+                  <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1]">
+                    You are currently browsing in Local Sandbox mode.
+                  </p>
+                  <p className="text-xs text-[#555E58] dark:text-[#9AA69E] leading-relaxed">
+                    Create a dedicated account to get an isolated vault, persistent collections, search history, chat conversations, and encrypted personal AI keys.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                    <Link
+                      href="/signup?redirect=/app"
+                      className="vg-cta-lime inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] text-xs font-semibold shadow-sm"
+                    >
+                      <span>Create Account</span>
+                    </Link>
+                    <Link
+                      href="/login?redirect=/app"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#FFFFFF] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10] text-xs font-medium text-[#101211] dark:text-[#F3F5F1]"
+                    >
+                      <span>Sign in</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -356,8 +553,22 @@ export const SettingsView: React.FC = () => {
                 AI Provider API Configuration
               </h3>
               <p className="text-xs text-[#555E58] dark:text-[#9AA69E] leading-relaxed">
-                Add your personal API keys to power semantic embeddings, OCR, and streaming chat. Keys are encrypted with AES-256-GCM.
+                Add your personal API keys to power semantic embeddings, OCR, and streaming chat. Keys are encrypted per user with AES-256-GCM.
               </p>
+
+              {!user && (
+                <div className="p-3.5 rounded-xl bg-[#F2F3F0] dark:bg-white/[0.04] border border-[#DDE2DC] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <span className="text-[#555E58] dark:text-[#9AA69E]">
+                    Sign in to store personal encrypted keys. Sandbox uses configured system defaults.
+                  </span>
+                  <Link
+                    href="/signup?redirect=/app"
+                    className="font-semibold text-[#087F5B] dark:text-[#CFFF49] hover:underline"
+                  >
+                    Create Account →
+                  </Link>
+                </div>
+              )}
 
               <div className="space-y-3">
                 {[
@@ -380,6 +591,15 @@ export const SettingsView: React.FC = () => {
                     linkLabel: 'Get Free Key',
                   },
                   {
+                    id: 'openai',
+                    label: 'OpenAI API Key',
+                    value: openaiKey,
+                    setter: setOpenaiKey,
+                    placeholder: 'sk-...',
+                    url: 'https://platform.openai.com/api-keys',
+                    linkLabel: 'Get Key',
+                  },
+                  {
                     id: 'cohere',
                     label: 'Cohere API Key',
                     value: cohereKey,
@@ -388,47 +608,75 @@ export const SettingsView: React.FC = () => {
                     url: 'https://dashboard.cohere.com',
                     linkLabel: 'Get Key',
                   },
-                ].map((provider) => (
-                  <div key={provider.id}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <label className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1]">
-                          {provider.label}
-                        </label>
-                        {existingKeys[provider.id] && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#087F5B]/10 dark:bg-[#CFFF49]/15 text-[#087F5B] dark:text-[#CFFF49] border border-[#087F5B]/25 dark:border-[#CFFF49]/30 font-mono">
-                            Active (••••{existingKeys[provider.id]})
-                          </span>
-                        )}
+                ].map((provider) => {
+                  const keyInfo = existingKeys[provider.id]
+                  const envAvailable = envProviders[provider.id]
+                  return (
+                    <div key={provider.id}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <label className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1]">
+                            {provider.label}
+                          </label>
+                          {keyInfo?.source === 'personal' ? (
+                            <span className="inline-flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full bg-[#087F5B]/10 dark:bg-[#CFFF49]/15 text-[#087F5B] dark:text-[#CFFF49] border border-[#087F5B]/25 dark:border-[#CFFF49]/30 font-mono">
+                              Personal (••••{keyInfo.last4})
+                              <button
+                                type="button"
+                                onClick={() => handleRemovePersonalKey(provider.id)}
+                                title="Remove personal key"
+                                className="hover:text-rose-500"
+                              >
+                                <X className="w-2.5 h-2.5" />
+                              </button>
+                            </span>
+                          ) : keyInfo?.source === 'env' || envAvailable ? (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] text-[#555E58] dark:text-[#9AA69E] border border-[#DDE2DC] dark:border-white/[0.10] font-mono">
+                              System Default Active
+                            </span>
+                          ) : null}
+                        </div>
+                        <a
+                          href={provider.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[10px] text-[#087F5B] dark:text-[#CFFF49] hover:underline flex items-center gap-1 font-medium"
+                        >
+                          {provider.linkLabel} <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
                       </div>
-                      <a
-                        href={provider.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] text-[#087F5B] dark:text-[#CFFF49] hover:underline flex items-center gap-1 font-medium"
-                      >
-                        {provider.linkLabel} <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
+                      <input
+                        type="password"
+                        disabled={!user}
+                        value={provider.value}
+                        onChange={(e) => provider.setter(e.target.value)}
+                        placeholder={
+                          keyInfo?.source === 'personal'
+                            ? '•••••••••••••••• (replace personal key)'
+                            : provider.placeholder
+                        }
+                        className="w-full bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#101211] dark:text-[#F3F5F1] font-mono focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49] disabled:opacity-50"
+                      />
                     </div>
-                    <input
-                      type="password"
-                      value={provider.value}
-                      onChange={(e) => provider.setter(e.target.value)}
-                      placeholder={existingKeys[provider.id] ? '••••••••••••••••' : provider.placeholder}
-                      className="w-full bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.10] rounded-xl px-3 py-2 text-xs text-[#101211] dark:text-[#F3F5F1] font-mono focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49]"
-                    />
-                  </div>
-                ))}
+                  )
+                })}
+
+                {saveError && (
+                  <p className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5" /> {saveError}
+                  </p>
+                )}
 
                 <div className="pt-2 flex items-center justify-between">
                   {saveSuccess && (
                     <span className="text-xs text-[#087F5B] dark:text-[#CFFF49] flex items-center gap-1 font-medium">
-                      <CheckCircle className="w-3.5 h-3.5" /> Saved securely!
+                      <CheckCircle className="w-3.5 h-3.5" /> {saveSuccess}
                     </span>
                   )}
                   <button
                     onClick={handleSaveKeys}
-                    className="vg-cta-lime ml-auto flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] text-xs font-semibold transition-all shadow-sm"
+                    disabled={!user}
+                    className="vg-cta-lime ml-auto flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] text-xs font-semibold transition-all shadow-sm disabled:opacity-45"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Save API Keys</span>
@@ -447,7 +695,7 @@ export const SettingsView: React.FC = () => {
                     Storage &amp; Cloud Distribution
                   </h3>
                   <p className="text-xs text-[#626B64] dark:text-[#9AA69E]">
-                    VectorGallery Personal Tier · End-to-End Encrypted
+                    VectorGallery Personal Tier · Isolated Per-User Vault
                   </p>
                 </div>
                 <span className="text-xs font-mono text-[#101211] dark:text-[#CFFF49] bg-[#F2F3F0] dark:bg-white/[0.06] px-3 py-1 rounded-full border border-[#DDE2DC] dark:border-white/[0.10]">
@@ -514,7 +762,6 @@ export const SettingsView: React.FC = () => {
                 </div>
               </div>
 
-              {/* Connected Devices Manager */}
               <div className="space-y-3 pt-2">
                 <h4 className="text-xs font-mono uppercase tracking-wider text-[#626B64] dark:text-[#9AA69E] flex items-center gap-2">
                   <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" /> Connected Devices &amp; Backups
@@ -527,14 +774,14 @@ export const SettingsView: React.FC = () => {
                         <Smartphone className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1]">Android Mobile Device</p>
+                        <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1]">Android Mobile Companion</p>
                         <p className="text-[11px] text-[#626B64] dark:text-[#9AA69E]">
                           Auto-Backup: {autoBackup ? 'Enabled' : 'Paused'} · Wi-Fi Only: {wifiOnly ? 'Yes' : 'No'}
                         </p>
                       </div>
                     </div>
                     <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#087F5B]/10 dark:bg-[#CFFF49]/15 text-[#087F5B] dark:text-[#CFFF49] border border-[#087F5B]/25 dark:border-[#CFFF49]/30 font-mono">
-                      SYNCED
+                      {storageStats?.backup_health?.connected_devices ? 'PAIRED' : 'READY'}
                     </span>
                   </div>
 
@@ -545,7 +792,7 @@ export const SettingsView: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1]">Web Browser Client</p>
-                        <p className="text-[11px] text-[#626B64] dark:text-[#9AA69E]">Desktop Web Session · Real-time Cloud Memory</p>
+                        <p className="text-[11px] text-[#626B64] dark:text-[#9AA69E]">Desktop Web Session · Real-time Vault</p>
                       </div>
                     </div>
                     <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1] border border-[#DDE2DC] dark:border-white/[0.12] font-mono">
@@ -585,7 +832,7 @@ export const SettingsView: React.FC = () => {
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-[#F2F3F0] border border-[#C7CEC6]" />
-                    <span>Liquid Silver (Light)</span>
+                    <span>Liquid Titanium (Light)</span>
                   </div>
                   {currentTheme === 'light' && <CheckCircle className="w-4 h-4 text-[#087F5B]" />}
                 </button>
@@ -601,7 +848,7 @@ export const SettingsView: React.FC = () => {
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-[#090B0A] border border-white/25" />
-                    <span>Liquid Carbon (Dark)</span>
+                    <span>Obsidian Volt (Dark)</span>
                   </div>
                   {currentTheme === 'dark' && <CheckCircle className="w-4 h-4 text-[#CFFF49]" />}
                 </button>
@@ -616,21 +863,50 @@ export const SettingsView: React.FC = () => {
                 Privacy &amp; Data Ownership
               </h3>
               <p className="text-xs text-[#555E58] dark:text-[#9AA69E] leading-relaxed">
-                VectorGallery values strict user data ownership. Your personal files, photos, and document embeddings are never used to train public models, and can be purged at any time.
+                VectorGallery enforces strict per-user vault isolation. Your uploaded files, photos, document chunks, search history, and AI conversations belong solely to your account and can be permanently purged at any time.
               </p>
 
-              <div className="pt-4 border-t border-red-500/20">
-                <button
-                  onClick={() => {
-                    if (confirm('Are you sure you want to delete your account and all stored files permanently?')) {
-                      alert('Account deletion request acknowledged.')
-                    }
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-xs text-red-600 dark:text-red-400 font-semibold transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Delete Account &amp; Purge Vault</span>
-                </button>
+              <div className="pt-4 border-t border-red-500/20 space-y-3">
+                {purgeNotice && (
+                  <p className="text-xs text-rose-600 dark:text-rose-400">{purgeNotice}</p>
+                )}
+
+                {!user ? (
+                  <p className="text-xs text-[#626B64] dark:text-[#9AA69E]">
+                    Sign in with a personal account to manage account deletion and full vault purge.
+                  </p>
+                ) : !confirmPurge ? (
+                  <button
+                    onClick={() => setConfirmPurge(true)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-xs text-red-600 dark:text-red-400 font-semibold transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete Account &amp; Purge Vault</span>
+                  </button>
+                ) : (
+                  <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-3">
+                    <p className="text-xs font-semibold text-rose-700 dark:text-rose-300">
+                      Permanently delete your account, uploaded files, collections, and AI history?
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handlePurgeAccount}
+                        disabled={purging}
+                        className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold disabled:opacity-50"
+                      >
+                        {purging ? 'Purging...' : 'Confirm Permanent Delete'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmPurge(false)}
+                        className="px-4 py-1.5 rounded-full border border-[#DDE2DC] dark:border-white/[0.15] text-xs font-medium text-[#101211] dark:text-[#F3F5F1]"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -639,4 +915,3 @@ export const SettingsView: React.FC = () => {
     </div>
   )
 }
-

@@ -13,48 +13,94 @@ export const ENV_KEY_MAP: Record<AIProvider, string> = {
 }
 
 const LOCAL_KEYS_FILE = path.join(process.cwd(), 'data', 'user_keys.json')
+const GUEST_USER_ID = '00000000-0000-0000-0000-000000000000'
 
-export function getLocalKeys(): Record<string, string> {
+interface RawLocalKeyStore {
+  byUser?: Record<string, Record<string, string>>
+  [providerOrKey: string]: any
+}
+
+function readRawLocalKeyStore(): RawLocalKeyStore {
   try {
     if (fs.existsSync(LOCAL_KEYS_FILE)) {
-      return JSON.parse(fs.readFileSync(LOCAL_KEYS_FILE, 'utf-8'))
+      return JSON.parse(fs.readFileSync(LOCAL_KEYS_FILE, 'utf-8')) || {}
     }
   } catch {}
   return {}
 }
 
-export function saveLocalKey(provider: string, rawKey: string): void {
-  try {
-    const dir = path.dirname(LOCAL_KEYS_FILE)
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-    const keys = getLocalKeys()
-    const p = provider.toLowerCase()
-    keys[p] = encrypt(rawKey)
-    fs.writeFileSync(LOCAL_KEYS_FILE, JSON.stringify(keys, null, 2))
-    
-    // Also inject into process.env for the running session
-    const envVar = ENV_KEY_MAP[p as AIProvider]
-    if (envVar) {
-      process.env[envVar] = rawKey
+function writeRawLocalKeyStore(store: RawLocalKeyStore): void {
+  const dir = path.dirname(LOCAL_KEYS_FILE)
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  fs.writeFileSync(LOCAL_KEYS_FILE, JSON.stringify(store, null, 2))
+}
+
+/**
+ * Reads local encrypted provider keys.
+ * When `userId` is omitted or guest, returns top-level sandbox keys; for registered users,
+ * returns keys strictly isolated under `byUser[userId]`.
+ */
+export function getLocalKeys(userId?: string | null): Record<string, string> {
+  const raw = readRawLocalKeyStore()
+  if (userId && userId !== GUEST_USER_ID) {
+    return raw.byUser?.[userId] || {}
+  }
+  const topLevel: Record<string, string> = {}
+  for (const [k, v] of Object.entries(raw)) {
+    if (k !== 'byUser' && typeof v === 'string') {
+      topLevel[k] = v
     }
+  }
+  return topLevel
+}
+
+export function saveLocalKey(provider: string, rawKey: string, userId?: string | null): void {
+  try {
+    const store = readRawLocalKeyStore()
+    const p = provider.toLowerCase()
+    const encrypted = encrypt(rawKey)
+
+    if (userId && userId !== GUEST_USER_ID) {
+      if (!store.byUser) store.byUser = {}
+      if (!store.byUser[userId]) store.byUser[userId] = {}
+      store.byUser[userId][p] = encrypted
+    } else {
+      store[p] = encrypted
+    }
+    writeRawLocalKeyStore(store)
   } catch (e) {
     console.error('Failed to save local key:', e)
   }
 }
 
-export function deleteLocalKey(provider: string): void {
+export function deleteLocalKey(provider: string, userId?: string | null): void {
   try {
-    const keys = getLocalKeys()
+    const store = readRawLocalKeyStore()
     const p = provider.toLowerCase()
-    delete keys[p]
-    fs.writeFileSync(LOCAL_KEYS_FILE, JSON.stringify(keys, null, 2))
 
-    const envVar = ENV_KEY_MAP[p as AIProvider]
-    if (envVar) {
-      delete process.env[envVar]
+    if (userId && userId !== GUEST_USER_ID) {
+      if (store.byUser?.[userId]) {
+        delete store.byUser[userId][p]
+      }
+    } else {
+      delete store[p]
     }
+    writeRawLocalKeyStore(store)
   } catch (e) {
     console.error('Failed to delete local key:', e)
+  }
+}
+
+export function purgeUserLocalKeys(userId: string): void {
+  if (!userId || userId === GUEST_USER_ID) return
+  try {
+    const store = readRawLocalKeyStore()
+    if (store.byUser && store.byUser[userId]) {
+      delete store.byUser[userId]
+      writeRawLocalKeyStore(store)
+    }
+  } catch (e) {
+    console.error('Failed to purge user local keys:', e)
   }
 }
 
@@ -95,14 +141,14 @@ export async function getProviderCredential({
     }
   }
 
-  // 2. Check local encrypted file store (for local dev mode)
-  const localKeys = getLocalKeys()
+  // 2. Check user-scoped (or sandbox) local encrypted file store
+  const localKeys = getLocalKeys(userId)
   const encLocalKey = localKeys[normalizedProvider]
   if (encLocalKey) {
     try {
       const decrypted = decrypt(encLocalKey)
       if (decrypted) return decrypted
-    } catch (e) {
+    } catch {
       console.warn(`[CredentialResolver] Notice: Local key for ${provider} could not be decrypted with current key`)
     }
   }
@@ -111,6 +157,9 @@ export async function getProviderCredential({
   const envVarName = ENV_KEY_MAP[normalizedProvider]
   if (envVarName && process.env[envVarName]) {
     return process.env[envVarName] || null
+  }
+  if (normalizedProvider === 'openai' && process.env.OPENAI_KEY) {
+    return process.env.OPENAI_KEY
   }
 
   return null

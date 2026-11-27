@@ -185,20 +185,23 @@ export async function generateEmbedding(
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              model: 'models/gemini-embedding-001',
               content: { parts: [{ text }] },
+              taskType: taskType === 'document' ? 'RETRIEVAL_DOCUMENT' : 'RETRIEVAL_QUERY',
+              outputDimensionality: 768,
             }),
           }
         )
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
-          // Auto-fallback to Cohere if Gemini is dead
+          // Auto-fallback to Cohere if Gemini fails
           if ((res.status === 403 || res.status === 429) && isProviderAvailable('COHERE_API_KEY')) {
             console.warn('[Providers] Gemini embedding failed, falling back to Cohere')
             return generateEmbedding(text, 'cohere', taskType, 0)
           }
           if (res.status === 429 && attempt < 5) {
             await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000))
-            return generateEmbedding(text, providerId, taskType, attempt + 1)
+            return generateEmbedding(text, providerId, taskType, attempt + 1, apiKeyOverride)
           }
           throw new Error(`Gemini ${res.status}: ${JSON.stringify(err)}`)
         }
@@ -255,10 +258,11 @@ export async function generateEmbedding(
       default:
         throw new Error(`Unknown embedding provider: ${providerId}`)
     }
-  } catch (e) {
-    if (attempt < 3) {
-      await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000))
-      return generateEmbedding(text, providerId, taskType, attempt + 1)
+  } catch (e: any) {
+    const msg = String(e?.message || e)
+    if (attempt < 2 && !/(400|401|403|404|not set|invalid)/i.test(msg)) {
+      await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500))
+      return generateEmbedding(text, providerId, taskType, attempt + 1, apiKeyOverride)
     }
     throw e
   }
@@ -308,7 +312,7 @@ export async function generateEmbeddingsBatch(
             }
             if (res.status === 429 && attempt < 5) {
               await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000 + 1000))
-              return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1)
+              return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1, apiKeyOverride)
             }
             throw new Error(`Gemini batch ${res.status}: ${JSON.stringify(err)}`)
           }
@@ -341,7 +345,7 @@ export async function generateEmbeddingsBatch(
             const err = await res.json().catch(() => ({}))
             if (res.status === 429 && attempt < 5) {
               await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000 + 1000))
-              return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1)
+              return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1, apiKeyOverride)
             }
             throw new Error(`OpenAI batch ${res.status}: ${JSON.stringify(err)}`)
           }
@@ -379,7 +383,7 @@ export async function generateEmbeddingsBatch(
             const err = await res.json().catch(() => ({}))
             if (res.status === 429 && attempt < 5) {
               await new Promise(r => setTimeout(r, (Math.pow(2, attempt) * 2000) + 4000))
-              return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1)
+              return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1, apiKeyOverride)
             }
             throw new Error(`Cohere batch ${res.status}: ${JSON.stringify(err)}`)
           }
@@ -396,9 +400,10 @@ export async function generateEmbeddingsBatch(
         throw new Error(`Unknown embedding provider: ${providerId}`)
     }
   } catch (e: any) {
-    if (attempt < 3) {
-      await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000 + 1000))
-      return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1)
+    const msg = String(e?.message || e)
+    if (attempt < 2 && !/(400|401|403|404|not set|invalid)/i.test(msg)) {
+      await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500 + 500))
+      return generateEmbeddingsBatch(texts, providerId, taskType, attempt + 1, apiKeyOverride)
     }
     throw e
   }
@@ -409,16 +414,18 @@ export async function generateEmbeddingsBatch(
 export async function expandQueryHyDE(
   query: string,
   chatProvider: ChatProviderId,
-  apiKeyOverride?: string | null
+  apiKeyOverride?: string | null,
+  attemptedProviders: Set<ChatProviderId> = new Set()
 ): Promise<string[]> {
   try {
+    attemptedProviders.add(chatProvider)
     const prompt = `Generate exactly 3 alternative search queries for: "${query}"\nReturn ONLY a JSON array of 3 strings. No other text.`
 
     switch (chatProvider) {
       case 'gemini': {
         const key = getApiKey('GEMINI_API_KEY', apiKeyOverride)
         if (!key) return [query]
-        const geminiModels = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest']
+        const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
         let data: any = null
         for (const model of geminiModels) {
           const res = await fetch(
@@ -441,8 +448,12 @@ export async function expandQueryHyDE(
           }
         }
         if (!data) {
-          if (isProviderAvailable('GROQ_API_KEY')) return expandQueryHyDE(query, 'groq')
-          if (isProviderAvailable('COHERE_API_KEY')) return expandQueryHyDE(query, 'cohere')
+          if (!attemptedProviders.has('groq') && isProviderAvailable('GROQ_API_KEY')) {
+            return expandQueryHyDE(query, 'groq', undefined, attemptedProviders)
+          }
+          if (!attemptedProviders.has('cohere') && isProviderAvailable('COHERE_API_KEY')) {
+            return expandQueryHyDE(query, 'cohere', undefined, attemptedProviders)
+          }
           return [query]
         }
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
@@ -501,11 +512,10 @@ export async function expandQueryHyDE(
         const key = getApiKey('GROQ_API_KEY')
         if (!key) return [query]
         const groqModels = [
-          'openai/gpt-oss-120b',
-          'openai/gpt-oss-20b',
-          'qwen/qwen3.8-27b',
           'llama-3.3-70b-versatile',
           'llama-3.1-8b-instant',
+          'openai/gpt-oss-120b',
+          'openai/gpt-oss-20b',
         ]
         let data: any = null
         for (const model of groqModels) {
@@ -549,17 +559,18 @@ export async function streamChatResponse(
   chatHistory: Array<{ role: string; text: string }>,
   chatProvider: ChatProviderId,
   onChunk: (text: string) => void,
-  apiKeyOverride?: string | null
+  apiKeyOverride?: string | null,
+  attemptedProviders: Set<ChatProviderId> = new Set()
 ): Promise<void> {
+  attemptedProviders.add(chatProvider)
   const config = CHAT_PROVIDERS[chatProvider]
   const key = getApiKey(config.keyEnv, apiKeyOverride)
 
   if (!key) {
-    // Auto-fallback to any available chat provider
     for (const fallbackId of ['groq', 'openai', 'cohere', 'gemini'] as ChatProviderId[]) {
-      if (fallbackId !== chatProvider && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
+      if (!attemptedProviders.has(fallbackId) && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
         console.warn(`[Providers] ${config.name} key missing, falling back to ${CHAT_PROVIDERS[fallbackId].name}`)
-        return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk)
+        return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk, undefined, attemptedProviders)
       }
     }
     throw new Error(`No chat provider API key available`)
@@ -587,7 +598,7 @@ export async function streamChatResponse(
         contents.push({ role: 'user', parts: [{ text: userQuery }] })
       }
 
-      const geminiModels = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest']
+      const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
       let res: Response | null = null
       for (const model of geminiModels) {
         const r = await fetch(
@@ -610,8 +621,8 @@ export async function streamChatResponse(
       if (!res || !res.ok) {
         console.warn(`[Providers] Gemini stream failed, trying fallback...`)
         for (const fallbackId of ['groq', 'cohere', 'openai'] as ChatProviderId[]) {
-          if (fallbackId !== chatProvider && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
-            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk)
+          if (!attemptedProviders.has(fallbackId) && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
+            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk, undefined, attemptedProviders)
           }
         }
         throw new Error(`Gemini stream error`)
@@ -661,8 +672,8 @@ export async function streamChatResponse(
       if (!res.ok) {
         console.warn(`[Providers] Cohere stream returned ${res.status}, trying fallback...`)
         for (const fallbackId of ['gemini', 'groq', 'openai'] as ChatProviderId[]) {
-          if (fallbackId !== chatProvider && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
-            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk)
+          if (!attemptedProviders.has(fallbackId) && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
+            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk, undefined, attemptedProviders)
           }
         }
         throw new Error(`Cohere chat error: ${res.status}`)
@@ -696,11 +707,10 @@ export async function streamChatResponse(
       messages.push({ role: 'user', content: userQuery })
 
       const groqModels = [
-        'openai/gpt-oss-120b',
-        'openai/gpt-oss-20b',
-        'qwen/qwen3.8-27b',
         'llama-3.3-70b-versatile',
         'llama-3.1-8b-instant',
+        'openai/gpt-oss-120b',
+        'openai/gpt-oss-20b',
       ]
       let groqRes: Response | null = null
       for (const model of groqModels) {
@@ -727,8 +737,8 @@ export async function streamChatResponse(
       if (!groqRes || !groqRes.ok) {
         console.warn(`[Providers] Groq stream failed, trying other providers...`)
         for (const fallbackId of ['gemini', 'cohere', 'openai'] as ChatProviderId[]) {
-          if (fallbackId !== chatProvider && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
-            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk)
+          if (!attemptedProviders.has(fallbackId) && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
+            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk, undefined, attemptedProviders)
           }
         }
         throw new Error(`Groq chat error`)
@@ -776,8 +786,8 @@ export async function streamChatResponse(
 
       if (!res.ok) {
         for (const fallbackId of ['groq', 'cohere', 'gemini'] as ChatProviderId[]) {
-          if (isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
-            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk)
+          if (!attemptedProviders.has(fallbackId) && isProviderAvailable(CHAT_PROVIDERS[fallbackId].keyEnv)) {
+            return streamChatResponse(systemPrompt, userQuery, chatHistory, fallbackId, onChunk, undefined, attemptedProviders)
           }
         }
         throw new Error(`OpenAI chat error: ${res.status}`)

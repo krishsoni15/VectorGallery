@@ -13,7 +13,7 @@ import { recursiveCharacterChunker } from '../../lib/chunker'
 import { withValidation, UploadRequestSchema } from '../../lib/validateRequest'
 import { withRateLimit } from '../../lib/rateLimiter'
 import { extractTextFromImage } from '../../lib/ocr'
-import { getServerUser } from '../../lib/supabase'
+import { getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '../../lib/supabase'
 import { getProviderCredential } from '../../lib/credentialResolver'
 import { z } from 'zod'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -45,8 +45,12 @@ async function uploadHandler(
     res.setHeader('Allow', ['POST'])
     return res.status(405).json({ error: `Method ${req.method} not allowed`, step: 'validation' })
   }
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return res.status(500).json({ error: 'Supabase not configured', step: 'config' })
+  const user = await getServerUser(req)
+  if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
+    return res.status(401).json({ error: 'Unauthorized: Authentication required', step: 'auth' })
+  }
+  if (!isServiceRoleConfigured() || !supabaseUrl || !supabaseAnonKey) {
+    return res.status(503).json({ error: 'Supabase not configured; use /api/v2/files/upload', step: 'config' })
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {

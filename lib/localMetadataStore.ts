@@ -36,11 +36,13 @@ function ensureStorage(): void {
   }
 }
 
-export function getLocalFiles(): LocalFileRecord[] {
+export function getLocalFiles(userId?: string): LocalFileRecord[] {
   ensureStorage()
   try {
     const raw = fs.readFileSync(DB_FILE, 'utf-8')
-    return JSON.parse(raw) as LocalFileRecord[]
+    const all = JSON.parse(raw) as LocalFileRecord[]
+    if (!userId) return all
+    return all.filter((f) => f.user_id === userId)
   } catch {
     return []
   }
@@ -49,7 +51,7 @@ export function getLocalFiles(): LocalFileRecord[] {
 export function saveLocalFile(record: LocalFileRecord): void {
   ensureStorage()
   const files = getLocalFiles()
-  const existingIdx = files.findIndex(f => f.id === record.id || f.sha256_hash === record.sha256_hash)
+  const existingIdx = files.findIndex((f) => f.id === record.id)
   if (existingIdx >= 0) {
     files[existingIdx] = { ...files[existingIdx], ...record, updated_at: new Date().toISOString() }
   } else {
@@ -58,38 +60,52 @@ export function saveLocalFile(record: LocalFileRecord): void {
   fs.writeFileSync(DB_FILE, JSON.stringify(files, null, 2))
 }
 
-export function findLocalFileByHash(hash: string): LocalFileRecord | undefined {
-  return getLocalFiles().find(f => f.sha256_hash === hash && !f.is_trashed)
+export function findLocalFileByHash(hash: string, userId?: string): LocalFileRecord | undefined {
+  return getLocalFiles(userId).find((f) => f.sha256_hash === hash && !f.is_trashed)
 }
 
-export function findLocalFileById(id: string): LocalFileRecord | undefined {
-  return getLocalFiles().find(f => f.id === id)
+export function findLocalFileById(id: string, userId?: string): LocalFileRecord | undefined {
+  return getLocalFiles(userId).find((f) => f.id === id)
 }
 
-export function updateLocalFile(id: string, updates: Partial<LocalFileRecord>): LocalFileRecord | null {
+export function updateLocalFile(
+  id: string,
+  updates: Partial<LocalFileRecord>,
+  userId?: string
+): LocalFileRecord | null {
   ensureStorage()
   const files = getLocalFiles()
-  const idx = files.findIndex(f => f.id === id)
+  const idx = files.findIndex((f) => f.id === id && (!userId || f.user_id === userId))
   if (idx === -1) return null
   files[idx] = { ...files[idx], ...updates, updated_at: new Date().toISOString() }
   fs.writeFileSync(DB_FILE, JSON.stringify(files, null, 2))
   return files[idx]
 }
 
-export function deleteLocalFile(id: string, permanent: boolean = false): boolean {
+export function deleteLocalFile(id: string, permanent: boolean = false, userId?: string): boolean {
   ensureStorage()
   const files = getLocalFiles()
+  const targetIdx = files.findIndex((f) => f.id === id && (!userId || f.user_id === userId))
+  if (targetIdx === -1) return false
+
   if (permanent) {
-    const filtered = files.filter(f => f.id !== id)
+    const filtered = files.filter((_, idx) => idx !== targetIdx)
     fs.writeFileSync(DB_FILE, JSON.stringify(filtered, null, 2))
     return true
   } else {
-    const idx = files.findIndex(f => f.id === id)
-    if (idx === -1) return false
-    files[idx].is_trashed = true
-    files[idx].updated_at = new Date().toISOString()
+    files[targetIdx].is_trashed = true
+    files[targetIdx].updated_at = new Date().toISOString()
     fs.writeFileSync(DB_FILE, JSON.stringify(files, null, 2))
     return true
   }
+}
+
+export function purgeUserLocalFiles(userId: string): LocalFileRecord[] {
+  ensureStorage()
+  const files = getLocalFiles()
+  const removed = files.filter((f) => f.user_id === userId)
+  const remaining = files.filter((f) => f.user_id !== userId)
+  fs.writeFileSync(DB_FILE, JSON.stringify(remaining, null, 2))
+  return removed
 }
 

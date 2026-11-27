@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
 import { getStorageDriver } from '@/lib/storage'
-import { updateLocalFile, deleteLocalFile } from '@/lib/localMetadataStore'
+import { updateLocalFile, deleteLocalFile, findLocalFileById } from '@/lib/localMetadataStore'
+import { removeLocalVectorChunks } from '@/lib/localVectorStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -11,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
@@ -27,18 +28,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (!isServiceRoleConfigured()) {
+      const storage = getStorageDriver()
+      let affected = 0
+      const purgedIds: string[] = []
       for (const id of file_ids) {
-        if (action === 'trash') updateLocalFile(id, { is_trashed: true })
-        else if (action === 'restore') updateLocalFile(id, { is_trashed: false })
-        else if (action === 'favorite') updateLocalFile(id, { is_favorite: true })
-        else if (action === 'unfavorite') updateLocalFile(id, { is_favorite: false })
-        else if (action === 'move') updateLocalFile(id, { folder_id: folder_id || null })
-        else if (action === 'delete') deleteLocalFile(id, true)
+        if (action === 'trash') {
+          if (updateLocalFile(id, { is_trashed: true }, userId)) affected++
+        } else if (action === 'restore') {
+          if (updateLocalFile(id, { is_trashed: false }, userId)) affected++
+        } else if (action === 'favorite') {
+          if (updateLocalFile(id, { is_favorite: true }, userId)) affected++
+        } else if (action === 'unfavorite') {
+          if (updateLocalFile(id, { is_favorite: false }, userId)) affected++
+        } else if (action === 'move') {
+          if (updateLocalFile(id, { folder_id: folder_id || null }, userId)) affected++
+        } else if (action === 'delete') {
+          const target = findLocalFileById(id, userId)
+          if (target) {
+            await storage.delete(target.storage_key).catch(() => {})
+            if (deleteLocalFile(id, true, userId)) {
+              purgedIds.push(id)
+              affected++
+            }
+          }
+        }
+      }
+      if (purgedIds.length > 0) {
+        removeLocalVectorChunks(purgedIds, userId)
       }
       return res.status(200).json({
         success: true,
         action,
-        affected_count: file_ids.length,
+        affected_count: affected,
       })
     }
 

@@ -17,6 +17,7 @@ import {
 import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { MotionReveal } from '@/components/landing/motion'
 import { Container, Section } from '@/components/landing/ui'
+import { useAuth } from '@/lib/AuthContext'
 import { cn } from '@/lib/utils'
 
 type WorkspaceTab = 'library' | 'search' | 'assistant'
@@ -55,6 +56,7 @@ const LIBRARY_MEMORIES = [
  */
 export function CinematicWorkspaceSection() {
   const reduced = useReducedMotion()
+  const { user } = useAuth()
   const [tab, setTab] = useState<WorkspaceTab>('library')
 
   return (
@@ -132,10 +134,10 @@ export function CinematicWorkspaceSection() {
               </div>
 
               <Link
-                href="/app"
+                href={user ? '/app' : '/signup'}
                 className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-[12.5px] font-semibold bg-[#CDFF45] text-[#101211] hover:bg-[#D8FF69] transition-colors shadow-sm"
               >
-                <span>Open Web Vault</span>
+                <span>{user ? 'Open Web Vault' : 'Get started'}</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>

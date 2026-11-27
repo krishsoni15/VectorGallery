@@ -51,7 +51,7 @@ const PROVIDERS = [
 ]
 
 export default function AccountPage() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, session, loading: authLoading } = useAuth()
   const router = useRouter()
   const [providerKeys, setProviderKeys] = useState<Record<string, ProviderKeyStatus>>({})
   const [fetching, setFetching] = useState(true)
@@ -61,6 +61,7 @@ export default function AccountPage() {
   const [showKey, setShowKey] = useState(false)
   const [modalError, setModalError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -68,21 +69,20 @@ export default function AccountPage() {
     }
   }, [user, authLoading, router])
 
+  const getTokenHeaders = (): Record<string, string> => {
+    let token = session?.access_token
+    if (!token && typeof document !== 'undefined') {
+      const match = document.cookie.match(/sb-access-token=([^;]+)/)
+      if (match) token = match[1]
+    }
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+
   const fetchUserStatus = async () => {
     try {
       setFetching(true)
-      const { supabase } = await import('@/lib/supabase')
-      const { data: { session } } = await supabase.auth.getSession()
-      let token = session?.access_token
-      if (!token && typeof document !== 'undefined') {
-        const match = document.cookie.match(/sb-access-token=([^;]+)/)
-        if (match) token = match[1]
-      }
-      
       const res = await fetch('/api/auth/user', {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
+        headers: getTokenHeaders(),
       })
 
       if (res.ok) {
@@ -99,8 +99,11 @@ export default function AccountPage() {
   useEffect(() => {
     if (user) {
       fetchUserStatus()
+    } else if (!authLoading) {
+      setFetching(false)
     }
-  }, [user])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading])
 
   const handleSaveKey = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,19 +113,11 @@ export default function AccountPage() {
     setActionLoading(modalProvider.id)
 
     try {
-      const { supabase } = await import('@/lib/supabase')
-      const { data: { session } } = await supabase.auth.getSession()
-      let token = session?.access_token
-      if (!token && typeof document !== 'undefined') {
-        const match = document.cookie.match(/sb-access-token=([^;]+)/)
-        if (match) token = match[1]
-      }
-
       const res = await fetch('/api/auth/provider-keys', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
+          ...getTokenHeaders(),
         },
         body: JSON.stringify({
           provider: modalProvider.id,
@@ -148,25 +143,18 @@ export default function AccountPage() {
   }
 
   const handleRemoveKey = async (providerId: string, providerName: string) => {
-    if (!confirm(`Are you sure you want to remove your personal ${providerName} API key? VectorGallery will fall back to system default keys.`)) {
+    if (confirmRemoveId !== providerId) {
+      setConfirmRemoveId(providerId)
       return
     }
 
     setActionLoading(providerId)
     try {
-      const { supabase } = await import('@/lib/supabase')
-      const { data: { session } } = await supabase.auth.getSession()
-      let token = session?.access_token
-      if (!token && typeof document !== 'undefined') {
-        const match = document.cookie.match(/sb-access-token=([^;]+)/)
-        if (match) token = match[1]
-      }
-
       const res = await fetch('/api/auth/provider-keys', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
+          ...getTokenHeaders(),
         },
         body: JSON.stringify({ provider: providerId }),
       })
@@ -174,6 +162,7 @@ export default function AccountPage() {
       if (res.ok) {
         setSaveSuccess(`Removed personal ${providerName} key.`)
         setTimeout(() => setSaveSuccess(null), 4000)
+        setConfirmRemoveId(null)
         fetchUserStatus()
       }
     } catch (err) {
@@ -332,7 +321,7 @@ export default function AccountPage() {
                         disabled={actionLoading === provider.id}
                         className="py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
                       >
-                        Remove
+                        {confirmRemoveId === provider.id ? 'Confirm Remove' : 'Remove'}
                       </button>
                     )}
                   </div>

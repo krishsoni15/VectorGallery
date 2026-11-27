@@ -59,6 +59,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     setSelectedFile(file)
   }
 
+  const handleClose = () => {
+    if (uploading) return
+    setSelectedFile(null)
+    setError(null)
+    setSuccess(false)
+    setProgress(0)
+    onClose()
+  }
+
   const handleUpload = async () => {
     if (!selectedFile) return
 
@@ -68,9 +77,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
     try {
       const reader = new FileReader()
+      reader.onerror = () => {
+        setError('Unable to read the selected file.')
+        setUploading(false)
+        setProgress(0)
+      }
       reader.onload = async () => {
         try {
-          const base64Data = (reader.result as string).split(',')[1]
+          const resultStr = String(reader.result || '')
+          const base64Data = resultStr.includes(',') ? resultStr.split(',')[1] : resultStr
           setProgress(50)
 
           const res = await fetch('/api/v2/files/upload', {
@@ -94,26 +109,29 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           setSuccess(true)
           setTimeout(() => {
             onUploadSuccess()
-            onClose()
             setSelectedFile(null)
             setUploading(false)
             setSuccess(false)
-          }, 800)
+            setProgress(0)
+            onClose()
+          }, 700)
         } catch (err: any) {
           setError(err.message || 'Upload failed')
           setUploading(false)
+          setProgress(0)
         }
       }
       reader.readAsDataURL(selectedFile)
     } catch (err: any) {
       setError(err.message || 'File read error')
       setUploading(false)
+      setProgress(0)
     }
   }
 
   return (
     <div
-      onClick={onClose}
+      onClick={handleClose}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101211]/45 dark:bg-black/75 backdrop-blur-md animate-fadeIn"
     >
       <div
@@ -125,9 +143,10 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             <UploadCloud className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" /> Upload to VectorGallery
           </h3>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close upload modal"
-            className="p-1.5 rounded-full text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] transition-colors"
+            disabled={uploading}
+            className="p-1.5 rounded-full text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] transition-colors disabled:opacity-40"
           >
             <X className="w-4 h-4" />
           </button>
@@ -217,7 +236,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         {/* Action buttons */}
         <div className="flex items-center justify-end gap-2 pt-2">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={uploading}
             className="px-4 py-2 rounded-full text-xs text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
           >

@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'

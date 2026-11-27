@@ -1,41 +1,92 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import {
+  getAdminSupabase,
+  getServerUser,
+  hasExplicitCredential,
+  isServiceRoleConfigured,
+} from '@/lib/supabase'
+import {
+  GUEST_USER_ID,
+  deleteLocalUserAccount,
+  getGuestProfile,
+  getLocalUserById,
+  updateLocalUserProfile,
+} from '@/lib/localAuthStore'
+import { purgeUserLocalFiles } from '@/lib/localMetadataStore'
+import { purgeUserVectorChunks } from '@/lib/localVectorStore'
+import { purgeUserAppData } from '@/lib/localAppStore'
+import { purgeUserLocalKeys } from '@/lib/credentialResolver'
+import { getStorageDriver } from '@/lib/storage'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
-    const userId = user?.id || '00000000-0000-0000-0000-000000000000'
+    const userId = user?.id || GUEST_USER_ID
 
     if (!isServiceRoleConfigured()) {
-      // Local development mock
       if (req.method === 'GET') {
+        if (!user) {
+          return res.status(200).json({ profile: getGuestProfile() })
+        }
+        const record = getLocalUserById(user.id)
         return res.status(200).json({
-          profile: {
-            id: userId,
-            full_name: 'Krish Soni',
-            email: 'krish@vectorgallery.app',
-            storage_quota_bytes: 16106127360,
-            backup_settings: {
-              auto_backup: true,
-              wifi_only: true,
-              categories: ['photos', 'documents', 'screenshots'],
-            },
-            theme: 'dark',
-          },
+          profile: record
+            ? {
+                id: record.id,
+                full_name: record.name,
+                email: record.email,
+                storage_quota_bytes: record.storage_quota_bytes,
+                backup_settings: record.backup_settings,
+                theme: record.theme,
+                created_at: record.created_at,
+                is_guest: false,
+              }
+            : getGuestProfile(),
         })
       }
+
       if (req.method === 'PUT') {
-        return res.status(200).json({ success: true, profile: req.body })
+        const { full_name, backup_settings, theme } = req.body || {}
+        const result = updateLocalUserProfile(userId, { full_name, backup_settings, theme })
+        if (!result) {
+          return res.status(404).json({ error: 'User profile not found' })
+        }
+        if (result.refreshedToken) {
+          res.setHeader(
+            'Set-Cookie',
+            `sb-access-token=${result.refreshedToken}; Path=/; Max-Age=604800; SameSite=Lax`
+          )
+        }
+        return res.status(200).json({ success: true, profile: result.profile })
       }
+
+      if (req.method === 'DELETE') {
+        if (!user) {
+          return res.status(401).json({ error: 'Sign in with an account before deleting profile data' })
+        }
+        const removedFiles = purgeUserLocalFiles(user.id)
+        const storage = getStorageDriver()
+        const keys = removedFiles.map((f) => f.storage_key).filter(Boolean)
+        if (keys.length > 0) {
+          await storage.delete(keys).catch(() => {})
+        }
+        purgeUserVectorChunks(user.id)
+        purgeUserAppData(user.id)
+        purgeUserLocalKeys(user.id)
+        deleteLocalUserAccount(user.id)
+        res.setHeader('Set-Cookie', 'sb-access-token=; Path=/; Max-Age=0; SameSite=Lax')
+        return res.status(200).json({ success: true, purged: true })
+      }
+
+      res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
       return res.status(405).json({ error: 'Method not allowed' })
     }
 
     const supabase = getAdminSupabase()
 
-    // ─── GET: Fetch User Profile & Settings ───
     if (req.method === 'GET') {
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -56,11 +107,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
           theme: profile?.theme || 'dark',
           created_at: profile?.created_at || user?.created_at,
+          is_guest: false,
         },
       })
     }
 
-    // ─── PUT: Update Profile or Settings ───
     if (req.method === 'PUT') {
       const { full_name, backup_settings, theme } = req.body
       const updates: any = { updated_at: new Date().toISOString() }
@@ -85,7 +136,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.warn('[Profile API] Upsert notice:', error.message)
       }
 
-      // Also update Supabase auth metadata if full_name changed
       if (full_name && typeof full_name === 'string') {
         try {
           await supabase.auth.admin.updateUserById(userId, {
@@ -100,11 +150,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
-    res.setHeader('Allow', ['GET', 'PUT'])
+    if (req.method === 'DELETE') {
+      const { data: userFiles } = await supabase
+        .from('files')
+        .select('storage_key')
+        .eq('user_id', userId)
+      const storage = getStorageDriver()
+      const keys = (userFiles || []).map((f: any) => f.storage_key).filter(Boolean)
+      if (keys.length > 0) await storage.delete(keys).catch(() => {})
+      await supabase.from('files').delete().eq('user_id', userId)
+      await supabase.auth.admin.deleteUser(userId)
+      res.setHeader('Set-Cookie', 'sb-access-token=; Path=/; Max-Age=0; SameSite=Lax')
+      return res.status(200).json({ success: true, purged: true })
+    }
+
+    res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
     return res.status(405).json({ error: `Method ${req.method} not allowed` })
   } catch (err: any) {
     console.error('[Profile API] Error:', err)
     return res.status(500).json({ error: err.message || 'Profile operation failed' })
   }
 }
-

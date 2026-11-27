@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { getLocalFiles } from '@/lib/localMetadataStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
@@ -21,12 +22,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (!isServiceRoleConfigured()) {
-      return res.status(200).json({
-        existing_hashes: [],
-        required_uploads: candidates.map((c: any) => ({
+      const existingSet = new Set(
+        getLocalFiles(userId)
+          .filter((f) => !f.is_trashed)
+          .map((f) => f.sha256_hash)
+      )
+      const existingHashes = candidates
+        .map((c: any) => c.sha256_hash)
+        .filter((h: any) => h && existingSet.has(h))
+      const requiredUploads = candidates
+        .filter((c: any) => !existingSet.has(c.sha256_hash))
+        .map((c: any) => ({
           sha256_hash: c.sha256_hash,
+          local_path: c.local_path,
           upload_url: '/api/v2/files/upload',
-        })),
+        }))
+
+      return res.status(200).json({
+        success: true,
+        existing_hashes: existingHashes,
+        required_uploads: requiredUploads,
+        skipped_count: existingHashes.length,
+        pending_count: requiredUploads.length,
       })
     }
 

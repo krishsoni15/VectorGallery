@@ -5,8 +5,10 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { VG_COMPONENTS, VG_SPHERE_THEME_SPEC } from '@/components/landing/design-system'
 import { LivingAuraCanvas } from '@/components/landing/shaders/LivingAuraCanvas'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function Custom404() {
+  const { user } = useAuth()
   return (
     <div className="vg-shell min-h-screen flex flex-col bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#087F5B]/20 dark:selection:bg-[#CDFF45]/25">
       <Head>
@@ -49,8 +51,8 @@ export default function Custom404() {
               <ArrowLeft className="w-4 h-4" />
               <span>Return home</span>
             </Link>
-            <Link href="/app" className={VG_COMPONENTS.buttons.secondary}>
-              <span>Open Web Vault</span>
+            <Link href={user ? '/app' : '/signup'} className={VG_COMPONENTS.buttons.secondary}>
+              <span>{user ? 'Open Web Vault' : 'Get started'}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

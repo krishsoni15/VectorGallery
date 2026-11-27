@@ -128,7 +128,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onOpenSettings }) => {
           Sign in
         </Link>
         <Link
-          href="/app"
+          href="/signup"
           className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-[12.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F4F6F2] dark:bg-[#CDFF45] dark:hover:bg-[#D8FF69] dark:text-[#090B0D] shadow-sm transition-[transform,background-color] active:scale-[0.98] whitespace-nowrap"
         >
           <span>Get started</span>

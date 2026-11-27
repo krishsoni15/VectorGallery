@@ -1,6 +1,6 @@
 // VECTORMIND — vector-search.ts
 // Pipeline: HyDE → Embed → Hybrid Search → RRF → MMR → Confidence → Pack → Stream
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import GPT3Tokenizer from 'gpt3-tokenizer'
 import {
@@ -8,6 +8,8 @@ import {
   EMBEDDING_PROVIDERS, CHAT_PROVIDERS, isProviderAvailable,
   type EmbeddingProviderId, type ChatProviderId
 } from '../../lib/providers'
+import { getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '../../lib/supabase'
+import { getProviderCredential } from '../../lib/credentialResolver'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -72,8 +74,13 @@ function packContext(items: any[], maxTokens = 15000): string {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      return res.status(500).json({ error: 'Supabase not configured' })
+    const user = await getServerUser(req)
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
+      return res.status(401).json({ error: 'Unauthorized: Authentication required' })
+    }
+
+    if (!isServiceRoleConfigured() || !supabaseUrl || !supabaseAnonKey) {
+      return res.status(503).json({ error: 'Vector Supabase database not configured; use /api/v2/chat' })
     }
 
     const { prompt: query, chatHistory, projectId, chatProvider: bodyChatProvider, embeddingProvider: bodyEmbeddingProvider, selectedFileIds } = req.body as {
@@ -123,14 +130,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       chatProvider = fb.id
     }
 
+    const personalChatKey = await getProviderCredential({ userId: user?.id, provider: chatProvider })
+    const personalEmbedKey = await getProviderCredential({ userId: user?.id, provider: embedProvider })
+
     // HyDE expansion
-    const allQueries = await expandQueryHyDE(sanitizedQuery, chatProvider)
+    const allQueries = await expandQueryHyDE(sanitizedQuery, chatProvider, personalChatKey)
     console.log(`[VectorGallery] Queries (${allQueries.length}):`, allQueries)
 
     // Embed queries using high-performance batching
     let queryEmbeddings: number[][] = []
     try {
-      queryEmbeddings = await generateEmbeddingsBatch(allQueries, embedProvider, 'query')
+      queryEmbeddings = await generateEmbeddingsBatch(allQueries, embedProvider, 'query', 0, personalEmbedKey)
     } catch (e: any) {
       console.error('[VectorGallery] Query batch embedding failed:', e.message)
     }
@@ -200,7 +210,8 @@ ${packedContext}`
       sanitizedQuery,
       chatHistory || [],
       chatProvider,
-      (text) => res.write(text)
+      (text) => res.write(text),
+      personalChatKey
     )
 
     res.end()

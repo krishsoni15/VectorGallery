@@ -16,6 +16,7 @@ import { LiveQrCode } from '@/components/LiveQrCode'
 import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
 import { LivingAuraCanvas } from '@/components/landing/shaders/LivingAuraCanvas'
 import { APK_EXPECTED_SHA256, RELEASES_URL } from '@/components/landing/tokens'
+import { useAuth } from '@/lib/AuthContext'
 import { cn } from '@/lib/utils'
 
 const INSTALL_STEPS = [
@@ -40,6 +41,7 @@ const INSTALL_STEPS = [
 ]
 
 export default function InstallPage() {
+  const { user } = useAuth()
   const [downloadStarted, setDownloadStarted] = useState(false)
   const [hasLocalApk, setHasLocalApk] = useState<boolean>(true)
   const [apkSizeMb, setApkSizeMb] = useState<string>('107.8 MB')
@@ -165,10 +167,10 @@ export default function InstallPage() {
                 )}
 
                 <Link
-                  href="/app"
+                  href={user ? '/app' : '/signup'}
                   className={VG_COMPONENTS.buttons.secondary}
                 >
-                  <span>Open Web Workspace</span>
+                  <span>{user ? 'Open Web Workspace' : 'Get started'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

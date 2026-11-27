@@ -3,8 +3,12 @@
  * Supports Cloud Vision (Gemini 2.0 Flash) with offline/zero-cost local fallback
  */
 
-export async function extractTextFromImage(buffer: Buffer, mimeType: string): Promise<string> {
-  const geminiKey = process.env.GEMINI_API_KEY
+export async function extractTextFromImage(
+  buffer: Buffer,
+  mimeType: string,
+  apiKeyOverride?: string | null
+): Promise<string> {
+  const geminiKey = apiKeyOverride?.trim() || process.env.GEMINI_API_KEY
 
   // 1. If Gemini Vision API key is configured, attempt multimodal OCR
   if (geminiKey) {
@@ -19,13 +23,16 @@ Format your output as clean Markdown:
 - If this is a screenshot, note the visible applications, headers, and UI elements.
 Do NOT include conversational filler like "Here is the text". Output ONLY the extracted text.`
 
-      const models = ['gemini-2.0-flash', 'gemini-1.5-flash']
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
       for (const model of models) {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
             body: JSON.stringify({
               contents: [{
                 parts: [

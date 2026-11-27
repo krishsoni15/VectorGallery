@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { withValidation, WorkspaceRequestSchema } from '../../lib/validateRequest'
 import { withRateLimit } from '../../lib/rateLimiter'
-import { getServerUserInfo, getUserTag, formatProjectForUser } from '../../lib/supabase'
+import { getServerUser, getServerUserInfo, getUserTag, formatProjectForUser, hasExplicitCredential, isServiceRoleConfigured } from '../../lib/supabase'
 import { z } from 'zod'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -15,8 +15,12 @@ async function workspacesHandler(
   res: NextApiResponse,
   data: z.infer<typeof WorkspaceRequestSchema>
 ) {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return res.status(500).json({ error: 'Supabase not configured' })
+  const user = await getServerUser(req)
+  if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
+    return res.status(401).json({ error: 'Unauthorized: Authentication required' })
+  }
+  if (!isServiceRoleConfigured() || !supabaseUrl || !supabaseAnonKey) {
+    return res.status(503).json({ error: 'Supabase workspaces not configured in local mode' })
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -118,6 +122,7 @@ async function workspacesHandler(
         .from('nods_project')
         .update(updateData)
         .eq('id', id)
+        .like('name', `${tag}%`)
         .select()
         .single()
 
@@ -129,7 +134,7 @@ async function workspacesHandler(
       const id = data.id || req.query.id as string
       if (!id) return res.status(400).json({ error: 'Workspace ID is required for deletion' })
 
-      const { error } = await supabase.from('nods_project').delete().eq('id', id)
+      const { error } = await supabase.from('nods_project').delete().eq('id', id).like('name', `${tag}%`)
       if (error) throw error
       return res.status(200).json({ success: true })
     }

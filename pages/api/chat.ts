@@ -11,7 +11,7 @@ import { getCachedAnswer, setCachedAnswer } from '../../lib/semanticCache'
 import { calculateGroundingScore } from '../../lib/groundingScore'
 import { withValidation, ChatRequestSchema } from '../../lib/validateRequest'
 import { withRateLimit } from '../../lib/rateLimiter'
-import { getServerUser } from '../../lib/supabase'
+import { getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '../../lib/supabase'
 import { getProviderCredential } from '../../lib/credentialResolver'
 import { z } from 'zod'
 
@@ -217,8 +217,12 @@ async function chatHandler(
   }
 
   try {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      return res.status(500).json({ error: 'Supabase not configured' })
+    const reqUser = await getServerUser(req)
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !reqUser) {
+      return res.status(401).json({ error: 'Unauthorized: Authentication required' })
+    }
+    if (!isServiceRoleConfigured() || !supabaseUrl || !supabaseAnonKey) {
+      return res.status(503).json({ error: 'Supabase not configured; use /api/v2/chat' })
     }
 
     const {

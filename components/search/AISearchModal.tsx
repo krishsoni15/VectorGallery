@@ -70,15 +70,16 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
   }, [isOpen, onClose])
 
   // Perform search query
-  const performSearch = async (searchTerm: string) => {
+  const performSearch = async (searchTerm: string, overrideCategory?: string) => {
     if (!searchTerm.trim()) {
       setResults([])
       return
     }
 
+    const activeCat = overrideCategory ?? categoryFilter
     setLoading(true)
     try {
-      const url = `/api/v2/search?q=${encodeURIComponent(searchTerm.trim())}&category=${categoryFilter}`
+      const url = `/api/v2/search?q=${encodeURIComponent(searchTerm.trim())}&category=${activeCat}`
       const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
@@ -155,7 +156,7 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
               key={cat}
               onClick={() => {
                 setCategoryFilter(cat)
-                if (query.trim()) performSearch(query)
+                if (query.trim()) performSearch(query, cat)
               }}
               className={`px-3 py-1 rounded-full capitalize transition-colors ${
                 categoryFilter === cat
@@ -177,7 +178,7 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
               </p>
               {results.map((res) => (
                 <div
-                  key={res.file_id}
+                  key={res.file_id || res.id}
                   onClick={() => {
                     onSelectResult(res)
                     onClose()
@@ -194,17 +195,17 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-[#101211] dark:text-[#F3F5F1] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors truncate">
-                        {res.file_name}
+                        {res.file_name || res.original_name}
                       </p>
                       <p className="text-[11px] text-[#555E58] dark:text-[#9AA69E] mt-0.5 line-clamp-2 leading-relaxed">
-                        {res.snippet}
+                        {res.snippet || res.excerpt}
                       </p>
                       <div className="flex items-center gap-2 mt-1.5 text-[10px] text-[#626B64] dark:text-[#9AA69E]">
                         <span className="capitalize px-2 py-0.5 rounded-full bg-[#F2F3F0] dark:bg-white/[0.06] font-medium">
                           {res.category}
                         </span>
                         <span className="text-[#087F5B] dark:text-[#CFFF49] font-mono">
-                          {res.why_matched}
+                          {res.why_matched || res.match_type || 'Matched'}
                         </span>
                       </div>
                     </div>
@@ -212,7 +213,7 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
 
                   <div className="shrink-0 flex items-center gap-1.5 text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors ml-3 mt-1">
                     <span className="text-[10px] font-mono font-bold">
-                      {Math.round(res.relevance_score * 100)}%
+                      {Math.round((res.relevance_score ?? res.score ?? 0.5) * 100)}%
                     </span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </div>

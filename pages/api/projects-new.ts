@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
-import { getServerUserInfo, getUserTag, formatProjectForUser } from '../../lib/supabase'
+import { getServerUser, getServerUserInfo, getUserTag, formatProjectForUser, hasExplicitCredential, isServiceRoleConfigured } from '../../lib/supabase'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -8,8 +8,12 @@ const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PU
 const supabaseAnonKey = (serviceKey && !serviceKey.includes('your_')) ? serviceKey : (anonKey || '')
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return res.status(500).json({ error: 'Supabase not configured' })
+  const reqUser = await getServerUser(req)
+  if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !reqUser) {
+    return res.status(401).json({ error: 'Unauthorized: Authentication required' })
+  }
+  if (!isServiceRoleConfigured() || !supabaseUrl || !supabaseAnonKey) {
+    return res.status(503).json({ error: 'Supabase projects not configured in local mode' })
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -186,7 +190,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { id } = req.query
       if (!id) return res.status(400).json({ error: 'Project ID is required' })
 
-      const { error } = await supabase.from('nods_project').delete().eq('id', id)
+      const { error } = await supabase.from('nods_project').delete().eq('id', id).like('name', `${tag}%`)
       if (error) throw error
       return res.status(200).json({ success: true })
     }
@@ -218,6 +222,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .from('nods_project')
           .update(updateData)
           .eq('id', id)
+          .like('name', `${tag}%`)
           .select()
           .single()
         data = result.data

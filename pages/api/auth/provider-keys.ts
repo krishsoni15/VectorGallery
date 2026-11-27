@@ -7,33 +7,34 @@ const VALID_PROVIDERS: AIProvider[] = ['gemini', 'openai', 'groq', 'cohere']
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const user = await getServerUser(req)
-  if (isServiceRoleConfigured() && !user) {
-    return res.status(401).json({ error: 'Authentication required' })
+  if (!user) {
+    return res.status(401).json({ error: 'Authentication required to manage personal API keys' })
   }
 
-  // 1. GET: Fetch list of personal configured keys metadata
+  // 1. GET: Fetch personal configured keys metadata (and env fallback status)
   if (req.method === 'GET') {
     if (!isServiceRoleConfigured()) {
-      const localKeys = getLocalKeys()
+      const localKeys = getLocalKeys(user.id)
       const list = Object.entries(localKeys).map(([provider, encKey]) => {
-        const raw = decrypt(encKey) || ''
-        const key_last4 = raw.length >= 4 ? raw.slice(-4) : '****'
+        let key_last4 = '****'
+        try {
+          const raw = decrypt(encKey) || ''
+          key_last4 = raw.length >= 4 ? raw.slice(-4) : raw || '****'
+        } catch {}
         return {
           provider,
           key_last4,
-          created_at: new Date().toISOString(),
+          source: 'personal' as const,
           updated_at: new Date().toISOString(),
         }
       })
 
-      // Also check env vars
       for (const p of VALID_PROVIDERS) {
-        if (!list.find(item => item.provider === p) && process.env[ENV_KEY_MAP[p]]) {
-          const raw = process.env[ENV_KEY_MAP[p]]!
+        if (!list.find((item) => item.provider === p) && process.env[ENV_KEY_MAP[p]]) {
           list.push({
             provider: p,
-            key_last4: raw.slice(-4),
-            created_at: new Date().toISOString(),
+            key_last4: 'env',
+            source: 'env' as any,
             updated_at: new Date().toISOString(),
           })
         }
@@ -47,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data, error } = await supabase
         .from('user_provider_keys')
         .select('provider, key_last4, created_at, updated_at')
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
 
       if (error) {
         throw error
@@ -62,25 +63,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // 2. POST: Save or update personal API key
   if (req.method === 'POST') {
     try {
-      const { provider, apiKey } = req.body
+      const { provider, apiKey } = req.body || {}
 
       if (!provider || !VALID_PROVIDERS.includes(provider as AIProvider)) {
         return res.status(400).json({ error: `Invalid provider. Must be one of: ${VALID_PROVIDERS.join(', ')}` })
       }
 
-      if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length === 0) {
-        return res.status(400).json({ error: 'API key string is required' })
+      if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length < 8) {
+        return res.status(400).json({ error: 'A valid API key string is required' })
       }
 
       const trimmedKey = apiKey.trim()
       const key_last4 = trimmedKey.length >= 4 ? trimmedKey.slice(-4) : trimmedKey
 
       if (!isServiceRoleConfigured()) {
-        saveLocalKey(provider, trimmedKey)
+        saveLocalKey(provider, trimmedKey, user.id)
         return res.status(200).json({
           success: true,
           message: `${provider.toUpperCase()} API key saved securely.`,
-          key: { provider, key_last4 },
+          key: { provider, key_last4, source: 'personal' },
         })
       }
 
@@ -90,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .from('user_provider_keys')
         .upsert(
           {
-            user_id: user!.id,
+            user_id: user.id,
             provider: provider.toLowerCase(),
             encrypted_api_key,
             key_last4,
@@ -119,14 +120,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // 3. DELETE: Remove personal API key
   if (req.method === 'DELETE') {
     try {
-      const { provider } = req.body || req.query
+      const provider = req.body?.provider || (req.query.provider as string)
 
       if (!provider || !VALID_PROVIDERS.includes(provider as AIProvider)) {
         return res.status(400).json({ error: `Invalid provider. Must be one of: ${VALID_PROVIDERS.join(', ')}` })
       }
 
       if (!isServiceRoleConfigured()) {
-        deleteLocalKey(provider)
+        deleteLocalKey(provider, user.id)
         return res.status(200).json({ success: true, message: `${provider} key deleted.` })
       }
 
@@ -134,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { error } = await supabase
         .from('user_provider_keys')
         .delete()
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
         .eq('provider', (provider as string).toLowerCase())
 
       if (error) {
@@ -147,5 +148,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
+  res.setHeader('Allow', ['GET', 'POST', 'DELETE'])
   return res.status(405).json({ error: 'Method not allowed' })
 }

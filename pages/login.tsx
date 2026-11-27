@@ -25,8 +25,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const { user, signIn } = useAuth()
   const router = useRouter()
+
+  const getSafeRedirect = () => {
+    const raw = typeof router.query.redirect === 'string' ? router.query.redirect : '/app'
+    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/app'
+  }
 
   const safeNavigate = (target: string) => {
     if (router.pathname !== target) {
@@ -52,40 +57,15 @@ export default function LoginPage() {
 
     try {
       const cleanEmail = email.trim()
-      const { data, error: signInError } = await signIn(cleanEmail, password)
+      const { error: signInError } = await signIn(cleanEmail, password)
 
       if (signInError) {
-        const errStr = (signInError.message || '').toLowerCase()
-        if (
-          errStr.includes('rate limit') ||
-          errStr.includes('smtp') ||
-          errStr.includes('exceeded')
-        ) {
-          localStorage.setItem('vm_user_email', cleanEmail)
-          localStorage.setItem('vm_user_name', cleanEmail.split('@')[0])
-          document.cookie =
-            'sb-access-token=local-user-session; path=/; max-age=604800; SameSite=Lax'
-          window.dispatchEvent(new Event('vectormind_auth_change'))
-          const redirect = (router.query.redirect as string) || '/app'
-          safeNavigate(redirect)
-          return
-        }
         setError(
           signInError.message ||
             'Invalid email or password. Please check your credentials.'
         )
       } else {
-        localStorage.setItem('vm_user_email', cleanEmail)
-        localStorage.setItem(
-          'vm_user_name',
-          data?.user?.user_metadata?.full_name || cleanEmail.split('@')[0]
-        )
-        if (data?.session?.access_token) {
-          document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=604800; SameSite=Lax`
-        }
-        window.dispatchEvent(new Event('vectormind_auth_change'))
-        const redirect = (router.query.redirect as string) || '/app'
-        safeNavigate(redirect)
+        safeNavigate(getSafeRedirect())
       }
     } catch (err: any) {
       setError(err.message || 'Failed to sign in. Please try again.')
@@ -166,6 +146,20 @@ export default function LoginPage() {
                 Sign in to open your library, collections, and personal AI settings.
               </p>
             </div>
+
+            {user && (
+              <div className="mb-6 p-3.5 rounded-xl bg-[#087F5B]/10 dark:bg-[#CFFF49]/10 border border-[#087F5B]/25 dark:border-[#CFFF49]/25 flex items-center justify-between gap-3">
+                <p className="text-xs text-[var(--vg-ink)] truncate">
+                  Signed in as <span className="font-semibold">{user.email}</span>
+                </p>
+                <Link
+                  href="/app"
+                  className="text-xs font-semibold text-[#087F5B] dark:text-[#CFFF49] hover:underline shrink-0"
+                >
+                  Open Vault →
+                </Link>
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 py-3 px-4 rounded-xl bg-rose-500/10 border-l-2 border-rose-500 text-rose-700 dark:text-rose-300 text-[13px]">

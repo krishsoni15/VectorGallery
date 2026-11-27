@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import React, { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/router'
 import { useAuth } from '@/lib/AuthContext'
 import { AppLayout, NavItemKey } from '@/components/layout/AppLayout'
 import { DashboardView } from '@/components/dashboard/DashboardView'
@@ -14,8 +13,7 @@ import { UploadModal } from '@/components/files/UploadModal'
 import { FilePreviewModal } from '@/components/files/FilePreviewModal'
 
 export default function AppPage() {
-  const { user, loading: authLoading } = useAuth()
-  const router = useRouter()
+  const { user } = useAuth()
 
   const [activeTab, setActiveTab] = useState<NavItemKey>('home')
   const [searchModalOpen, setSearchModalOpen] = useState(false)
@@ -24,9 +22,14 @@ export default function AppPage() {
   const [newCollectionModalOpen, setNewCollectionModalOpen] = useState(false)
   const [newCollectionName, setNewCollectionName] = useState('')
   const [newCollectionDesc, setNewCollectionDesc] = useState('')
+  const [collectionError, setCollectionError] = useState<string | null>(null)
   const [assistantInitialPrompt, setAssistantInitialPrompt] = useState<string | null>(null)
+  const [focusedAssistantFile, setFocusedAssistantFile] = useState<any | null>(null)
 
-  // Real backend statistics state
+  // Inline modal states for rename / permanent delete (no blocking native dialogs)
+  const [renameTarget, setRenameTarget] = useState<{ id: string; currentName: string; nextName: string } | null>(null)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+
   const [stats, setStats] = useState({
     storage: {
       total_bytes_used: 0,
@@ -51,12 +54,10 @@ export default function AppPage() {
     recent_files: [] as any[],
   })
 
-  // File library state
   const [files, setFiles] = useState<any[]>([])
   const [filesLoading, setFilesLoading] = useState(false)
   const [collections, setCollections] = useState<any[]>([])
 
-  // Fetch real dashboard stats
   const fetchStats = useCallback(async () => {
     try {
       const res = await fetch('/api/v2/dashboard/stats')
@@ -69,7 +70,6 @@ export default function AppPage() {
     }
   }, [])
 
-  // Fetch files based on active tab
   const fetchFiles = useCallback(async (tab: NavItemKey) => {
     setFilesLoading(true)
     try {
@@ -81,15 +81,14 @@ export default function AppPage() {
       else if (tab === 'documents') category = 'documents'
       else if (tab === 'audio') category = 'audio'
       else if (tab === 'favorites') isFavorite = true
-      else if (tab === 'trash') {
-        isTrashed = true
-      }
+      else if (tab === 'trash') isTrashed = true
 
-      const res = await fetch(`/api/v2/files?category=${category}&is_trashed=${isTrashed}${isFavorite ? '&is_favorite=true' : ''}`)
+      const res = await fetch(
+        `/api/v2/files?category=${category}&is_trashed=${isTrashed}${isFavorite ? '&is_favorite=true' : ''}`
+      )
       if (res.ok) {
         const data = await res.json()
         const rawFiles = data.files || []
-        // Photos view includes both camera photos and screenshots so smart filter pills stay accurate
         if (tab === 'photos') {
           setFiles(
             rawFiles.filter(
@@ -110,7 +109,6 @@ export default function AppPage() {
     }
   }, [])
 
-  // Fetch collections
   const fetchCollections = useCallback(async () => {
     try {
       const res = await fetch('/api/v2/collections')
@@ -123,12 +121,16 @@ export default function AppPage() {
     }
   }, [])
 
+  // Reload user-scoped vault data whenever session user changes
   useEffect(() => {
     fetchStats()
     fetchCollections()
-  }, [fetchStats, fetchCollections])
+    if (['photos', 'videos', 'documents', 'audio', 'downloads', 'recent', 'favorites', 'trash', 'collections'].includes(activeTab)) {
+      fetchFiles(activeTab)
+    }
+  }, [user?.id, activeTab, fetchStats, fetchCollections, fetchFiles])
 
-  // Global Keyboard shortcuts: Cmd+K (Search), Cmd+U (Upload), Escape (Dismiss modals)
+  // Global Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -141,6 +143,8 @@ export default function AppPage() {
         setSearchModalOpen(false)
         setUploadModalOpen(false)
         setNewCollectionModalOpen(false)
+        setRenameTarget(null)
+        setDeleteTargetId(null)
         setPreviewFile(null)
       }
     }
@@ -148,25 +152,21 @@ export default function AppPage() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  useEffect(() => {
-    if (['photos', 'videos', 'documents', 'audio', 'downloads', 'recent', 'favorites', 'trash', 'collections'].includes(activeTab)) {
-      fetchFiles(activeTab)
-    }
-  }, [activeTab, fetchFiles])
-
-  // File action handlers
   const handleToggleFavorite = async (fileId: string, currentStatus: boolean) => {
     try {
-      await fetch(`/api/v2/files/${fileId}`, {
+      const res = await fetch(`/api/v2/files/${fileId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_favorite: !currentStatus }),
       })
-      setFiles((prev) =>
-        prev.map((f) => (f.id === fileId ? { ...f, is_favorite: !currentStatus } : f))
-      )
-      if (previewFile?.id === fileId) {
-        setPreviewFile((prev: any) => ({ ...prev, is_favorite: !currentStatus }))
+      if (res.ok) {
+        setFiles((prev) =>
+          prev.map((f) => (f.id === fileId ? { ...f, is_favorite: !currentStatus } : f))
+        )
+        if (previewFile?.id === fileId) {
+          setPreviewFile((prev: any) => ({ ...prev, is_favorite: !currentStatus }))
+        }
+        fetchStats()
       }
     } catch (e) {
       console.error('[App] Favorite toggle error:', e)
@@ -175,9 +175,12 @@ export default function AppPage() {
 
   const handleTrashFile = async (fileId: string) => {
     try {
-      await fetch(`/api/v2/files/${fileId}`, { method: 'DELETE' })
-      setFiles((prev) => prev.filter((f) => f.id !== fileId))
-      fetchStats()
+      const res = await fetch(`/api/v2/files/${fileId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setFiles((prev) => prev.filter((f) => f.id !== fileId))
+        if (previewFile?.id === fileId) setPreviewFile(null)
+        fetchStats()
+      }
     } catch (e) {
       console.error('[App] Trash error:', e)
     }
@@ -185,45 +188,52 @@ export default function AppPage() {
 
   const handleRestoreFile = async (fileId: string) => {
     try {
-      await fetch('/api/v2/files/restore', {
+      const res = await fetch('/api/v2/files/restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ file_ids: [fileId] }),
       })
-      setFiles((prev) => prev.filter((f) => f.id !== fileId))
-      fetchStats()
+      if (res.ok) {
+        setFiles((prev) => prev.filter((f) => f.id !== fileId))
+        fetchStats()
+      }
     } catch (e) {
       console.error('[App] Restore error:', e)
     }
   }
 
-  const handlePermanentDelete = async (fileId: string) => {
-    if (!confirm('Are you sure you want to permanently delete this file? This cannot be undone.')) {
-      return
-    }
+  const handleConfirmPermanentDelete = async () => {
+    if (!deleteTargetId) return
+    const targetId = deleteTargetId
+    setDeleteTargetId(null)
     try {
-      await fetch(`/api/v2/files/${fileId}?permanent=true`, { method: 'DELETE' })
-      setFiles((prev) => prev.filter((f) => f.id !== fileId))
-      fetchStats()
+      const res = await fetch(`/api/v2/files/${targetId}?permanent=true`, { method: 'DELETE' })
+      if (res.ok) {
+        setFiles((prev) => prev.filter((f) => f.id !== targetId))
+        fetchStats()
+      }
     } catch (e) {
       console.error('[App] Permanent delete error:', e)
     }
   }
 
-  const handleRenameFile = async (fileId: string, currentName: string) => {
-    const newName = prompt('Enter new filename:', currentName)
-    if (!newName || newName.trim() === currentName) return
+  const handleConfirmRename = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!renameTarget || !renameTarget.nextName.trim()) return
+    const { id, currentName, nextName } = renameTarget
+    const clean = nextName.trim()
+    setRenameTarget(null)
+    if (clean === currentName) return
 
     try {
-      const res = await fetch(`/api/v2/files/${fileId}`, {
+      const res = await fetch(`/api/v2/files/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ original_name: newName.trim() }),
+        body: JSON.stringify({ original_name: clean }),
       })
       if (res.ok) {
-        setFiles((prev) =>
-          prev.map((f) => (f.id === fileId ? { ...f, original_name: newName.trim() } : f))
-        )
+        setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, original_name: clean } : f)))
+        fetchStats()
       }
     } catch (e) {
       console.error('[App] Rename error:', e)
@@ -253,12 +263,12 @@ export default function AppPage() {
 
   const handleOpenFileById = async (fileId: string) => {
     let f = files.find((file) => file.id === fileId) || stats.recent_files?.find((file) => file.id === fileId)
-    if (!f) {
+    if (!f || !f.sha256_hash) {
       try {
         const res = await fetch(`/api/v2/files/${fileId}`)
         if (res.ok) {
           const data = await res.json()
-          f = data.file
+          f = data.file || f
         }
       } catch (e) {
         console.error('[App] Failed to fetch file by id:', e)
@@ -267,7 +277,10 @@ export default function AppPage() {
     if (f) setPreviewFile(f)
   }
 
-  const handleBulkAction = async (action: 'trash' | 'restore' | 'favorite' | 'unfavorite' | 'delete', selectedIds: string[]) => {
+  const handleBulkAction = async (
+    action: 'trash' | 'restore' | 'favorite' | 'unfavorite' | 'delete',
+    selectedIds: string[]
+  ) => {
     try {
       const res = await fetch('/api/v2/files/bulk', {
         method: 'POST',
@@ -285,55 +298,57 @@ export default function AppPage() {
 
   const handleCreateCollection = async () => {
     if (!newCollectionName.trim()) return
-    const name = newCollectionName.trim()
-    const description = newCollectionDesc.trim()
+    setCollectionError(null)
     try {
       const res = await fetch('/api/v2/collections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          description,
+          name: newCollectionName.trim(),
+          description: newCollectionDesc.trim(),
           type: 'custom',
         }),
       })
-      const data = res.ok ? await res.json().catch(() => null) : null
-      if (data?.collection) {
-        fetchCollections()
-      } else {
-        // Local Sandbox mode fallback: append custom collection cleanly into state
-        setCollections((prev) => [
-          ...prev,
-          {
-            id: `custom-${Date.now()}`,
-            name,
-            description: description || 'Custom digital memory collection',
-            type: 'custom',
-            is_smart: false,
-          },
-        ])
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        setCollectionError(data?.error || 'Unable to create collection')
+        return
       }
+      await fetchCollections()
       setNewCollectionModalOpen(false)
       setNewCollectionName('')
       setNewCollectionDesc('')
-    } catch (e) {
-      console.error('[App] Create collection error:', e)
+    } catch (e: any) {
+      setCollectionError(e.message || 'Network error creating collection')
     }
   }
 
-  const handleSelectCollection = async (col: any) => {
-    setFilesLoading(true)
-    try {
-      const res = await fetch(`/api/v2/collections/${col.id}/files`)
-      if (res.ok) {
-        const data = await res.json()
-        setFiles(data.files || [])
-        setActiveTab('documents')
-      }
-    } catch (e) {
-      console.error('[App] Select collection error:', e)
-    } finally {
-      setFilesLoading(false)
+  const handleAddFilesToCollection = async (collectionId: string, fileIds: string[]) => {
+    const res = await fetch(`/api/v2/collections/${collectionId}/files`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_ids: fileIds }),
+    })
+    if (res.ok) {
+      await fetchCollections()
+    }
+  }
+
+  const handleRemoveFileFromCollection = async (collectionId: string, fileId: string) => {
+    const res = await fetch(`/api/v2/collections/${collectionId}/files?file_id=${encodeURIComponent(fileId)}`, {
+      method: 'DELETE',
+    })
+    if (res.ok) {
+      await fetchCollections()
+    }
+  }
+
+  const handleDeleteCollection = async (collectionId: string) => {
+    const res = await fetch(`/api/v2/collections/${collectionId}`, {
+      method: 'DELETE',
+    })
+    if (res.ok) {
+      await fetchCollections()
     }
   }
 
@@ -359,7 +374,6 @@ export default function AppPage() {
         }}
         connectedDevicesCount={stats.backup_health.connected_devices}
       >
-        {/* Local Preview Banner for Unauthenticated Sessions */}
         {!user && (
           <div className="bg-[#FFFFFF]/90 dark:bg-[#131715]/90 border-b border-[#DDE2DC] dark:border-white/[0.08] px-4 sm:px-6 py-2 text-xs flex flex-wrap items-center justify-between gap-2 text-[#555E58] dark:text-[#9AA69E]">
             <div className="flex items-center gap-2">
@@ -371,16 +385,21 @@ export default function AppPage() {
             </div>
             <div className="flex items-center gap-2 ml-auto">
               <Link
-                href="/login"
+                href="/login?redirect=/app"
                 className="px-3 py-1 rounded-full border border-[#DDE2DC] dark:border-white/[0.12] bg-[#F2F3F0] dark:bg-white/[0.06] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.12] text-[#101211] dark:text-[#F3F5F1] font-medium text-[11.5px] transition-colors"
               >
-                Sign in to sync
+                Sign in
+              </Link>
+              <Link
+                href="/signup?redirect=/app"
+                className="px-3 py-1 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] font-semibold text-[11.5px] transition-colors"
+              >
+                Create account
               </Link>
             </div>
           </div>
         )}
 
-        {/* View Router */}
         {activeTab === 'home' && (
           <DashboardView
             stats={stats}
@@ -397,6 +416,8 @@ export default function AppPage() {
             onOpenFile={handleOpenFileById}
             initialPrompt={assistantInitialPrompt}
             onConsumedPrompt={() => setAssistantInitialPrompt(null)}
+            focusedFile={focusedAssistantFile}
+            onClearFocusedFile={() => setFocusedAssistantFile(null)}
           />
         )}
 
@@ -410,8 +431,10 @@ export default function AppPage() {
             onToggleFavorite={handleToggleFavorite}
             onTrashFile={handleTrashFile}
             onRestoreFile={handleRestoreFile}
-            onPermanentDelete={handlePermanentDelete}
-            onRenameFile={handleRenameFile}
+            onPermanentDelete={(id) => setDeleteTargetId(id)}
+            onRenameFile={(id, currentName) =>
+              setRenameTarget({ id, currentName, nextName: currentName })
+            }
             onDownloadFile={handleDownloadFile}
             onBulkAction={handleBulkAction}
           />
@@ -425,6 +448,9 @@ export default function AppPage() {
             onToggleFavorite={handleToggleFavorite}
             onDownloadFile={handleDownloadFile}
             onCreateCollection={() => setNewCollectionModalOpen(true)}
+            onAddFilesToCollection={handleAddFilesToCollection}
+            onRemoveFileFromCollection={handleRemoveFileFromCollection}
+            onDeleteCollection={handleDeleteCollection}
           />
         )}
 
@@ -443,6 +469,10 @@ export default function AppPage() {
           >
             <h3 className="text-base font-bold text-[#101211] dark:text-[#F3F5F1]">Create New Collection</h3>
             <p className="text-xs text-[#626B64] dark:text-[#9AA69E]">Organize your files into a persistent digital memory album.</p>
+
+            {collectionError && (
+              <p className="text-xs text-rose-600 dark:text-rose-400">{collectionError}</p>
+            )}
 
             <div className="space-y-3">
               <div>
@@ -491,21 +521,87 @@ export default function AppPage() {
         </div>
       )}
 
+      {/* Rename File Modal */}
+      {renameTarget && (
+        <div
+          onClick={() => setRenameTarget(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101211]/45 dark:bg-black/80 backdrop-blur-md animate-fadeIn"
+        >
+          <form
+            onSubmit={handleConfirmRename}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] p-6 space-y-4 shadow-2xl"
+          >
+            <h3 className="text-sm font-bold text-[#101211] dark:text-[#F3F5F1]">Rename File</h3>
+            <input
+              type="text"
+              autoFocus
+              value={renameTarget.nextName}
+              onChange={(e) => setRenameTarget({ ...renameTarget, nextName: e.target.value })}
+              className="w-full bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.12] rounded-xl px-3 py-2 text-xs text-[#101211] dark:text-[#F3F5F1] focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49]"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setRenameTarget(null)}
+                className="px-3.5 py-1.5 rounded-full text-xs text-[#626B64] dark:text-[#9AA69E]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="vg-cta-lime px-4 py-1.5 rounded-full bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] text-xs font-semibold"
+              >
+                Save Name
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Permanent Delete Confirmation Modal */}
+      {deleteTargetId && (
+        <div
+          onClick={() => setDeleteTargetId(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101211]/45 dark:bg-black/80 backdrop-blur-md animate-fadeIn"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] p-6 space-y-4 shadow-2xl"
+          >
+            <h3 className="text-sm font-bold text-[#101211] dark:text-[#F3F5F1]">Permanently Delete File?</h3>
+            <p className="text-xs text-[#555E58] dark:text-[#9AA69E]">
+              This removes the original file and its indexed search chunks permanently.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTargetId(null)}
+                className="px-3.5 py-1.5 rounded-full text-xs text-[#626B64] dark:text-[#9AA69E]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmPermanentDelete}
+                className="px-4 py-1.5 rounded-full bg-rose-600 text-white text-xs font-semibold"
+              >
+                Delete Forever
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Global Modals */}
       <AISearchModal
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
         onSelectResult={(result) => {
-          setPreviewFile({
-            id: result.file_id,
-            original_name: result.file_name,
-            category: result.category,
-            mime_type: result.mime_type,
-            size_bytes: result.size_bytes,
-            thumbnail_url: result.thumbnail_url,
-            extracted_text: result.snippet,
-            created_at: result.created_at,
-          })
+          const targetId = result.file_id || result.id
+          if (targetId) {
+            handleOpenFileById(targetId)
+          }
         }}
       />
 
@@ -514,16 +610,18 @@ export default function AppPage() {
         onClose={() => setUploadModalOpen(false)}
         onUploadSuccess={() => {
           fetchStats()
+          fetchCollections()
           fetchFiles(activeTab)
         }}
       />
 
       <FilePreviewModal
         file={previewFile}
-        filesList={files.length > 0 ? files : (stats.recent_files || [])}
+        filesList={files.length > 0 ? files : stats.recent_files || []}
         onNavigateFile={(nextFile) => setPreviewFile(nextFile)}
         onOpenAssistantWithFile={(targetFile) => {
           const name = targetFile?.original_name || targetFile?.name || 'this file'
+          setFocusedAssistantFile(targetFile)
           setAssistantInitialPrompt(`Summarize key details and extracted text from "${name}".`)
           setPreviewFile(null)
           setActiveTab('assistant')

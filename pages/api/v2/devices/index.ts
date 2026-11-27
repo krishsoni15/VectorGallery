@@ -1,16 +1,36 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { listLocalDevices, upsertLocalDevice } from '@/lib/localAppStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
 
     if (!isServiceRoleConfigured()) {
-      return res.status(200).json({ devices: [] })
+      if (req.method === 'GET') {
+        return res.status(200).json({ devices: listLocalDevices(userId) })
+      }
+      if (req.method === 'POST') {
+        const { device_name, platform, device_identifier, app_version, settings } = req.body || {}
+        if (!device_name || !platform || !device_identifier) {
+          return res.status(400).json({ error: 'device_name, platform, and device_identifier are required' })
+        }
+        const device = upsertLocalDevice({
+          userId,
+          device_name,
+          platform,
+          device_identifier,
+          app_version,
+          settings,
+        })
+        return res.status(200).json({ success: true, device })
+      }
+      res.setHeader('Allow', ['GET', 'POST'])
+      return res.status(405).json({ error: 'Method not allowed' })
     }
 
     const supabase = getAdminSupabase()

@@ -1,5 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import {
+  deleteLocalConversation,
+  getLocalConversation,
+  renameLocalConversation,
+} from '@/lib/localAppStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const conversationId = req.query.id as string
@@ -9,21 +14,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
 
     if (!isServiceRoleConfigured()) {
-      return res.status(200).json({
-        conversation: { id: conversationId, title: 'Memory Conversation' },
-        messages: [],
-      })
+      const conv = getLocalConversation(conversationId, userId)
+      if (!conv) {
+        return res.status(404).json({ error: 'Conversation not found or access denied' })
+      }
+      if (req.method === 'GET') {
+        const { messages, ...summary } = conv
+        return res.status(200).json({
+          conversation: summary,
+          messages,
+        })
+      }
+      if (req.method === 'PATCH') {
+        const { title } = req.body || {}
+        if (!title || typeof title !== 'string') {
+          return res.status(400).json({ error: 'Title is required' })
+        }
+        const updated = renameLocalConversation(conversationId, userId, title)
+        return res.status(200).json({ success: true, conversation: updated })
+      }
+      if (req.method === 'DELETE') {
+        deleteLocalConversation(conversationId, userId)
+        return res.status(200).json({ success: true, deleted: true })
+      }
+      res.setHeader('Allow', ['GET', 'PATCH', 'DELETE'])
+      return res.status(405).json({ error: `Method ${req.method} not allowed` })
     }
 
     const supabase = getAdminSupabase()
 
-    // Verify conversation ownership
     const { data: conv, error: convErr } = await supabase
       .from('conversations')
       .select('*')
@@ -35,7 +60,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Conversation not found or access denied' })
     }
 
-    // ─── GET: Fetch Messages & Citations ───
     if (req.method === 'GET') {
       const { data: messages, error: msgErr } = await supabase
         .from('conversation_messages')
@@ -46,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (msgErr) throw msgErr
 
       const messageIds = (messages || []).map((m: any) => m.id)
-      let citationsMap: Record<string, any[]> = {}
+      const citationsMap: Record<string, any[]> = {}
 
       if (messageIds.length > 0) {
         const { data: citations } = await supabase
@@ -71,7 +95,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
-    // ─── PATCH: Rename Conversation ───
     if (req.method === 'PATCH') {
       const { title } = req.body
       if (!title || typeof title !== 'string') {
@@ -94,7 +117,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ success: true, conversation: updated })
     }
 
-    // ─── DELETE: Remove Conversation ───
     if (req.method === 'DELETE') {
       const { error: delErr } = await supabase
         .from('conversations')
@@ -114,4 +136,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: err.message || 'Conversation operation failed' })
   }
 }
-

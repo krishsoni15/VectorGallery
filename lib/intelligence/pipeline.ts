@@ -8,8 +8,10 @@ import { getAdminSupabase, isServiceRoleConfigured } from '../supabase'
 import { getStorageDriver } from '../storage'
 import { parseDocument } from './documentParser'
 import { generateEmbeddingsBatch, isProviderAvailable, EMBEDDING_PROVIDERS, type EmbeddingProviderId } from '../providers'
+import { getProviderCredential } from '../credentialResolver'
 import { ProcessingStatus } from './types'
-import { saveLocalFile, findLocalFileByHash } from '../localMetadataStore'
+import { saveLocalFile, findLocalFileByHash, updateLocalFile } from '../localMetadataStore'
+import { upsertLocalVectorChunks } from '../localVectorStore'
 
 export interface ProcessFileInput {
   filename: string
@@ -41,20 +43,19 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
   const sha256 = crypto.createHash('sha256').update(buffer).digest('hex')
   const sizeBytes = buffer.length
 
-  // 2. Duplicate Detection
-  // Check if identical file already exists for this user
+  // 2. Duplicate Detection scoped strictly per userId
   if (isServiceRoleConfigured()) {
     try {
       const { data: existing } = await supabase
         .from('files')
-        .select('id, original_name, category, size_bytes, processing_status, sha256_hash')
+        .select('id, original_name, category, size_bytes, processing_status, sha256_hash, thumbnail_url, storage_key')
         .eq('user_id', userId)
         .eq('sha256_hash', sha256)
         .eq('is_trashed', false)
         .maybeSingle()
 
       if (existing) {
-        const publicUrl = storage.getPublicUrl(`${userId}/${sha256}_${filename}`)
+        const publicUrl = existing.thumbnail_url || storage.getPublicUrl(existing.storage_key)
         return {
           fileId: existing.id,
           isDuplicate: true,
@@ -71,7 +72,7 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
       console.warn('[Pipeline] Duplicate check notice:', e)
     }
   } else {
-    const existing = findLocalFileByHash(sha256)
+    const existing = findLocalFileByHash(sha256, userId)
     if (existing) {
       return {
         fileId: existing.id,
@@ -94,8 +95,14 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
     upsert: true,
   })
 
+  // Resolve user's OCR & embedding credentials
+  const userGeminiKey = await getProviderCredential({ userId, provider: 'gemini' })
+  const userEmbedKey = await getProviderCredential({ userId, provider: embeddingProvider })
+
   // 4. Extraction & Parsing
-  const parsed = await parseDocument(filename, buffer, mimeType)
+  const parsed = await parseDocument(filename, buffer, mimeType, {
+    geminiApiKey: userGeminiKey,
+  })
   const category = parsed.metadata.category
 
   // 5. Database Record Creation
@@ -117,7 +124,7 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
           storage_provider: process.env.STORAGE_PROVIDER || 'local',
           sha256_hash: sha256,
           thumbnail_url: uploadResult.url,
-          extracted_text: parsed.rawText.slice(0, 10000), // First 10k chars for fast FTS
+          extracted_text: parsed.rawText.slice(0, 10000),
           processing_status: 'EXTRACTING',
           indexing_status: 'PENDING',
           metadata: parsed.metadata,
@@ -145,9 +152,9 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
       storage_provider: 'local',
       sha256_hash: sha256,
       thumbnail_url: uploadResult.url,
-      extracted_text: parsed.rawText.slice(0, 10000),
+      extracted_text: parsed.rawText.slice(0, 20000),
       processing_status: 'READY',
-      indexing_status: 'COMPLETED',
+      indexing_status: 'PENDING',
       is_favorite: false,
       is_trashed: false,
       created_at: new Date().toISOString(),
@@ -156,56 +163,89 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
     })
   }
 
-  // 6. Vector Embeddings (if chunks exist and provider key is available)
+  // 6. Vector Embeddings & Chunk Indexing (Cloud & Local)
   let chunksIndexed = 0
-  const chunksToEmbed = parsed.chunks.filter(c => c.content.trim().length > 0)
+  const chunksToEmbed = parsed.chunks.filter((c) => c.content.trim().length > 0)
 
   if (chunksToEmbed.length > 0) {
     const config = EMBEDDING_PROVIDERS[embeddingProvider]
-    const hasKey = config && isProviderAvailable(config.keyEnv)
+    const hasKey = Boolean(userEmbedKey) || (config && isProviderAvailable(config.keyEnv))
+    let embeddings: number[][] | null = null
 
     if (hasKey) {
       try {
-        const texts = chunksToEmbed.map(c => c.content)
-        const embeddings = await generateEmbeddingsBatch(texts, embeddingProvider, 'document')
-
-        if (isServiceRoleConfigured()) {
-          // Backward-compatible entry in nods_page and nods_page_section
-          const { data: page } = await supabase
-            .from('nods_page')
-            .insert({
-              project_id: '00000000-0000-0000-0000-000000000001',
-              user_id: userId,
-              path: filename,
-              checksum: sha256,
-              meta: { filename, size: sizeBytes, storageUrl: uploadResult.url, fileId },
-              type: category,
-            })
-            .select()
-            .single()
-
-          if (page) {
-            const sections = chunksToEmbed.map((chunk, i) => ({
-              page_id: page.id,
-              content: chunk.content,
-              embedding: embeddings[i],
-              token_count: chunk.tokenCount,
-              heading_context: chunk.heading,
-              page_number: chunk.pageNumber,
-              chunk_level: 1,
-            }))
-
-            await supabase.from('nods_page_section').insert(sections)
-            chunksIndexed = sections.length
-          }
-        }
+        const texts = chunksToEmbed.map((c) => c.content)
+        embeddings = await generateEmbeddingsBatch(
+          texts,
+          embeddingProvider,
+          'document',
+          0,
+          userEmbedKey
+        )
       } catch (embErr: any) {
-        console.warn('[Pipeline] Embedding generation skipped/failed (falling back to keyword search):', embErr.message)
+        console.warn('[Pipeline] Embedding generation skipped/failed (continuing with lexical chunks):', embErr.message)
       }
     }
+
+    if (isServiceRoleConfigured() && embeddings) {
+      try {
+        const { data: page } = await supabase
+          .from('nods_page')
+          .insert({
+            project_id: '00000000-0000-0000-0000-000000000001',
+            user_id: userId,
+            path: filename,
+            checksum: sha256,
+            meta: { filename, size: sizeBytes, storageUrl: uploadResult.url, fileId },
+            type: category,
+          })
+          .select()
+          .single()
+
+        if (page) {
+          const sections = chunksToEmbed.map((chunk, i) => ({
+            page_id: page.id,
+            content: chunk.content,
+            embedding: embeddings![i],
+            token_count: chunk.tokenCount,
+            heading_context: chunk.heading,
+            page_number: chunk.pageNumber,
+            chunk_level: 1,
+          }))
+
+          await supabase.from('nods_page_section').insert(sections)
+          chunksIndexed = sections.length
+        }
+      } catch (dbErr: any) {
+        console.warn('[Pipeline] Supabase chunk indexing failed:', dbErr.message)
+      }
+    } else if (!isServiceRoleConfigured()) {
+      chunksIndexed = upsertLocalVectorChunks({
+        userId,
+        fileId,
+        filename,
+        category,
+        chunks: chunksToEmbed.map((chunk, i) => ({
+          content: chunk.content,
+          tokenCount: chunk.tokenCount,
+          heading: chunk.heading,
+          pageNumber: chunk.pageNumber,
+          embedding: embeddings?.[i],
+        })),
+      })
+      updateLocalFile(
+        fileId,
+        {
+          indexing_status: embeddings ? 'INDEXED' : 'COMPLETED',
+        },
+        userId
+      )
+    }
+  } else if (!isServiceRoleConfigured()) {
+    updateLocalFile(fileId, { indexing_status: 'COMPLETED' }, userId)
   }
 
-  // 7. Update status to READY & increment storage stats
+  // 7. Update status to READY & auto-tag in Supabase mode
   if (isServiceRoleConfigured()) {
     try {
       await supabase
@@ -216,7 +256,6 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
         })
         .eq('id', fileId)
 
-      // Auto-tag file
       if (parsed.metadata.tags.length > 0) {
         for (const tag of parsed.metadata.tags) {
           const { data: tagRow } = await supabase
@@ -247,4 +286,3 @@ export async function processFile(input: ProcessFileInput): Promise<ProcessFileR
     chunksIndexed,
   }
 }
-

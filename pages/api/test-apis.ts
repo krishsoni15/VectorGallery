@@ -1,7 +1,12 @@
-// Diagnostic endpoint to test all API keys
+// Diagnostic endpoint to test configured AI API keys
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getServerUser } from '@/lib/supabase'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = await getServerUser(req)
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized: Authentication required' })
+  }
   const geminiKey = process.env.GEMINI_API_KEY
   const cohereKey = process.env.COHERE_API_KEY
   const results: any = { gemini: {}, cohere: {}, supabase: {} }

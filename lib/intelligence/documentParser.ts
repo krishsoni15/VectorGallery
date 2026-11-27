@@ -11,7 +11,8 @@ import { analyzeScreenshot } from './screenshot'
 export async function parseDocument(
   filename: string,
   buffer: Buffer,
-  mimeType: string
+  mimeType: string,
+  options?: { geminiApiKey?: string | null }
 ): Promise<ExtractionResult> {
   const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase()
   let rawText = ''
@@ -38,7 +39,7 @@ export async function parseDocument(
 
   // 2. Extract content by type
   if (category === 'photos') {
-    rawText = await extractTextFromImage(buffer, mimeType || 'image/png')
+    rawText = await extractTextFromImage(buffer, mimeType || 'image/png', options?.geminiApiKey)
     const screenshot = analyzeScreenshot(filename, rawText, mimeType)
     if (screenshot.isScreenshot) {
       category = 'screenshots'

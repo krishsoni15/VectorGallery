@@ -16,6 +16,7 @@ import { SplitTextReveal } from '@/components/landing/motion/LivingMotionPrimiti
 import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { MotionReveal } from '@/components/landing/motion'
 import { Container, Section } from '@/components/landing/ui'
+import { useAuth } from '@/lib/AuthContext'
 import { cn } from '@/lib/utils'
 
 type SearchMode = 'all' | 'photo' | 'document'
@@ -167,6 +168,7 @@ function HighlightedText({ text, tokens }: { text: string; tokens: string[] }) {
 
 export function InteractiveMemorySearch() {
   const reduced = useReducedMotion()
+  const { user } = useAuth()
   const [query, setQuery] = useState('Find my train ticket to Nice.')
   const [mode, setMode] = useState<SearchMode>('all')
   const [selectedId, setSelectedId] = useState<string>('boarding-pass')
@@ -349,8 +351,8 @@ export function InteractiveMemorySearch() {
                 >
                   Restore sample
                 </button>
-                <Link href="/app" className={VG_COMPONENTS.buttons.primarySm}>
-                  Open Web Vault
+                <Link href={user ? '/app' : '/signup'} className={VG_COMPONENTS.buttons.primarySm}>
+                  {user ? 'Open Web Vault' : 'Get started'}
                 </Link>
               </div>
             </div>
@@ -449,10 +451,10 @@ export function InteractiveMemorySearch() {
                             OCR: <HighlightedText text={activeItem.ocrExcerpt} tokens={tokens} />
                           </p>
                           <Link
-                            href="/app"
+                            href={user ? '/app' : '/signup'}
                             className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-[#087F5B] dark:text-[#CDFF45] hover:underline shrink-0"
                           >
-                            <span>Try in Web Vault</span>
+                            <span>{user ? 'Try in Web Vault' : 'Get started'}</span>
                             <ArrowUpRight className="w-3.5 h-3.5" />
                           </Link>
                         </div>

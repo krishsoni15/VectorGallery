@@ -1,30 +1,46 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import {
+  clearLocalSearchHistory,
+  listLocalSearchHistory,
+  recordLocalSearchHistory,
+} from '@/lib/localAppStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
 
     if (!isServiceRoleConfigured()) {
       if (req.method === 'GET') {
-        return res.status(200).json({
-          history: [
-            { query: 'AWS EC2 pricing' },
-            { query: 'College admission PDF' },
-            { query: 'Docker notes' },
-          ],
-        })
+        return res.status(200).json({ history: listLocalSearchHistory(userId) })
       }
-      return res.status(200).json({ success: true })
+      if (req.method === 'POST') {
+        const { query, result_count = 0, filters = {} } = req.body || {}
+        if (!query || typeof query !== 'string' || !query.trim()) {
+          return res.status(400).json({ error: 'Search query is required' })
+        }
+        const history = recordLocalSearchHistory({
+          userId,
+          query,
+          resultCount: result_count,
+          filters,
+        })
+        return res.status(201).json({ success: true, history })
+      }
+      if (req.method === 'DELETE') {
+        clearLocalSearchHistory(userId, req.query.id as string | undefined)
+        return res.status(200).json({ success: true, cleared: true })
+      }
+      res.setHeader('Allow', ['GET', 'POST', 'DELETE'])
+      return res.status(405).json({ error: `Method ${req.method} not allowed` })
     }
 
     const supabase = getAdminSupabase()
 
-    // ─── GET: Fetch Recent Unique Search Queries ───
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('search_history')
@@ -38,7 +54,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json({ history: [] })
       }
 
-      // Deduplicate queries preserving recent order
       const seen = new Set<string>()
       const uniqueHistory = (data || []).filter((item: any) => {
         const q = item.query.trim().toLowerCase()
@@ -50,7 +65,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ history: uniqueHistory })
     }
 
-    // ─── POST: Record Search Query ───
     if (req.method === 'POST') {
       const { query, result_count = 0, filters = {} } = req.body
 
@@ -76,7 +90,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(201).json({ success: true, history: data })
     }
 
-    // ─── DELETE: Clear Search History ───
     if (req.method === 'DELETE') {
       const id = req.query.id as string
 
@@ -98,4 +111,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: err.message || 'Search history failed' })
   }
 }
-

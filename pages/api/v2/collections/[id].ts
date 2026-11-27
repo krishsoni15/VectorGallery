@@ -1,5 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import {
+  deleteLocalCollection,
+  findLocalCollection,
+  updateLocalCollection,
+} from '@/lib/localAppStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const collectionId = req.query.id as string
@@ -9,21 +14,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
 
     if (!isServiceRoleConfigured()) {
-      return res.status(200).json({
-        success: true,
-        collection: { id: collectionId, name: 'Collection', type: 'custom' },
-      })
+      if (req.method === 'GET') {
+        const col = findLocalCollection(collectionId, userId)
+        if (!col) return res.status(404).json({ error: 'Collection not found' })
+        return res.status(200).json({ collection: col })
+      }
+      if (req.method === 'PUT' || req.method === 'PATCH') {
+        const { name, description, icon } = req.body || {}
+        const updated = updateLocalCollection(collectionId, userId, {
+          ...(typeof name === 'string' && name.trim() ? { name: name.trim() } : {}),
+          ...(description !== undefined ? { description: String(description) } : {}),
+          ...(icon !== undefined ? { icon: String(icon) } : {}),
+        })
+        if (!updated) return res.status(404).json({ error: 'Collection not found' })
+        return res.status(200).json({ success: true, collection: updated })
+      }
+      if (req.method === 'DELETE') {
+        const deleted = deleteLocalCollection(collectionId, userId)
+        if (!deleted) return res.status(404).json({ error: 'Collection not found' })
+        return res.status(200).json({ success: true, deleted: true })
+      }
+      res.setHeader('Allow', ['GET', 'PUT', 'PATCH', 'DELETE'])
+      return res.status(405).json({ error: `Method ${req.method} not allowed` })
     }
 
     const supabase = getAdminSupabase()
 
-    // ─── GET: Fetch Single Collection ───
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('collections')
@@ -39,7 +61,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ collection: data })
     }
 
-    // ─── PUT / PATCH: Update Collection ───
     if (req.method === 'PUT' || req.method === 'PATCH') {
       const { name, description, icon, cover_image_url, filter_criteria } = req.body
       const updates: any = { updated_at: new Date().toISOString() }
@@ -63,7 +84,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ success: true, collection: data })
     }
 
-    // ─── DELETE: Remove Collection ───
     if (req.method === 'DELETE') {
       const { error } = await supabase
         .from('collections')
@@ -83,4 +103,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: err.message || 'Collection operation failed' })
   }
 }
-

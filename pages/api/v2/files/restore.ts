@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { updateLocalFile } from '@/lib/localMetadataStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const user = await getServerUser(req)
-    if (isServiceRoleConfigured() && !user) {
+    if ((isServiceRoleConfigured() || hasExplicitCredential(req)) && !user) {
       return res.status(401).json({ error: 'Unauthorized: Authentication required' })
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
@@ -21,7 +22,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (!isServiceRoleConfigured()) {
-      return res.status(200).json({ success: true, restored_count: file_ids.length })
+      let restored = 0
+      for (const id of file_ids) {
+        if (updateLocalFile(id, { is_trashed: false }, userId)) {
+          restored++
+        }
+      }
+      return res.status(200).json({ success: true, restored_count: restored })
     }
 
     const supabase = getAdminSupabase()

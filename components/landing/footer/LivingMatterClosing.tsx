@@ -17,6 +17,7 @@ import {
   SECURITY_DOC_URL,
 } from '@/components/landing/tokens'
 import { Container } from '@/components/landing/ui'
+import { useAuth } from '@/lib/AuthContext'
 import { cn } from '@/lib/utils'
 
 const CONVERGING_MEMORIES = [
@@ -61,6 +62,7 @@ const CONVERGING_MEMORIES = [
  */
 export function FinalBrandMomentSection() {
   const reduced = useReducedMotion()
+  const { user } = useAuth()
 
   return (
     <section
@@ -177,8 +179,8 @@ export function FinalBrandMomentSection() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-3.5 pt-1">
-              <Link href="/app" className={VG_COMPONENTS.buttons.limePill}>
-                <span>Get started</span>
+              <Link href={user ? '/app' : '/signup'} className={VG_COMPONENTS.buttons.limePill}>
+                <span>{user ? 'Open Web Vault' : 'Get started'}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link href="/install" className={VG_COMPONENTS.buttons.secondary}>
@@ -204,6 +206,7 @@ export function FinalBrandMomentSection() {
 
 export function CompactFaqAndFooter({ apkSizeLabel }: { apkSizeLabel?: string }) {
   void apkSizeLabel
+  const { user } = useAuth()
   const [openIndex, setOpenIndex] = useState<number | null>(0)
   const faqList = FAQ_ITEMS.slice(0, 6)
 
@@ -294,8 +297,8 @@ export function CompactFaqAndFooter({ apkSizeLabel }: { apkSizeLabel?: string })
               <div className="text-[12px] font-semibold text-[var(--vg-ink)]">Product</div>
               <ul className="space-y-2 text-[var(--vg-ink-2)]">
                 <li>
-                  <Link href="/app" className="hover:text-[var(--vg-ink)] transition-colors">
-                    Open Vault
+                  <Link href={user ? '/app' : '/signup'} className="hover:text-[var(--vg-ink)] transition-colors">
+                    {user ? 'Open Vault' : 'Get started'}
                   </Link>
                 </li>
                 <li>
