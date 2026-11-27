@@ -227,6 +227,10 @@ export const VG_TYPOGRAPHY = {
       fontWeight: 600,
     },
   },
+  editorialWordClass:
+    'font-semibold text-[#087F5B] dark:text-[#CFFF49] tracking-[-0.02em]',
+  editorialWordOnForestClass:
+    'font-semibold text-[#CFFF49] tracking-[-0.02em]',
 } as const
 
 export const VG_LAYOUT = {
@@ -351,24 +355,24 @@ export const VG_COMPONENTS = {
  */
 export const VG_AURA_SHADER_SPEC = {
   lightStops: {
-    base: '#F2F3F0',
-    mid: '#E7E9E5',
-    highlight: '#D1D5D2',
+    base: '#ECEDEA',
+    mid: '#D9DDD8',
+    highlight: '#C8CEC9',
     limeCaustic: '#D4FF54',
-    opacityRange: [0.34, 0.56] as const,
+    opacityRange: [0.38, 0.62] as const,
   },
   darkStops: {
     base: '#090B0A',
-    mid: '#131715',
-    highlight: '#202522',
+    mid: '#121614',
+    highlight: '#1E2421',
     limeCaustic: '#CFFF49',
     jadeCaustic: '#39D9A0',
-    opacityRange: [0.32, 0.52] as const,
+    opacityRange: [0.40, 0.64] as const,
   },
   cssFallbackLight:
-    'radial-gradient(ellipse 64% 58% at 22% 72%, rgba(212, 255, 84, 0.14), transparent 58%), radial-gradient(ellipse 62% 58% at 78% 72%, rgba(209, 213, 210, 0.55), rgba(242, 243, 240, 0.92) 64%)',
+    'radial-gradient(ellipse 56% 52% at 22% 76%, rgba(212, 255, 84, 0.18), transparent 60%), linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 36%, #EFF1ED 62%, #E5E8E3 100%)',
   cssFallbackDark:
-    'radial-gradient(ellipse 62% 56% at 24% 74%, rgba(207, 255, 73, 0.08), transparent 58%), radial-gradient(ellipse 60% 56% at 78% 70%, rgba(57, 217, 160, 0.07), rgba(19, 23, 21, 0.94) 64%)',
+    'radial-gradient(ellipse 54% 50% at 24% 76%, rgba(207, 255, 73, 0.10), transparent 60%), linear-gradient(180deg, #090B0A 0%, #090B0A 36%, #111513 66%, #181D1A 100%)',
 } as const
 
 export const VG_SPHERE_THEME_SPEC = {
