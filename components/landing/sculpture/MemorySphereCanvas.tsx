@@ -123,7 +123,7 @@ export function MemorySphereCanvas({
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
           className={cn(
-            'w-full h-full object-contain scale-[1.10] drop-shadow-[0_26px_42px_rgba(16,18,17,0.16)] dark:drop-shadow-[0_28px_52px_rgba(0,0,0,0.68)] transition-opacity duration-300',
+            'w-full h-full object-contain scale-[1.10] transition-opacity duration-300',
             videoReady && !reduced ? 'opacity-0' : 'opacity-100'
           )}
         />
@@ -142,7 +142,7 @@ export function MemorySphereCanvas({
             onPlaying={() => setVideoReady(true)}
             aria-label="Animated 3D acid-lime glass and liquid-silver Memory Sphere sculpture"
             className={cn(
-              'absolute inset-0 w-full h-full object-contain scale-[1.10] drop-shadow-[0_26px_42px_rgba(16,18,17,0.16)] dark:drop-shadow-[0_28px_52px_rgba(0,0,0,0.68)] transition-opacity duration-300',
+              'absolute inset-0 w-full h-full object-contain scale-[1.10] transition-opacity duration-300',
               videoReady ? 'opacity-100' : 'opacity-0'
             )}
           >
