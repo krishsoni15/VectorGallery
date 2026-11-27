@@ -91,30 +91,32 @@ export function MemorySphereCanvas({
         className
       )}
     >
-      {/* Ambient ground shadow below the floating sphere */}
+      {/* Ambient ground shadow directly underneath the tight-cropped floating sphere */}
       <div
         aria-hidden="true"
-        className="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[56%] h-[11%] rounded-full blur-2xl opacity-65 dark:opacity-80 transition-opacity duration-500"
+        className="pointer-events-none absolute bottom-[-4%] left-1/2 -translate-x-1/2 w-[54%] h-[18%] rounded-full blur-2xl opacity-65 dark:opacity-85 transition-opacity duration-500"
         style={{
           background:
             resolvedTheme === 'dark'
               ? 'radial-gradient(ellipse at center, rgba(207,255,73,0.18) 0%, rgba(0,0,0,0.88) 68%, transparent 100%)'
-              : 'radial-gradient(ellipse at center, rgba(16,18,17,0.22) 0%, rgba(16,18,17,0.06) 58%, transparent 100%)',
+              : 'radial-gradient(ellipse at center, rgba(16,18,17,0.24) 0%, rgba(16,18,17,0.06) 58%, transparent 100%)',
         }}
       />
 
-      {/* Interactive 3D perspective stage holding instant transparent poster & infinite-loop RGBA WebP */}
+      {/* Interactive 3D perspective stage holding instant transparent poster & infinite-loop RGBA WebP.
+          Both images are positioned absolutely so the stage keeps strict aspect-[1.44/1] visible bounds
+          while alpha=0 top/bottom margins bleed invisibly with overflow-visible. */}
       <motion.div
         style={
           reduced
             ? undefined
             : {
-                transformPerspective: 1100,
+                transformPerspective: 1150,
                 rotateX: tiltX,
                 rotateY: tiltY,
               }
         }
-        className="relative z-10 w-full h-full flex items-center justify-center"
+        className="relative z-10 w-full aspect-[1.44/1] overflow-visible"
       >
         <img
           src={VG_SPHERE_THEME_SPEC.heroVideoPoster}
@@ -122,7 +124,7 @@ export function MemorySphereCanvas({
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
           className={cn(
-            'w-full h-full object-contain scale-[1.10] transition-opacity duration-300',
+            'w-[126%] max-w-none aspect-square object-contain absolute left-1/2 top-1/2 -translate-x-[48.8%] -translate-y-1/2 transition-opacity duration-300',
             animReady && !reduced ? 'opacity-0' : 'opacity-100'
           )}
         />
@@ -136,7 +138,7 @@ export function MemorySphereCanvas({
             decoding="async"
             onLoad={() => setAnimReady(true)}
             className={cn(
-              'absolute inset-0 w-full h-full object-contain scale-[1.10] transition-opacity duration-300',
+              'w-[126%] max-w-none aspect-square object-contain absolute left-1/2 top-1/2 -translate-x-[48.8%] -translate-y-1/2 transition-opacity duration-300',
               animReady ? 'opacity-100' : 'opacity-0'
             )}
           />

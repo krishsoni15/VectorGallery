@@ -170,9 +170,9 @@ export const VG_TYPOGRAPHY = {
   },
   scale: {
     monumentalWordmark: {
-      fontSize: 'clamp(2.45rem, 12.4vw, 15.2rem)',
+      fontSize: 'clamp(2.2rem, 11.15vw, 13.8rem)',
       lineHeight: '0.86',
-      letterSpacing: '-0.056em',
+      letterSpacing: '-0.052em',
       fontWeight: 700,
     },
     closingMonument: {
