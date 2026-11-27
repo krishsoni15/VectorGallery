@@ -8,7 +8,6 @@ import {
   Music,
   Camera,
   UploadCloud,
-  Search,
   Zap,
   Smartphone,
   Clock,
@@ -69,6 +68,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateTab,
   onSelectFile,
 }) => {
+  void onOpenSearch
   const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({})
 
   const isRenderableImage = (file: any) =>
@@ -114,17 +114,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          <button
-            onClick={onOpenSearch}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#FFFFFF] dark:bg-[#131715] hover:border-[#101211]/35 dark:hover:border-white/[0.2] border border-[#DDE2DC] dark:border-white/[0.10] text-xs sm:text-sm font-medium text-[#101211] dark:text-[#F3F5F1] transition-colors group shadow-sm"
-          >
-            <Search className="w-4 h-4 text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors" />
-            <span>Ask vault anything...</span>
-            <kbd className="text-[10.5px] bg-[#F2F3F0] dark:bg-white/[0.06] border border-[#DDE2DC] dark:border-white/[0.10] px-2 py-0.5 rounded-full font-mono text-[#626B64] dark:text-[#9AA69E] ml-1">
-              ⌘K
-            </kbd>
-          </button>
-
           <button
             onClick={() => onNavigateTab('assistant')}
             className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#101211] hover:bg-[#232825] dark:bg-white/[0.08] dark:hover:bg-white/[0.14] text-xs sm:text-sm font-medium text-[#F3F5F1] transition-colors"

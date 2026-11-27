@@ -41,6 +41,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 }) => {
   const [showInfo, setShowInfo] = useState(true)
   const [copiedText, setCopiedText] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
   const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({})
 
   const isRenderableImage = (item: any) =>
@@ -170,16 +171,22 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           <button
             onClick={() => {
               if (typeof navigator !== 'undefined' && navigator.share) {
-                navigator.share({ title: displayName, url: file.thumbnail_url })
+                navigator.share({ title: displayName, url: file.thumbnail_url }).catch(() => {})
               } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                navigator.clipboard.writeText(`${window.location.origin}${file.thumbnail_url || ''}`)
-                alert('Photo link copied!')
+                navigator.clipboard.writeText(`${window.location.origin}${file.thumbnail_url || ''}`).catch(() => {})
+                setCopiedLink(true)
+                setTimeout(() => setCopiedLink(false), 1800)
               }
             }}
-            title="Share"
-            className="p-2 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300 hover:text-[#CFFF49] transition-colors"
+            title={copiedLink ? 'Link copied' : 'Copy link'}
+            aria-label={copiedLink ? 'Link copied' : 'Share file link'}
+            className={`p-2 rounded-full transition-colors ${
+              copiedLink
+                ? 'bg-[#CDFF45]/20 text-[#CDFF45]'
+                : 'bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300 hover:text-[#CDFF45]'
+            }`}
           >
-            <Share2 className="w-4 h-4" />
+            {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
           </button>
 
           <button

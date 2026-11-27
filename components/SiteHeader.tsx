@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Menu, Smartphone, X } from 'lucide-react'
+import { ArrowRight, Github, Menu, Smartphone, X } from 'lucide-react'
 import { AccountMenu } from '@/components/AccountMenu'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
-import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
+import { VG_LAYOUT } from '@/components/landing/design-system'
 import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
+import { REPO_URL } from '@/components/landing/tokens'
 import { cn } from '@/lib/utils'
 
 interface SiteHeaderProps {
@@ -14,9 +15,10 @@ interface SiteHeaderProps {
 }
 
 const NAV_LINKS = [
-  { href: '/#showcase', label: 'Product' },
+  { href: '/#scroll-story', label: 'Experience' },
+  { href: '/#search', label: 'Product' },
   { href: '/#mobile', label: 'Mobile' },
-  { href: '/#privacy', label: 'Open Source' },
+  { href: '/#privacy', label: 'Open source' },
 ]
 
 export function SiteHeader({ minimal = false }: SiteHeaderProps) {
@@ -81,6 +83,17 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open Source Repository on GitHub"
+            className="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[12.5px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#FFFFFF]/75 dark:hover:bg-white/[0.08] border border-transparent hover:border-[#101211]/[0.08] dark:hover:border-white/[0.10] transition-colors whitespace-nowrap"
+          >
+            <Github className="w-3.5 h-3.5" />
+            <span>GitHub</span>
+          </a>
+
           <ThemeSwitch />
 
           {!minimal && (

@@ -19,7 +19,7 @@ describe('API Security, Upload Guardrails & Offline Grounding', () => {
     }
     for (const relKey of createdUploadPaths) {
       try {
-        const fullPath = path.join(process.cwd(), 'public', 'uploads', relKey)
+        const fullPath = path.join(process.cwd(), 'uploads', relKey)
         if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath)
       } catch {}
     }

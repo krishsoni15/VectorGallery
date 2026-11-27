@@ -110,8 +110,8 @@ export interface StageKinematics {
  * Keeps forward and reverse scrubbing mathematically reversible without state drift.
  */
 export function computeStageKinematics(p: number): StageKinematics {
-  const unfoldW = smoothstep(0.06, 0.22, p)
-  const discoverW = smoothstep(0.14, 0.30, p)
+  const unfoldW = smoothstep(0.08, 0.24, p)
+  const discoverW = smoothstep(0.19, 0.35, p)
   const connectW = smoothstep(0.44, 0.60, p)
   const rememberW = smoothstep(0.61, 0.78, p)
   const productW = smoothstep(0.79, 0.94, p)
