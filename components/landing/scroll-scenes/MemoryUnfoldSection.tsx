@@ -320,7 +320,8 @@ export function MemoryUnfoldSection() {
   const cutoutSrc = VG_SPHERE_THEME_SPEC.heroVideoPoster
 
   const maxSpreadX = Math.min(stageDims.w * 0.35, 420)
-  const maxSpreadY = Math.min(stageDims.h * 0.36, 168)
+  const isCompactHeight = stageDims.h < 405
+  const maxSpreadY = Math.min(stageDims.h * (isCompactHeight ? 0.34 : 0.35), 166)
 
   return (
     <section
@@ -333,7 +334,7 @@ export function MemoryUnfoldSection() {
     >
       <div
         ref={triggerWrapRef}
-        className="relative w-full min-h-[700px] md:h-[calc(100vh-64px)] md:max-h-[860px] flex flex-col justify-between py-6 sm:py-8 overflow-hidden"
+        className="relative w-full min-h-[560px] md:min-h-0 md:h-[calc(100vh-64px)] md:max-h-[840px] flex flex-col justify-between py-3 sm:py-4 lg:py-5 overflow-hidden"
       >
         <div
           aria-hidden="true"
@@ -345,29 +346,29 @@ export function MemoryUnfoldSection() {
           }}
         />
 
-        <div className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 flex flex-col justify-between gap-4`}>
+        <div className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 min-h-0 flex flex-col justify-between gap-2.5 sm:gap-3`}>
           {/* TOP NARRATIVE HEADER */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--vg-border)] pb-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-2.5 border-b border-[var(--vg-border)] pb-2.5 sm:pb-3 shrink-0">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 mb-2">
+              <div className="inline-flex items-center gap-2 mb-1">
                 <span className="inline-block w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#CFFF49]" />
-                <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--vg-ink-2)]">
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--vg-ink-2)]">
                   Scene {activeScene.numeral} / 06 · {activeScene.label}
                 </span>
               </div>
               <h2
                 id="scroll-story-heading"
-                className="font-display font-bold tracking-[-0.038em] leading-[1.06] text-[1.6rem] sm:text-[2.15rem] lg:text-[2.5rem] text-[#101211] dark:text-[#F3F5F1]"
+                className="font-display font-bold tracking-[-0.038em] leading-[1.05] text-[1.35rem] sm:text-[1.75rem] lg:text-[2.15rem] text-[#101211] dark:text-[#F3F5F1]"
               >
                 {activeScene.title}
               </h2>
-              <p className="mt-1.5 text-[14px] sm:text-[15px] text-[var(--vg-ink-2)] max-w-xl leading-[1.5]">
+              <p className="mt-1 text-[13px] sm:text-[14px] text-[var(--vg-ink-2)] max-w-xl leading-[1.45] line-clamp-2">
                 {activeScene.caption}
               </p>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="hidden sm:flex items-center gap-2 font-mono text-[12px] text-[var(--vg-ink-2)] px-3 py-1.5 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)]">
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div className="hidden sm:flex items-center gap-2 font-mono text-[11.5px] text-[var(--vg-ink-2)] px-3 py-1 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)]">
                 <span>Scroll</span>
                 <span className="text-[#101211] dark:text-[#CFFF49] font-semibold">
                   {Math.round(effectiveProgress * 100)}%
@@ -386,7 +387,7 @@ export function MemoryUnfoldSection() {
           {/* CHOREOGRAPHED CENTER TRANSFORM STAGE */}
           <div
             ref={stageRef}
-            className="relative flex-1 min-h-[390px] sm:min-h-[440px] flex items-center justify-center"
+            className="relative flex-1 min-h-[260px] sm:min-h-[300px] flex items-center justify-center"
           >
             {/* Scene F Workspace Reveal Shell */}
             <div
@@ -395,7 +396,7 @@ export function MemoryUnfoldSection() {
                 opacity: stage.vaultFrameOpacity,
                 transform: `scale(${lerp(0.95, 1, stage.vaultFrameOpacity)})`,
               }}
-              className="pointer-events-none absolute inset-x-2 sm:inset-x-8 lg:inset-x-20 top-2 bottom-2 rounded-3xl border border-[var(--vg-border-strong)] bg-[#FFFFFF]/90 dark:bg-[#131715]/90 backdrop-blur-xl shadow-[var(--vg-shadow-hero)] flex flex-col justify-between p-4 sm:p-5"
+              className="pointer-events-none absolute inset-x-2 sm:inset-x-8 lg:inset-x-20 top-1.5 bottom-1.5 rounded-3xl border border-[var(--vg-border-strong)] bg-[#FFFFFF]/90 dark:bg-[#131715]/90 backdrop-blur-xl shadow-[var(--vg-shadow-hero)] flex flex-col justify-between p-3 sm:p-4"
             >
               <div className="flex items-center justify-between border-b border-[var(--vg-border)] pb-3">
                 <div className="flex items-center gap-2.5">
@@ -497,7 +498,7 @@ export function MemoryUnfoldSection() {
                 opacity: stage.sphereOpacity,
                 transform: `scale(${stage.sphereScale.toFixed(3)}) rotate(${(effectiveProgress * 22).toFixed(2)}deg)`,
               }}
-              className="pointer-events-none relative z-20 w-[230px] h-[230px] sm:w-[290px] sm:h-[290px] lg:w-[320px] lg:h-[320px] flex items-center justify-center"
+              className="pointer-events-none relative z-20 w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] lg:w-[290px] lg:h-[290px] flex items-center justify-center"
             >
               <img
                 src={cutoutSrc}
@@ -549,7 +550,10 @@ export function MemoryUnfoldSection() {
                       transform: `translate3d(calc(-50% + ${xPx.toFixed(1)}px), calc(-50% + ${yPx.toFixed(1)}px), 0) rotate(${rFinal.toFixed(2)}deg) scale(${fragScale.toFixed(3)})`,
                     }}
                     className={cn(
-                      'absolute w-[104px] sm:w-[146px] lg:w-[166px] rounded-2xl overflow-hidden bg-[var(--vg-surface)] border transition-shadow duration-200',
+                      'absolute rounded-2xl overflow-hidden bg-[var(--vg-surface)] border transition-shadow duration-200',
+                      isCompactHeight
+                        ? 'w-[100px] sm:w-[110px] lg:w-[118px]'
+                        : 'w-[104px] sm:w-[144px] lg:w-[162px]',
                       isHighlighted
                         ? 'border-[#087F5B] dark:border-[#CFFF49] shadow-[0_24px_54px_-14px_rgba(212,255,84,0.45),0_12px_28px_-10px_rgba(16,18,17,0.24)] ring-2 ring-[#D4FF54]/75 dark:ring-[#CFFF49]/75 z-30'
                         : 'border-[var(--vg-border-strong)] shadow-[var(--vg-shadow-card)] z-20'
@@ -583,7 +587,7 @@ export function MemoryUnfoldSection() {
           </div>
 
           {/* BOTTOM INTERACTIVE SCENE SCRUBBER BAR */}
-          <div className="relative z-30 flex flex-col gap-2.5 pt-2">
+          <div className="relative z-30 flex flex-col gap-2 pt-1 shrink-0">
             <div className="w-full h-1 rounded-full bg-[#DDE2DC] dark:bg-white/[0.10] overflow-hidden">
               <div
                 className="h-full rounded-full bg-[#087F5B] dark:bg-[#CFFF49] transition-[width] duration-75"
@@ -606,7 +610,7 @@ export function MemoryUnfoldSection() {
                     aria-selected={active}
                     onClick={() => handleSelectScene(idx)}
                     className={cn(
-                      'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
+                      'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11.5px] sm:text-[12px] font-medium border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
                       active
                         ? 'bg-[#101211] text-[#F3F5F1] border-[#101211] dark:bg-[#CFFF49] dark:text-[#090B0A] dark:border-[#CFFF49] shadow-sm'
                         : 'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[var(--vg-border-strong)]'
