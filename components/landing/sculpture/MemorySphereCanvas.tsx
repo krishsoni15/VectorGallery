@@ -16,10 +16,10 @@ interface MemorySphereCanvasProps {
 }
 
 /**
- * Interactive Looping 3D Memory Sphere Sculpture.
- * Uses the transparent alpha-matted studio 3D sculpture loop (memory-sphere-hero.webm)
- * directly in Hero with cursor-linked 3D spring depth parallax, subtle orbital aura shadow,
- * and automatic crisp static transparent fallback under prefers-reduced-motion.
+ * Interactive Endless-Loop 3D Memory Sphere Sculpture.
+ * Uses the infinite-loop (-loop 0) transparent 32-bit RGBA Animated WebP sculpture
+ * (memory-sphere-hero.webp) directly in Hero with cursor-linked 3D spring depth parallax,
+ * subtle ambient ground shadow, and instant static poster fallback under prefers-reduced-motion.
  */
 export function MemorySphereCanvas({
   mode = 'hero',
@@ -31,12 +31,12 @@ export function MemorySphereCanvas({
   void mode
   void progress
   const containerRef = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const animRef = useRef<HTMLImageElement>(null)
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() =>
     themeMode === 'dark' ? 'dark' : 'light'
   )
-  const [videoReady, setVideoReady] = useState(false)
+  const [animReady, setAnimReady] = useState(false)
 
   const reduced = useClientReducedMotion()
 
@@ -76,12 +76,11 @@ export function MemorySphereCanvas({
   }, [reduced, tiltXRaw, tiltYRaw])
 
   useEffect(() => {
-    const vid = videoRef.current
-    if (!vid || reduced) return
-    if (vid.readyState >= 2) {
-      setVideoReady(true)
+    if (reduced) return
+    const el = animRef.current
+    if (el && el.complete && el.naturalWidth > 0) {
+      setAnimReady(true)
     }
-    vid.play().catch(() => {})
   }, [reduced])
 
   return (
@@ -104,7 +103,7 @@ export function MemorySphereCanvas({
         }}
       />
 
-      {/* Interactive 3D perspective stage holding both crisp transparent poster & looping VP9 alpha video */}
+      {/* Interactive 3D perspective stage holding instant transparent poster & infinite-loop RGBA WebP */}
       <motion.div
         style={
           reduced
@@ -124,30 +123,23 @@ export function MemorySphereCanvas({
           decoding="async"
           className={cn(
             'w-full h-full object-contain scale-[1.10] transition-opacity duration-300',
-            videoReady && !reduced ? 'opacity-0' : 'opacity-100'
+            animReady && !reduced ? 'opacity-0' : 'opacity-100'
           )}
         />
 
         {!reduced && (
-          <video
-            ref={videoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            poster={VG_SPHERE_THEME_SPEC.heroVideoPoster}
-            onCanPlay={() => setVideoReady(true)}
-            onLoadedData={() => setVideoReady(true)}
-            onPlaying={() => setVideoReady(true)}
-            aria-label="Animated 3D acid-lime glass and liquid-silver Memory Sphere sculpture"
+          <img
+            ref={animRef}
+            src={VG_SPHERE_THEME_SPEC.heroAnimWebp}
+            alt="Animated 3D acid-lime glass and liquid-silver Memory Sphere sculpture"
+            loading={priority ? 'eager' : 'lazy'}
+            decoding="async"
+            onLoad={() => setAnimReady(true)}
             className={cn(
               'absolute inset-0 w-full h-full object-contain scale-[1.10] transition-opacity duration-300',
-              videoReady ? 'opacity-100' : 'opacity-0'
+              animReady ? 'opacity-100' : 'opacity-0'
             )}
-          >
-            <source src={VG_SPHERE_THEME_SPEC.heroVideoWebm} type="video/webm" />
-          </video>
+          />
         )}
       </motion.div>
     </div>

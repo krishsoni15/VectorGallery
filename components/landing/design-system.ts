@@ -376,7 +376,7 @@ export const VG_AURA_SHADER_SPEC = {
 } as const
 
 export const VG_SPHERE_THEME_SPEC = {
-  heroVideoWebm: '/landing/artwork/memory-sphere-hero.webm',
+  heroAnimWebp: '/landing/artwork/memory-sphere-hero.webp',
   heroVideoPoster: '/landing/artwork/memory-sphere-video-poster.webp',
   heroSourceMp4: '/original-95b39c963d2d05ef93d4459cf213c8cb.mp4',
   light: {
