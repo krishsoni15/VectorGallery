@@ -60,7 +60,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'size'>('date')
   const [sortAsc, setSortAsc] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [photoAlbum, setPhotoAlbum] = useState<'all' | 'wishes' | 'screenshots' | 'favorites'>('all')
+  const [photoAlbum, setPhotoAlbum] = useState<'all' | 'camera' | 'wishes' | 'screenshots' | 'favorites'>('all')
   const [brokenThumbs, setBrokenThumbs] = useState<Record<string, boolean>>({})
 
   const isRenderableImage = (file: any) =>
@@ -80,12 +80,13 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
   // Filter and Sort
   const filteredFiles = files.filter((f) => {
     if (isPhotosMode) {
+      if (photoAlbum === 'camera' && f.category !== 'photos') return false
       if (photoAlbum === 'wishes' && !isWishPhoto(f)) return false
-      if (photoAlbum === 'screenshots' && !(f.category === 'screenshots' || f.original_name.toLowerCase().includes('screenshot'))) return false
+      if (photoAlbum === 'screenshots' && !(f.category === 'screenshots' || (f.original_name || '').toLowerCase().includes('screenshot'))) return false
       if (photoAlbum === 'favorites' && !f.is_favorite) return false
     }
     if (!searchTerm.trim()) return true
-    return f.original_name.toLowerCase().includes(searchTerm.toLowerCase())
+    return (f.original_name || '').toLowerCase().includes(searchTerm.toLowerCase())
   })
 
   const sortedFiles = [...filteredFiles].sort((a, b) => {
@@ -189,8 +190,91 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
     return FileText
   }
 
+  const VIEW_META: Record<string, { eyebrow: string; title: string; description: string; searchLabel: string }> = {
+    photos: {
+      eyebrow: 'Visual Timeline',
+      title: 'Photos & Screenshots',
+      description: 'Browse synced camera photos, screenshots, and celebration cards organized chronologically with optical OCR.',
+      searchLabel: 'photos & screenshots',
+    },
+    recent: {
+      eyebrow: 'Complete Archive',
+      title: 'All Files',
+      description: 'Every non-trashed photo, scanned receipt, text note, and document stored in your vault.',
+      searchLabel: 'all files',
+    },
+    downloads: {
+      eyebrow: 'Complete Archive',
+      title: 'All Files',
+      description: 'Every non-trashed photo, scanned receipt, text note, and document stored in your vault.',
+      searchLabel: 'all files',
+    },
+    documents: {
+      eyebrow: 'OCR Documents',
+      title: 'Documents & Notes',
+      description: 'Searchable PDFs, receipts, handwritten scans, and text records indexed for instant AI recall.',
+      searchLabel: 'documents',
+    },
+    favorites: {
+      eyebrow: 'Pinned Items',
+      title: 'Favorites',
+      description: 'Files and memories you starred for quick access across desktop and Android.',
+      searchLabel: 'favorites',
+    },
+    trash: {
+      eyebrow: 'Recently Deleted',
+      title: 'Trash',
+      description: 'Items moved to Trash can be restored back to your vault or permanently removed.',
+      searchLabel: 'trash',
+    },
+    videos: {
+      eyebrow: 'Motion Archive',
+      title: 'Videos',
+      description: 'Backed-up video clips stored privately in your personal vault.',
+      searchLabel: 'videos',
+    },
+    audio: {
+      eyebrow: 'Sound Library',
+      title: 'Audio',
+      description: 'Voice memos, recordings, and audio files preserved in your archive.',
+      searchLabel: 'audio',
+    },
+  }
+
+  const activeMeta = VIEW_META[activeCategory] || {
+    eyebrow: 'Vault Section',
+    title: activeCategory,
+    description: 'Browse, filter, and inspect indexed files in your personal archive.',
+    searchLabel: activeCategory,
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl 2xl:max-w-[1900px] w-full mx-auto space-y-6 animate-fadeIn">
+      {/* ─── Editorial Page Header ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-[#087F5B] dark:text-[#CFFF49] font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#087F5B] dark:bg-[#CFFF49]" />
+            <span>{activeMeta.eyebrow}</span>
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-[#101211] dark:text-[#F3F5F1]">
+            {activeMeta.title}
+          </h2>
+          <p className="text-xs sm:text-sm text-[#555E58] dark:text-[#9AA69E] max-w-2xl leading-relaxed">
+            {activeMeta.description}
+          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 self-start sm:self-end px-3.5 py-1.5 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] shrink-0">
+          <span className="text-sm font-bold font-mono text-[#101211] dark:text-[#CFFF49]">
+            {filteredFiles.length}
+          </span>
+          <span className="text-xs text-[#555E58] dark:text-[#9AA69E]">
+            {filteredFiles.length === 1 ? 'item' : 'items'}
+          </span>
+        </div>
+      </div>
+
       {/* ─── Control Toolbar ─── */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#DDE2DC] dark:border-white/[0.08]">
         {/* Left: Search input */}
@@ -200,7 +284,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={`Filter ${activeCategory}...`}
+            placeholder={`Filter ${activeMeta.searchLabel}...`}
             className="w-full bg-[#FFFFFF] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10] rounded-full pl-9 pr-4 py-2 text-xs text-[#101211] dark:text-[#F3F5F1] placeholder-[#626B64] dark:placeholder-[#7B867F] focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49] transition-colors"
           />
         </div>
@@ -286,16 +370,21 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
         <div className="space-y-3">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             {[
-              { id: 'all' as const, label: 'All Photos', count: files.length },
+              { id: 'all' as const, label: 'All Media', count: files.length },
               {
-                id: 'wishes' as const,
-                label: 'Celebrations',
-                count: files.filter(isWishPhoto).length,
+                id: 'camera' as const,
+                label: 'Camera',
+                count: files.filter((f) => f.category === 'photos').length,
               },
               {
                 id: 'screenshots' as const,
                 label: 'Screenshots',
-                count: files.filter((f) => f.category === 'screenshots' || f.original_name.toLowerCase().includes('screenshot')).length,
+                count: files.filter((f) => f.category === 'screenshots' || (f.original_name || '').toLowerCase().includes('screenshot')).length,
+              },
+              {
+                id: 'wishes' as const,
+                label: 'Celebrations',
+                count: files.filter(isWishPhoto).length,
               },
               {
                 id: 'favorites' as const,

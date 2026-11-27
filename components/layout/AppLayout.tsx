@@ -90,20 +90,40 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     window.dispatchEvent(new Event('vm_theme_change'))
   }
 
-  const navItems = [
-    { key: 'photos' as NavItemKey, label: 'Photos', icon: ImageIcon },
-    { key: 'home' as NavItemKey, label: 'Memories Dashboard', icon: Home },
-    { key: 'assistant' as NavItemKey, label: 'Assistant', icon: Zap, badge: 'AI' },
-    { key: 'search' as NavItemKey, label: 'AI Search', icon: Search, action: onOpenSearch },
-    { key: 'collections' as NavItemKey, label: 'Albums & Collections', icon: FolderHeart },
-    { key: 'documents' as NavItemKey, label: 'Documents', icon: FileText },
-    { key: 'videos' as NavItemKey, label: 'Videos', icon: Video },
-    { key: 'audio' as NavItemKey, label: 'Audio', icon: Music },
-    { key: 'favorites' as NavItemKey, label: 'Favorites', icon: Star },
-    { key: 'recent' as NavItemKey, label: 'Recent', icon: Clock },
-    { key: 'downloads' as NavItemKey, label: 'Downloads', icon: Download },
-    { key: 'trash' as NavItemKey, label: 'Trash', icon: Trash2 },
+  const navItems: Array<{
+    key: NavItemKey
+    label: string
+    icon: React.ComponentType<{ className?: string }>
+    badge?: string
+    action?: () => void
+    sectionLabel?: string
+  }> = [
+    { key: 'home', label: 'Overview', icon: Home },
+    { key: 'photos', label: 'Photos', icon: ImageIcon },
+    { key: 'recent', label: 'All Files', icon: Clock },
+    { key: 'documents', label: 'Documents', icon: FileText },
+    { key: 'collections', label: 'Collections', icon: FolderHeart },
+    { key: 'assistant', label: 'Assistant', icon: Zap, badge: 'AI', sectionLabel: 'Intelligence' },
+    { key: 'search', label: 'AI Search', icon: Search, action: onOpenSearch },
+    { key: 'favorites', label: 'Favorites', icon: Star, sectionLabel: 'Organize' },
+    { key: 'trash', label: 'Trash', icon: Trash2 },
   ]
+
+  const TAB_TITLES: Record<NavItemKey, string> = {
+    home: 'Overview',
+    photos: 'Photos & Screenshots',
+    recent: 'All Files',
+    documents: 'Documents',
+    collections: 'Albums & Collections',
+    assistant: 'AI Assistant',
+    search: 'AI Search',
+    favorites: 'Favorites',
+    trash: 'Trash',
+    downloads: 'All Files',
+    videos: 'Videos',
+    audio: 'Audio',
+    settings: 'Settings',
+  }
 
   const handleNavClick = (item: (typeof navItems)[0]) => {
     if (item.action) {
@@ -156,38 +176,35 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive = activeTab === item.key
-                const isCollectionsDivider = item.key === 'collections'
 
                 return (
                   <React.Fragment key={item.key}>
-                    {isCollectionsDivider && (
+                    {item.sectionLabel && (
                       <div className="pt-3 pb-1 px-3 text-[10px] font-mono uppercase tracking-[0.12em] text-[#626B64] dark:text-[#7B867F] border-t border-[#DDE2DC] dark:border-white/[0.06] mt-2">
-                        <span>Collections</span>
+                        <span>{item.sectionLabel}</span>
                       </div>
                     )}
                     <button
                       onClick={() => handleNavClick(item)}
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors ${
                         isActive
-                          ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/15 dark:text-[#CFFF49] font-semibold'
+                          ? 'bg-[#101211] text-[#F3F5F1] dark:bg-white/[0.10] dark:text-[#F3F5F1] font-semibold'
                           : 'text-[#555E58] dark:text-[#9AA69E] hover:bg-[#E7E9E5]/70 dark:hover:bg-white/[0.05] hover:text-[#101211] dark:hover:text-[#F3F5F1]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <Icon
-                          className={`w-4 h-4 ${
-                            isActive ? 'text-[#D4FF54] dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#7B867F]'
-                          }`}
+                          className={`w-4 h-4 ${isActive ? 'text-[#D4FF54] dark:text-[#CFFF49]' : 'text-[#626B64] dark:text-[#7B867F]'
+                            }`}
                         />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
                         <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${
-                            isActive
-                              ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]'
-                              : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
-                          }`}
+                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${isActive
+                            ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]'
+                            : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
+                            }`}
                         >
                           {item.badge}
                         </span>
@@ -253,45 +270,42 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </button>
         </div>
 
-        {/* 12-Item Desktop Navigation Links */}
-        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 custom-scrollbar">
+        {/* Minimal Desktop Navigation Links */}
+        <nav aria-label="Workspace navigation" className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 custom-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = activeTab === item.key
-            const isCollectionsDivider = item.key === 'collections'
 
             return (
               <React.Fragment key={item.key}>
-                {isCollectionsDivider && (
+                {item.sectionLabel && (
                   <div className="pt-3 pb-1 px-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.12em] text-[#626B64] dark:text-[#7B867F] border-t border-[#DDE2DC] dark:border-white/[0.06] mt-2">
-                    <span>Collections</span>
+                    <span>{item.sectionLabel}</span>
                   </div>
                 )}
                 <button
                   onClick={() => handleNavClick(item)}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[12.5px] font-medium transition-colors group ${
                     isActive
-                      ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/15 dark:text-[#CFFF49] font-semibold'
+                      ? 'bg-[#101211] text-[#F3F5F1] dark:bg-white/[0.10] dark:text-[#F3F5F1] font-semibold'
                       : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5]/65 dark:hover:bg-white/[0.05]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Icon
-                      className={`w-4 h-4 shrink-0 transition-colors ${
-                        isActive
-                          ? 'text-[#D4FF54] dark:text-[#CFFF49]'
-                          : 'text-[#626B64] dark:text-[#7B867F] group-hover:text-[#101211] dark:group-hover:text-[#F3F5F1]'
-                      }`}
+                      className={`w-4 h-4 shrink-0 transition-colors ${isActive
+                        ? 'text-[#D4FF54] dark:text-[#CFFF49]'
+                        : 'text-[#626B64] dark:text-[#7B867F] group-hover:text-[#101211] dark:group-hover:text-[#F3F5F1]'
+                        }`}
                     />
                     <span className="truncate">{item.label}</span>
                   </div>
                   {item.badge && (
                     <span
-                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${
-                        isActive
-                          ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]'
-                          : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
-                      }`}
+                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold ${isActive
+                        ? 'bg-white/15 text-[#D4FF54] dark:bg-[#CFFF49]/20 dark:text-[#CFFF49]'
+                        : 'bg-[#E7E9E5] dark:bg-white/[0.08] text-[#101211] dark:text-[#F3F5F1]'
+                        }`}
                     >
                       {item.badge}
                     </span>
@@ -300,7 +314,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </React.Fragment>
             )
           })}
-        </div>
+        </nav>
 
         {/* Bottom Section: Storage, Devices, Settings, User Profile */}
         <div className="p-3 border-t border-[#DDE2DC] dark:border-white/[0.08] space-y-2.5 bg-[#F2F3F0]/65 dark:bg-[#090B0A]/45">
@@ -337,11 +351,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <div className="pt-1.5 flex items-center justify-between gap-1 border-t border-[#DDE2DC] dark:border-white/[0.06]">
             <button
               onClick={() => onSelectTab('settings')}
-              className={`flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                activeTab === 'settings'
-                  ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/15 dark:text-[#CFFF49] font-semibold'
-                  : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5]/70 dark:hover:bg-white/[0.05]'
-              }`}
+              className={`flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${activeTab === 'settings'
+                ? 'bg-[#101211] text-[#F3F5F1] dark:bg-[#CFFF49]/15 dark:text-[#CFFF49] font-semibold'
+                : 'text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5]/70 dark:hover:bg-white/[0.05]'
+                }`}
             >
               <Settings className="w-3.5 h-3.5" />
               <span>Settings</span>
@@ -385,13 +398,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="font-display text-sm font-bold tracking-[-0.02em] text-[#101211] dark:text-[#F3F5F1] capitalize hidden sm:flex items-center gap-2">
-              {activeTab === 'home' ? 'Memory Vault' : activeTab.replace('-', ' ')}
+            <h1 className="font-display text-sm font-bold tracking-[-0.02em] text-[#101211] dark:text-[#F3F5F1] hidden sm:flex items-center gap-2">
+              {TAB_TITLES[activeTab] || activeTab}
             </h1>
           </div>
 
           {/* Centered Clean Search Pill */}
-          <div className="flex-1 min-w-0 max-w-xl mx-1 sm:mx-4">
+          <div className="flex-1 max-w-xl mx-1 sm:mx-4">
             <button
               onClick={onOpenSearch}
               className="w-full flex items-center justify-between px-3.5 sm:px-4 py-2 rounded-full bg-[#F2F3F0] dark:bg-[#131715] hover:bg-[#E7E9E5]/80 dark:hover:bg-[#1A1F1D] border border-[#DDE2DC] dark:border-white/[0.10] text-xs transition-colors group"
@@ -454,9 +467,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         {/* ─── Mobile Bottom Navigation ─── */}
         <nav className="md:hidden flex items-center justify-around h-16 border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF]/92 dark:bg-[#090B0A]/92 backdrop-blur-xl shrink-0 px-1 z-20">
           {[
-            { key: 'home' as NavItemKey, label: 'Vault', icon: Home },
+            { key: 'home' as NavItemKey, label: 'Overview', icon: Home },
             { key: 'photos' as NavItemKey, label: 'Photos', icon: ImageIcon },
-            { key: 'collections' as NavItemKey, label: 'Albums', icon: FolderHeart },
+            { key: 'collections' as NavItemKey, label: 'Collections', icon: FolderHeart },
             { key: 'assistant' as NavItemKey, label: 'Assistant', icon: Zap },
           ].map((tab) => {
             const Icon = tab.icon
@@ -465,11 +478,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <button
                 key={tab.key}
                 onClick={() => onSelectTab(tab.key)}
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
-                  isActive
-                    ? 'text-[#101211] dark:text-[#CFFF49] font-semibold'
-                    : 'text-[#626B64] dark:text-[#9AA69E]'
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${isActive
+                  ? 'text-[#101211] dark:text-[#CFFF49] font-semibold'
+                  : 'text-[#626B64] dark:text-[#9AA69E]'
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-[10px]">{tab.label}</span>

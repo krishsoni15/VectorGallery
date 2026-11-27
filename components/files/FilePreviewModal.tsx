@@ -48,7 +48,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
     (item.category === 'photos' ||
       item.category === 'screenshots' ||
       item.mime_type?.startsWith('image/') ||
-      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(item.original_name || ''))
+      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(item.original_name || item.name || ''))
 
   // Current file index in filesList
   const currentIndex = file && filesList.length > 0 ? filesList.findIndex((f) => f.id === file.id) : -1
@@ -99,13 +99,18 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   }
 
   const isImage = isRenderableImage(file)
+  const displayName = file.original_name || file.name || 'Vault memory'
+  const displayBytes = Number(file.size_bytes ?? file.size ?? 0)
+  const displayMime = file.mime_type || (isImage ? 'image/jpeg' : 'application/octet-stream')
   const mainThumbKey = String(file.thumbnail_url || file.id)
   const canRenderMainImage = isImage && !brokenThumbs[mainThumbKey]
-  const formattedDate = new Date(file.created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  const formattedDate = file.created_at
+    ? new Date(file.created_at).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : 'Recent'
 
   const handleCopyOcr = () => {
     if (file.extracted_text) {
@@ -129,9 +134,9 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           </button>
 
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-white truncate max-w-sm sm:max-w-md">{file.original_name}</h3>
+            <h3 className="text-sm font-semibold text-white truncate max-w-sm sm:max-w-md">{displayName}</h3>
             <p className="text-[11px] text-zinc-400 font-mono">
-              {formattedDate} • {formatSize(file.size_bytes)}
+              {formattedDate} • {formatSize(displayBytes)}
               {currentIndex !== -1 && (
                 <span className="ml-2 px-1.5 py-0.5 rounded bg-white/[0.08] text-zinc-300">
                   {currentIndex + 1} of {filesList.length}
@@ -146,7 +151,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           {onOpenAssistantWithFile && (
             <button
               onClick={() => onOpenAssistantWithFile(file)}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition-all shadow-sm"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#CFFF49]/15 hover:bg-[#CFFF49]/25 border border-[#CFFF49]/35 text-[#CFFF49] text-xs font-semibold transition-all shadow-sm"
               title="Ask AI about this file"
             >
               <Zap className="w-3.5 h-3.5" />
@@ -165,14 +170,14 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           <button
             onClick={() => {
               if (typeof navigator !== 'undefined' && navigator.share) {
-                navigator.share({ title: file.original_name, url: file.thumbnail_url })
+                navigator.share({ title: displayName, url: file.thumbnail_url })
               } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
                 navigator.clipboard.writeText(`${window.location.origin}${file.thumbnail_url || ''}`)
                 alert('Photo link copied!')
               }
             }}
             title="Share"
-            className="p-2 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300 hover:text-emerald-400 transition-colors"
+            className="p-2 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300 hover:text-[#CFFF49] transition-colors"
           >
             <Share2 className="w-4 h-4" />
           </button>
@@ -189,7 +194,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             onClick={() => setShowInfo(!showInfo)}
             title="Toggle Info Drawer"
             className={`p-2 rounded-full transition-colors ${
-              showInfo ? 'bg-emerald-500 text-zinc-950 font-bold' : 'bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300'
+              showInfo ? 'bg-[#CFFF49] text-[#101211] font-bold' : 'bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300'
             }`}
           >
             <Info className="w-4 h-4" />
@@ -226,24 +231,24 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           {canRenderMainImage ? (
             <img
               src={file.thumbnail_url}
-              alt={file.original_name}
+              alt={displayName}
               className="max-h-[82vh] max-w-[90vw] object-contain rounded-lg shadow-2xl drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]"
               onError={() =>
                 setBrokenThumbs((prev) => ({ ...prev, [mainThumbKey]: true }))
               }
             />
           ) : (
-            <div className="flex flex-col items-center justify-center p-12 rounded-3xl bg-[#0F1117]/80 border border-white/[0.08] space-y-4 text-center max-w-md mx-4">
-              <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-400">
+            <div className="flex flex-col items-center justify-center p-12 rounded-3xl bg-[#131715]/90 border border-white/[0.10] space-y-4 text-center max-w-md mx-4">
+              <div className="p-4 rounded-2xl bg-[#CFFF49]/15 text-[#CFFF49]">
                 {isImage ? <ImageIcon className="w-12 h-12" /> : <FileText className="w-12 h-12" />}
               </div>
               <div>
-                <h4 className="text-base font-bold text-white">{file.original_name}</h4>
-                <p className="text-xs text-zinc-400 mt-1">{file.mime_type} • {formatSize(file.size_bytes)}</p>
+                <h4 className="text-base font-bold text-white">{displayName}</h4>
+                <p className="text-xs text-zinc-400 mt-1">{displayMime} • {formatSize(displayBytes)}</p>
               </div>
               <button
                 onClick={() => onDownload(file)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-all shadow-lg"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#CFFF49] hover:bg-[#D8FF6B] text-xs font-bold text-[#101211] transition-all shadow-lg"
               >
                 <Download className="w-4 h-4" /> Download File
               </button>
@@ -255,9 +260,8 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
         {hasNext && (
           <button
             onClick={handleNext}
-            className={`absolute right-4 z-30 p-3 rounded-full bg-black/60 hover:bg-black/80 border border-white/[0.1] text-zinc-200 hover:text-white hover:scale-110 transition-all shadow-xl ${
-              showInfo ? 'right-4 lg:right-[390px]' : 'right-4'
-            }`}
+            className={`absolute right-4 z-30 p-3 rounded-full bg-black/60 hover:bg-black/80 border border-white/[0.1] text-zinc-200 hover:text-white hover:scale-110 transition-all shadow-xl ${showInfo ? 'right-4 lg:right-[390px]' : 'right-4'
+              }`}
             title="Next (Right Arrow)"
           >
             <ChevronRight className="w-6 h-6" />
@@ -277,11 +281,10 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                     key={f.id}
                     onClick={() => onNavigateFile && onNavigateFile(f)}
                     title={f.original_name}
-                    className={`relative shrink-0 w-11 h-11 rounded-xl overflow-hidden transition-all duration-200 ${
-                      isSelected
-                        ? 'ring-2 ring-emerald-400 scale-110 shadow-lg brightness-110'
-                        : 'opacity-50 hover:opacity-100 hover:scale-105'
-                    }`}
+                    className={`relative shrink-0 w-11 h-11 rounded-xl overflow-hidden transition-all duration-200 ${isSelected
+                      ? 'ring-2 ring-emerald-400 scale-110 shadow-lg brightness-110'
+                      : 'opacity-50 hover:opacity-100 hover:scale-105'
+                      }`}
                   >
                     {hasThumb ? (
                       <img
@@ -381,19 +384,21 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             <div className="space-y-3 pt-2 border-t border-[#DDE2DC] dark:border-white/[0.08] text-xs">
               <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
                 <span className="text-[#626B64] dark:text-[#9AA69E]">Category</span>
-                <span className="font-semibold text-[#101211] dark:text-[#F3F5F1] capitalize">{file.category}</span>
+                <span className="font-semibold text-[#101211] dark:text-[#F3F5F1] capitalize">{file.category || 'file'}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
                 <span className="text-[#626B64] dark:text-[#9AA69E]">MIME Type</span>
-                <span className="font-mono text-[#101211] dark:text-[#F3F5F1] text-[11px]">{file.mime_type || 'image/jpeg'}</span>
+                <span className="font-mono text-[#101211] dark:text-[#F3F5F1] text-[11px]">{displayMime}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
                 <span className="text-[#626B64] dark:text-[#9AA69E]">File Size</span>
-                <span className="font-mono text-[#101211] dark:text-[#F3F5F1]">{formatSize(file.size_bytes)}</span>
+                <span className="font-mono text-[#101211] dark:text-[#F3F5F1]">{formatSize(displayBytes)}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-[#DDE2DC] dark:border-white/[0.05]">
                 <span className="text-[#626B64] dark:text-[#9AA69E]">Uploaded</span>
-                <span className="font-mono text-[#101211] dark:text-[#F3F5F1] text-[11px]">{new Date(file.created_at).toLocaleString()}</span>
+                <span className="font-mono text-[#101211] dark:text-[#F3F5F1] text-[11px]">
+                  {file.created_at ? new Date(file.created_at).toLocaleString() : 'Recent'}
+                </span>
               </div>
               <div className="py-1">
                 <span className="text-[#626B64] dark:text-[#9AA69E] block mb-1">SHA-256 Hash</span>

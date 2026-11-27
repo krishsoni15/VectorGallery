@@ -77,12 +77,10 @@ export default function AppPage() {
       let isTrashed = false
       let isFavorite = false
 
-      if (tab === 'photos') category = 'photos'
-      else if (tab === 'videos') category = 'videos'
+      if (tab === 'videos') category = 'videos'
       else if (tab === 'documents') category = 'documents'
       else if (tab === 'audio') category = 'audio'
       else if (tab === 'favorites') isFavorite = true
-      else if (tab === 'downloads') category = 'all'
       else if (tab === 'trash') {
         isTrashed = true
       }
@@ -90,7 +88,20 @@ export default function AppPage() {
       const res = await fetch(`/api/v2/files?category=${category}&is_trashed=${isTrashed}${isFavorite ? '&is_favorite=true' : ''}`)
       if (res.ok) {
         const data = await res.json()
-        setFiles(data.files || [])
+        const rawFiles = data.files || []
+        // Photos view includes both camera photos and screenshots so smart filter pills stay accurate
+        if (tab === 'photos') {
+          setFiles(
+            rawFiles.filter(
+              (f: any) =>
+                f.category === 'photos' ||
+                f.category === 'screenshots' ||
+                f.mime_type?.startsWith('image/')
+            )
+          )
+        } else {
+          setFiles(rawFiles)
+        }
       }
     } catch (e) {
       console.error('[App] Failed to fetch files:', e)
@@ -274,22 +285,37 @@ export default function AppPage() {
 
   const handleCreateCollection = async () => {
     if (!newCollectionName.trim()) return
+    const name = newCollectionName.trim()
+    const description = newCollectionDesc.trim()
     try {
       const res = await fetch('/api/v2/collections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: newCollectionName.trim(),
-          description: newCollectionDesc.trim(),
+          name,
+          description,
           type: 'custom',
         }),
       })
-      if (res.ok) {
+      const data = res.ok ? await res.json().catch(() => null) : null
+      if (data?.collection) {
         fetchCollections()
-        setNewCollectionModalOpen(false)
-        setNewCollectionName('')
-        setNewCollectionDesc('')
+      } else {
+        // Local Sandbox mode fallback: append custom collection cleanly into state
+        setCollections((prev) => [
+          ...prev,
+          {
+            id: `custom-${Date.now()}`,
+            name,
+            description: description || 'Custom digital memory collection',
+            type: 'custom',
+            is_smart: false,
+          },
+        ])
       }
+      setNewCollectionModalOpen(false)
+      setNewCollectionName('')
+      setNewCollectionDesc('')
     } catch (e) {
       console.error('[App] Create collection error:', e)
     }

@@ -246,7 +246,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <Clock className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" /> Recent Memories
           </h3>
           <button
-            onClick={() => onNavigateTab('documents')}
+            onClick={() => onNavigateTab('recent')}
             className="text-xs text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CFFF49] transition-colors flex items-center gap-1 font-medium"
           >
             View all files <ArrowRight className="w-3 h-3" />

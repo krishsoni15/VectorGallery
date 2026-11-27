@@ -82,12 +82,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         recent_files: localFiles.slice(0, 10).map(f => ({
           id: f.id,
           name: f.original_name,
+          original_name: f.original_name,
           category: f.category,
           size: f.size_bytes,
+          size_bytes: f.size_bytes,
           formatted_size: formatBytes(f.size_bytes),
           created_at: f.created_at,
           mime_type: f.mime_type,
           thumbnail_url: f.thumbnail_url,
+          extracted_text: f.extracted_text,
+          is_favorite: f.is_favorite,
+          sha256_hash: f.sha256_hash,
         })),
       })
     }
@@ -97,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 1. Calculate actual file counts and total byte usage
     const { data: files } = await supabase
       .from('files')
-      .select('id, original_name, category, size_bytes, created_at, mime_type, thumbnail_url')
+      .select('id, original_name, category, size_bytes, created_at, mime_type, thumbnail_url, extracted_text, is_favorite, sha256_hash')
       .eq('user_id', userId)
       .eq('is_trashed', false)
       .order('created_at', { ascending: false })
