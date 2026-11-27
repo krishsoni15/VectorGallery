@@ -65,12 +65,20 @@ export function FinalBrandMomentSection() {
   return (
     <section
       aria-labelledby="final-moment-heading"
-      className="relative overflow-hidden bg-[#090B0D] text-[#F4F6F2] border-y border-white/[0.10] py-24 sm:py-32 lg:py-36"
+      className="relative overflow-hidden bg-gradient-to-b from-[#E9EDE8]/45 via-[#F4F5F2] to-[#FFFFFF] dark:from-[#090B0D] dark:via-[#090B0D] dark:to-[#090B0D] text-[#101211] dark:text-[#F4F6F2] border-y border-[var(--vg-border)] py-16 sm:py-20 lg:py-24"
     >
-      {/* Pure Cool Obsidian & Metallic Silver Studio Atmosphere (zero muddy olive fade) */}
+      {/* Clean Titanium & Silver Studio Field (Light + Dark coherent) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 dark:hidden"
+        style={{
+          background:
+            'radial-gradient(ellipse 56% 52% at 50% 52%, rgba(205,255,69,0.12), rgba(227,232,234,0.45) 48%, transparent 78%)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 hidden dark:block"
         style={{
           background:
             'radial-gradient(ellipse 56% 48% at 50% 52%, rgba(184,197,204,0.10), rgba(70,214,164,0.05) 42%, #090B0D 76%)',
@@ -78,42 +86,42 @@ export function FinalBrandMomentSection() {
       />
 
       <Container wide className="relative z-10">
-        <div className="max-w-6xl mx-auto text-center space-y-8">
+        <div className="max-w-6xl mx-auto text-center space-y-5 sm:space-y-6">
           <div>
-            <p className="text-[13px] font-medium text-[#46D6A4] mb-4">
+            <p className="text-[13px] font-medium text-[#087F5B] dark:text-[#46D6A4] mb-3">
               Begin With Your Archive
             </p>
 
             <h2
               id="final-moment-heading"
-              className="font-display font-bold uppercase tracking-[-0.05em] leading-[0.91] text-[#F4F6F2]"
-              style={{ fontSize: 'clamp(2.45rem, 8.1vw, 7.8rem)' }}
+              className="font-display font-bold uppercase tracking-[-0.05em] leading-[0.91] text-[#101211] dark:text-[#F4F6F2]"
+              style={{ fontSize: 'clamp(2.35rem, 7.2vw, 6.8rem)' }}
             >
-              EVERYTHING WORTH KEEPING<span className="text-[#CDFF45]">.</span>
+              EVERYTHING. REMEMBERED<span className="text-[#101211] dark:text-[#CDFF45]">.</span>
             </h2>
           </div>
 
           {/* Reconverging Memory Constellation & Reformed Sculpture Stage */}
-          <div className="relative mx-auto flex items-center justify-center py-6 sm:py-10 min-h-[260px] sm:min-h-[310px]">
+          <div className="relative mx-auto flex items-center justify-center py-4 sm:py-6 min-h-[210px] sm:min-h-[250px]">
             {/* Converging Curved Orbital Guides */}
             <svg
               aria-hidden="true"
-              viewBox="-360 -140 720 280"
+              viewBox="-360 -130 720 260"
               className="hidden md:block pointer-events-none absolute inset-0 w-full h-full"
             >
               <ellipse
                 rx="220"
-                ry="88"
+                ry="84"
                 fill="none"
-                stroke="#B8C5CC"
-                strokeOpacity="0.16"
+                stroke="currentColor"
+                className="text-[#101211]/15 dark:text-[#B8C5CC]/[0.18]"
                 strokeWidth="1"
               />
               <path
                 d="M -220 -55 Q -95 0 0 0 M -205 60 Q -85 10 0 0 M 220 -50 Q 95 0 0 0 M 205 60 Q 85 10 0 0"
                 fill="none"
-                stroke="#CDFF45"
-                strokeOpacity="0.28"
+                stroke="currentColor"
+                className="text-[#087F5B]/30 dark:text-[#CDFF45]/[0.30]"
                 strokeWidth="1.1"
               />
             </svg>
@@ -126,17 +134,17 @@ export function FinalBrandMomentSection() {
                   initial={
                     reduced
                       ? undefined
-                      : { x: frag.x * 1.35, y: frag.y * 1.25, opacity: 0.45, scale: 0.92 }
+                      : { x: frag.x * 1.32, y: frag.y * 1.2, opacity: 0.45, scale: 0.92 }
                   }
                   whileInView={
                     reduced
                       ? undefined
-                      : { x: frag.x, y: frag.y, opacity: 0.9, scale: 1 }
+                      : { x: frag.x, y: frag.y, opacity: 0.92, scale: 1 }
                   }
                   viewport={{ once: true, amount: 0.35 }}
                   transition={{ duration: 0.85, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
                   style={{ left: '50%', top: '50%', rotate: frag.rotate }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 w-32 xl:w-36 rounded-2xl overflow-hidden border border-white/[0.14] bg-[#111416] shadow-2xl"
+                  className="absolute -translate-x-1/2 -translate-y-1/2 w-28 xl:w-32 rounded-2xl overflow-hidden border border-[var(--vg-border-strong)] bg-[var(--vg-surface)] shadow-xl"
                 >
                   <div className="aspect-[4/3] w-full overflow-hidden">
                     <img src={frag.src} alt={frag.alt} className="w-full h-full object-cover" />
@@ -146,34 +154,34 @@ export function FinalBrandMomentSection() {
             </div>
 
             {/* Restored Centerpiece Memory Sphere Core */}
-            <div className="relative z-10 w-[210px] h-[210px] sm:w-[250px] sm:h-[250px] xl:w-[285px] xl:h-[285px] shrink-0">
+            <div className="relative z-10 w-[190px] h-[190px] sm:w-[225px] sm:h-[225px] xl:w-[250px] xl:h-[250px] shrink-0">
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-6 rounded-full blur-3xl opacity-55"
                 style={{
                   background:
-                    'radial-gradient(circle, rgba(205,255,69,0.20) 0%, rgba(70,214,164,0.10) 45%, transparent 72%)',
+                    'radial-gradient(circle, rgba(205,255,69,0.22) 0%, rgba(70,214,164,0.12) 45%, transparent 72%)',
                 }}
               />
               <img
                 src={reduced ? VG_SPHERE_THEME_SPEC.heroVideoPoster : VG_SPHERE_THEME_SPEC.heroAnimWebp}
                 alt="VectorGallery Memory Sphere reformed core"
-                className="relative z-10 w-full h-full object-contain scale-[1.08]"
+                className="relative z-10 w-full h-full object-contain scale-[1.06]"
               />
             </div>
           </div>
 
-          <div className="max-w-xl mx-auto space-y-6">
-            <p className="text-[17px] sm:text-[18.5px] leading-[1.6] text-[#A4AEA9]">
+          <div className="max-w-xl mx-auto space-y-5">
+            <p className="text-[16.5px] sm:text-[18px] leading-[1.6] text-[var(--vg-ink-2)]">
               One intelligent home for your digital life.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
-              <Link href="/app" className={VG_COMPONENTS.buttons.forestPrimary}>
+            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-1">
+              <Link href="/app" className={VG_COMPONENTS.buttons.limePill}>
                 <span>Get started</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link href="/install" className={VG_COMPONENTS.buttons.forestSecondary}>
+              <Link href="/install" className={VG_COMPONENTS.buttons.secondary}>
                 <Download className="w-4 h-4" />
                 <span>Download Android</span>
               </Link>
@@ -181,10 +189,10 @@ export function FinalBrandMomentSection() {
                 href={REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 h-12 px-5 rounded-full text-[14.5px] font-medium text-[#A4AEA9] hover:text-[#F4F6F2] transition-colors"
+                className="inline-flex items-center gap-2 h-11 px-4 rounded-full text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2] transition-colors"
               >
                 <Github className="w-4 h-4" />
-                <span>Explore GitHub</span>
+                <span>GitHub</span>
               </a>
             </div>
           </div>
@@ -270,9 +278,9 @@ export function CompactFaqAndFooter({ apkSizeLabel }: { apkSizeLabel?: string })
         </Container>
       </div>
 
-      {/* Architectural Editorial Footer (#27) */}
+      {/* Architectural Editorial Footer */}
       <footer className="border-t border-[var(--vg-border)] bg-[var(--vg-bg)] overflow-hidden">
-        <Container className="pt-14 sm:pt-18 pb-8">
+        <Container className="pt-14 sm:pt-16 pb-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-[var(--vg-border)]">
             <div className="lg:col-span-5 space-y-4">
               <VectorGalleryLogo size="md" />
@@ -374,13 +382,13 @@ export function CompactFaqAndFooter({ apkSizeLabel }: { apkSizeLabel?: string })
           {/* Monumental Architectural Closing Graphic Wordmark */}
           <div
             aria-hidden="true"
-            className="select-none pointer-events-none pt-2 border-t border-[var(--vg-border)]/70"
+            className="select-none pointer-events-none pt-3 border-t border-[var(--vg-border)]"
           >
             <p
-              className="font-display font-bold uppercase tracking-[-0.055em] leading-[0.86] text-[#101211]/[0.07] dark:text-[#F4F6F2]/[0.07] text-center whitespace-nowrap"
+              className="font-display font-bold uppercase tracking-[-0.055em] leading-[0.86] text-[#101211]/[0.06] dark:text-[#F4F6F2]/[0.06] text-center whitespace-nowrap"
               style={{ fontSize: 'clamp(2.1rem, 11vw, 13rem)' }}
             >
-              VECTORGALLERY<span className="text-[#087F5B]/35 dark:text-[#CDFF45]/35">.</span>
+              VECTORGALLERY<span className="text-[#101211]/20 dark:text-[#CDFF45]/25">.</span>
             </p>
           </div>
         </Container>

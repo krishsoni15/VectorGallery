@@ -175,7 +175,7 @@ export function MemorySphereCanvas({
           onClick={() => setPaused((p) => !p)}
           aria-label={paused ? 'Resume Memory Sphere motion' : 'Pause Memory Sphere motion'}
           title={paused ? 'Resume animation' : 'Pause animation'}
-          className="pointer-events-auto absolute bottom-2 right-2 sm:bottom-4 sm:right-6 z-30 w-8 h-8 rounded-full bg-[var(--vg-surface)]/85 opacity-0 hover:opacity-100 focus-visible:opacity-100 border border-[var(--vg-border)] backdrop-blur-md flex items-center justify-center text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
+          className="pointer-events-auto absolute bottom-2 right-2 sm:bottom-4 sm:right-6 z-30 w-8 h-8 rounded-full bg-[#FFFFFF]/90 dark:bg-[#111416]/90 opacity-0 hover:opacity-100 focus-visible:opacity-100 border border-[var(--vg-border)] backdrop-blur-md flex items-center justify-center text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
         >
           {paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
         </button>

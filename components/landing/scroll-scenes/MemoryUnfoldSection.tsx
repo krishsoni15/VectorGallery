@@ -326,7 +326,7 @@ export function MemoryUnfoldSection() {
                 opacity: k.workspaceShellOpacity,
                 transform: `scale(${lerp(0.95, 1, k.workspaceShellOpacity)})`,
               }}
-              className="pointer-events-none absolute inset-x-1 sm:inset-x-4 lg:inset-x-12 top-1 bottom-1 rounded-3xl border border-[var(--vg-border-strong)] bg-[#FFFFFF]/92 dark:bg-[#111416]/94 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)] grid grid-cols-1 lg:grid-cols-12 overflow-hidden z-10"
+              className="pointer-events-none absolute inset-x-1 sm:inset-x-4 lg:inset-x-12 top-1 bottom-1 rounded-3xl border border-[var(--vg-border-strong)] bg-[#FFFFFF]/95 dark:bg-[#111416]/95 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)] grid grid-cols-1 lg:grid-cols-12 overflow-hidden z-10"
             >
               {/* Left Library Header */}
               <div className="lg:col-span-7 border-b lg:border-b-0 lg:border-r border-[var(--vg-border)] p-4 sm:p-5 flex flex-col justify-between">

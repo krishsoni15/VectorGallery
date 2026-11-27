@@ -123,15 +123,16 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onOpenSettings }) => {
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="h-9 px-3.5 inline-flex items-center rounded-full text-[13px] font-medium text-[#181C19] dark:text-[#A3ADA5] hover:bg-[#F0F1EC] dark:hover:bg-[#171A18] hover:text-[#087F5B] dark:hover:text-[#F2F3EF] transition-colors"
+          className="inline-flex items-center h-8 px-3 rounded-full text-[12.5px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#FFFFFF]/75 dark:hover:bg-white/[0.08] transition-[background-color] whitespace-nowrap"
         >
           Sign in
         </Link>
         <Link
           href="/app"
-          className="vg-cta h-9 px-4 inline-flex items-center rounded-full text-[13px] font-semibold bg-[#087F5B] hover:bg-[#066649] text-[#FFFFFF] dark:bg-[#58D6A8] dark:hover:bg-[#70DFB7] dark:text-[#071912] shadow-sm transition-all active:scale-[0.98]"
+          className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-[12.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F4F6F2] dark:bg-[#CDFF45] dark:hover:bg-[#D8FF69] dark:text-[#090B0D] shadow-sm transition-[transform,background-color] active:scale-[0.98] whitespace-nowrap"
         >
-          Get started
+          <span>Get started</span>
+          <span aria-hidden="true">&rarr;</span>
         </Link>
       </div>
     )

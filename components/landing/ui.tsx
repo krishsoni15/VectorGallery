@@ -40,9 +40,9 @@ export function Section({
 }) {
   const bgMap = {
     default: 'bg-[var(--vg-bg)]',
-    secondary: 'bg-[#E7E9E5]/65 dark:bg-[#131715]',
-    soft: 'bg-[#E7E9E5] dark:bg-[#202522]',
-    forest: 'bg-[#090B0A] text-[#F3F5F1]',
+    secondary: 'bg-[#E9EDE8]/55 dark:bg-[#111416]/75 border-y border-[var(--vg-border)]',
+    soft: 'bg-[#E9EDE8] dark:bg-[#191D20]',
+    forest: 'bg-[#090B0D] text-[#F4F6F2]',
   }
 
   return (
@@ -166,7 +166,7 @@ export function SecondaryButton({
 }: ActionLinkProps) {
   const baseClass = cn(
     size === 'sm' ? VG_COMPONENTS.buttons.secondarySm : VG_COMPONENTS.buttons.secondary,
-    'hover:border-[#087F5B]/40 dark:hover:border-[#58D6A8]/40',
+    'hover:border-[#087F5B]/45 dark:hover:border-[#CDFF45]/45',
     className
   )
 
@@ -228,7 +228,7 @@ export function BrowserFrame({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5" aria-hidden="true">
             <span className="w-2.5 h-2.5 rounded-full bg-[#CBD2C7] dark:bg-white/20" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD2C7]/75 dark:bg-white/14" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#CBD2C7]/75 dark:bg-white/15" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#CBD2C7]/55 dark:bg-white/10" />
           </div>
           <span className="text-[12px] font-medium text-[var(--vg-ink-2)]">{title}</span>

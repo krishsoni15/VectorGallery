@@ -170,51 +170,68 @@ export function OwnershipSection({
             </div>
 
             <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1 text-[13px]">
-              <TextLink href={LICENSE_URL} external>
+              <Link
+                href={LICENSE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2] transition-colors"
+              >
                 License <ExternalLink className="w-3 h-3" />
-              </TextLink>
-              <TextLink href={SECURITY_DOC_URL} external>
+              </Link>
+              <Link
+                href={SECURITY_DOC_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2] transition-colors"
+              >
                 Documentation <ExternalLink className="w-3 h-3" />
-              </TextLink>
-              <TextLink href={CONTRIBUTING_URL} external>
+              </Link>
+              <Link
+                href={CONTRIBUTING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2] transition-colors"
+              >
                 Contribute <ExternalLink className="w-3 h-3" />
-              </TextLink>
-              <TextLink href={ISSUES_URL} external>
+              </Link>
+              <Link
+                href={ISSUES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2] transition-colors"
+              >
                 Issues <ExternalLink className="w-3 h-3" />
-              </TextLink>
+              </Link>
               <Link href="/install" className="font-medium text-[#087F5B] dark:text-[#CDFF45] hover:underline">
-                Installation →
+                Installation &rarr;
               </Link>
             </div>
           </div>
 
-          {/* Right Translucent Sculptural Containment Flow + Configurable Storage Switcher */}
+          {/* Right Clean Translucent Containment Stage (flat hairline layout, zero nested card walls) */}
           <div className="lg:col-span-6 space-y-4">
-            <div className="relative rounded-[2rem] border border-[var(--vg-border-strong)] bg-[#FFFFFF]/88 dark:bg-[#111416]/90 backdrop-blur-2xl p-6 sm:p-7 shadow-[var(--vg-shadow-card)] overflow-hidden">
-              {/* Controlled Path Flow Visualization: Your device -> Your storage -> Your access */}
-              <div className="mb-6 pb-5 border-b border-[var(--vg-border)]">
-                <p className="text-[12px] font-medium text-[var(--vg-ink-2)] mb-4">
-                  Ownership Data Flow
+            <div className="relative rounded-[2rem] border border-[var(--vg-border-strong)] bg-[#FFFFFF]/90 dark:bg-[#111416]/90 backdrop-blur-2xl p-6 sm:p-8 shadow-[var(--vg-shadow-card)] overflow-hidden space-y-6">
+              {/* Calm Horizontal Flow Ribbon */}
+              <div className="pb-5 border-b border-[var(--vg-border)]">
+                <p className="text-[11.5px] font-medium text-[var(--vg-ink-2)] mb-3.5">
+                  Ownership Flow
                 </p>
 
-                <div className="grid grid-cols-3 gap-2 sm:gap-3 items-center relative">
+                <div className="grid grid-cols-3 divide-x divide-[var(--vg-border)]">
                   {[
-                    { icon: Laptop, title: 'Your device', note: 'Camera roll & files' },
-                    { icon: FolderLock, title: 'Your storage', note: currentStorage.label },
-                    { icon: Globe, title: 'Your access', note: 'Direct browser & APK' },
-                  ].map((node, i) => {
+                    { icon: Laptop, title: 'Your device', note: 'Camera & files' },
+                    { icon: FolderLock, title: 'Your storage', note: currentStorage.label, active: true },
+                    { icon: Globe, title: 'Your access', note: 'Web & APK' },
+                  ].map((node) => {
                     const Icon = node.icon
                     return (
-                      <div
-                        key={node.title}
-                        className={cn(
-                          'relative rounded-2xl p-3 sm:p-3.5 border text-center transition-colors',
-                          i === 1
-                            ? 'bg-[#F4F5F2] dark:bg-[#191D20] border-[#087F5B]/45 dark:border-[#CDFF45]/45'
-                            : 'bg-[#FFFFFF] dark:bg-[#090B0D] border-[var(--vg-border)]'
-                        )}
-                      >
-                        <Icon className="w-4 h-4 mx-auto mb-1.5 text-[#087F5B] dark:text-[#CDFF45]" />
+                      <div key={node.title} className="px-2 sm:px-3 first:pl-0 last:pr-0 text-center">
+                        <Icon
+                          className={cn(
+                            'w-4 h-4 mx-auto mb-1.5',
+                            node.active ? 'text-[#087F5B] dark:text-[#CDFF45]' : 'text-[var(--vg-ink-2)]'
+                          )}
+                        />
                         <p className="text-[12px] sm:text-[13px] font-semibold text-[#101211] dark:text-[#F4F6F2]">
                           {node.title}
                         </p>
@@ -227,42 +244,39 @@ export function OwnershipSection({
                 </div>
               </div>
 
-              <p className="text-[12px] font-medium text-[var(--vg-ink-2)] mb-3">
-                Select Configurable Storage Target
-              </p>
+              {/* Minimalist Segmented Driver Switch */}
+              <div className="space-y-4">
+                <div className="inline-flex flex-wrap gap-1 p-1 rounded-full bg-[var(--vg-surface-2)] border border-[var(--vg-border)]">
+                  {STORAGE_TARGETS.map((target) => {
+                    const active = selectedStorage === target.id
+                    return (
+                      <button
+                        key={target.id}
+                        type="button"
+                        onClick={() => setSelectedStorage(target.id)}
+                        className={cn(
+                          'px-3.5 py-1.5 rounded-full text-[12.5px] font-medium transition-colors',
+                          active
+                            ? 'bg-[#FFFFFF] dark:bg-[#191D20] text-[#101211] dark:text-[#CDFF45] shadow-sm font-semibold'
+                            : 'text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2]'
+                        )}
+                      >
+                        {target.label}
+                      </button>
+                    )
+                  })}
+                </div>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                {STORAGE_TARGETS.map((target) => {
-                  const active = selectedStorage === target.id
-                  return (
-                    <button
-                      key={target.id}
-                      type="button"
-                      onClick={() => setSelectedStorage(target.id)}
-                      className={cn(
-                        'px-4 py-2 rounded-full text-[13px] font-medium border transition-all',
-                        active
-                          ? 'bg-[#101211] text-[#F4F6F2] border-[#101211] dark:bg-[#CDFF45] dark:text-[#090B0D] dark:border-[#CDFF45] font-semibold'
-                          : 'bg-[var(--vg-surface-2)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[#101211] dark:hover:text-[#F4F6F2]'
-                      )}
-                    >
-                      {target.label}
-                    </button>
-                  )
-                })}
-              </div>
-
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#F4F5F2] dark:bg-[#090B0D] border border-[var(--vg-border)] space-y-2">
-                <p className="font-display text-[16px] font-bold text-[#101211] dark:text-[#F4F6F2]">
-                  {currentStorage.label}
-                </p>
-                <p className="text-[13.5px] text-[var(--vg-ink-2)] leading-relaxed">
-                  {currentStorage.summary}
-                </p>
-                <div className="pt-1.5">
-                  <span className="inline-block font-mono text-[11px] px-2.5 py-1 rounded-md bg-[#FFFFFF] dark:bg-[#111416] border border-[var(--vg-border)] text-[#087F5B] dark:text-[#CDFF45]">
+                <div className="space-y-2 pt-1">
+                  <p className="font-display text-[17px] font-bold text-[#101211] dark:text-[#F4F6F2]">
+                    {currentStorage.label}
+                  </p>
+                  <p className="text-[14px] text-[var(--vg-ink-2)] leading-relaxed">
+                    {currentStorage.summary}
+                  </p>
+                  <p className="font-mono text-[11.5px] text-[#087F5B] dark:text-[#CDFF45] pt-1">
                     {currentStorage.config}
-                  </span>
+                  </p>
                 </div>
               </div>
             </div>

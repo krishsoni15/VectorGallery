@@ -18,7 +18,7 @@ import { MotionReveal } from '@/components/landing/motion'
 import { Container, Section } from '@/components/landing/ui'
 import { cn } from '@/lib/utils'
 
-type SearchMode = 'all' | 'photo' | 'document' | 'question'
+type SearchMode = 'all' | 'photo' | 'document'
 
 interface MemoryRecord {
   id: string
@@ -41,6 +41,10 @@ const STOPWORDS = new Set([
   'have', 'about', 'into', 'all', 'did', 'my', 'say', 'photos', 'to', 'in',
   'on', 'at', 'of', 'by', 'is', 'it', 'or', 'be',
 ])
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
 const MEMORY_CORPUS: MemoryRecord[] = [
   {
@@ -130,15 +134,15 @@ const MEMORY_CORPUS: MemoryRecord[] = [
 ]
 
 const SAMPLE_PROMPTS: Array<{ label: string; query: string; mode: SearchMode }> = [
-  { label: 'Train ticket to Nice', query: 'Find my train ticket to Nice.', mode: 'document' },
-  { label: 'Dinner photos in September', query: 'Find our dinner photos from September.', mode: 'photo' },
+  { label: 'Train ticket', query: 'Find my train ticket to Nice.', mode: 'all' },
+  { label: 'September dinner', query: 'Find our dinner photos from September.', mode: 'photo' },
   { label: 'Headphones receipt', query: 'Show the receipt for my headphones.', mode: 'document' },
-  { label: 'Project deadline notes', query: 'What did my project notes say about the deadline?', mode: 'question' },
+  { label: 'Deadline notes', query: 'What did my project notes say about the deadline?', mode: 'document' },
 ]
 
 function HighlightedText({ text, tokens }: { text: string; tokens: string[] }) {
   if (!tokens.length) return <>{text}</>
-  const escaped = tokens.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const escaped = tokens.map(escapeRegex)
   const pattern = `\\b(${escaped.join('|')})\\b`
   const splitRegex = new RegExp(pattern, 'gi')
   const matchRegex = new RegExp(`^${pattern}$`, 'i')
@@ -185,11 +189,12 @@ export function InteractiveMemorySearch() {
 
     const scored = pool
       .map((item) => {
-        const hay = `${item.filename} ${item.categoryLabel} ${item.sceneSummary} ${item.ocrExcerpt} ${item.tags.join(' ')}`.toLowerCase()
+        const hay = `${item.filename} ${item.categoryLabel} ${item.sceneSummary} ${item.ocrExcerpt} ${item.tags.join(' ')}`
         let score = 0
         for (const tok of cleanTokens) {
+          const wordMatch = new RegExp(`\\b${escapeRegex(tok)}\\b`, 'i')
           if (item.tags.some((t) => t === tok)) score += 5
-          else if (hay.includes(tok)) score += 2
+          else if (wordMatch.test(hay)) score += 2
         }
         return { item, score }
       })
@@ -201,6 +206,7 @@ export function InteractiveMemorySearch() {
   }, [query, mode])
 
   const activeItem = matches.find((m) => m.id === selectedId) || matches[0] || null
+  const isModified = query !== SAMPLE_PROMPTS[0].query || mode !== 'all'
 
   const applySample = (sample: (typeof SAMPLE_PROMPTS)[number]) => {
     setQuery(sample.query)
@@ -209,57 +215,60 @@ export function InteractiveMemorySearch() {
   }
 
   return (
-    <Section id="search" surface="default" ariaLabel="Interactive natural-language memory search">
+    <Section id="search" surface="default" ariaLabel="Interactive natural-language memory search" className="py-20 sm:py-24">
       <Container wide className="scroll-mt-24">
-        <div className="max-w-4xl mb-10 sm:mb-12">
-          <p className="text-[13px] font-medium text-[#087F5B] dark:text-[#46D6A4] mb-3">
+        <div className="max-w-3xl mb-8 sm:mb-10">
+          <p className="text-[13px] font-medium text-[#087F5B] dark:text-[#46D6A4] mb-2.5">
             Interactive Sample Demonstration
           </p>
 
           <SplitTextReveal
             as="h2"
             text="Don't search harder. Remember naturally."
-            className="font-display font-bold tracking-[-0.04em] leading-[1.03] text-[#101211] dark:text-[#F4F6F2]"
-            style={{ fontSize: 'clamp(2.2rem, 4.4vw, 4.65rem)' }}
+            className="font-display font-bold tracking-[-0.04em] leading-[1.04] text-[#101211] dark:text-[#F4F6F2]"
+            style={{ fontSize: 'clamp(2.1rem, 4.1vw, 4.1rem)' }}
           />
-          <p className="mt-4 text-[16px] sm:text-[17.5px] leading-[1.6] text-[var(--vg-ink-2)] max-w-2xl">
-            Ask for a destination on a ticket stub, a September dinner table, an equipment receipt, or handwritten deadline notes—VectorGallery surfaces exact files and cites where the detail lives.
+          <p className="mt-3 text-[15.5px] sm:text-[16.5px] leading-[1.58] text-[var(--vg-ink-2)] max-w-2xl">
+            Ask for a ticket destination, a September dinner table, a studio receipt, or handwritten deadline notes—VectorGallery surfaces exact files with cited detail.
           </p>
         </div>
 
-        {/* Focused Studio Spatial Search Workbench */}
-        <MotionReveal className="rounded-[2rem] border border-[var(--vg-border-strong)] bg-[#FFFFFF]/90 dark:bg-[#111416]/90 backdrop-blur-xl shadow-[var(--vg-shadow-hero)] p-4 sm:p-6 lg:p-8">
-          {/* Natural-Language Search Input + Mode Filters */}
-          <div className="flex flex-col lg:flex-row lg:items-center gap-3.5 pb-5 border-b border-[var(--vg-border)]">
+        {/* Minimalist Unified Search Workbench */}
+        <MotionReveal className="rounded-[2rem] border border-[var(--vg-border-strong)] bg-[#FFFFFF]/95 dark:bg-[#111416]/95 backdrop-blur-xl shadow-[var(--vg-shadow-hero)] p-4 sm:p-6">
+          {/* Single Clean Query Bar + Compact 3-Way Scope Switch */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-3 pb-3.5 border-b border-[var(--vg-border)]">
             <div className="relative flex-1">
-              <Search className="w-4.5 h-4.5 text-[#087F5B] dark:text-[#CDFF45] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-[#087F5B] dark:text-[#CDFF45] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search sample archive by phrase, receipt, or detail"
                 placeholder="Ask naturally: train ticket to Nice, headphones receipt, deadline notes..."
-                className={VG_COMPONENTS.inputs.search}
+                className={cn(VG_COMPONENTS.inputs.search, 'h-11 pr-9 text-[14.5px]')}
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery('')}
                   aria-label="Clear search query"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[var(--vg-surface-2)]"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[var(--vg-surface-2)]"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter results by category">
+            <div
+              className="inline-flex items-center p-1 rounded-full bg-[var(--vg-surface-2)] border border-[var(--vg-border)] self-start lg:self-auto"
+              role="group"
+              aria-label="Filter results by category"
+            >
               {(
                 [
-                  { id: 'all', label: 'Everything', icon: Search },
+                  { id: 'all', label: 'All', icon: Search },
                   { id: 'photo', label: 'Photos', icon: ImageIcon },
-                  { id: 'document', label: 'Documents', icon: FileText },
-                  { id: 'question', label: 'AI Answers', icon: MessageSquare },
+                  { id: 'document', label: 'Docs', icon: FileText },
                 ] as const
               ).map((tab) => {
                 const Icon = tab.icon
@@ -271,8 +280,10 @@ export function InteractiveMemorySearch() {
                     aria-pressed={active}
                     onClick={() => setMode(tab.id)}
                     className={cn(
-                      'inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl text-[13px] font-medium border transition-all',
-                      active ? VG_COMPONENTS.buttons.tabActive : VG_COMPONENTS.buttons.tabIdle
+                      'inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full text-[12.5px] font-medium transition-colors',
+                      active
+                        ? 'bg-[#FFFFFF] dark:bg-[#191D20] text-[#101211] dark:text-[#CDFF45] shadow-sm font-semibold'
+                        : 'text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2]'
                     )}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -283,9 +294,9 @@ export function InteractiveMemorySearch() {
             </div>
           </div>
 
-          {/* Example Query Prompts + Reset */}
-          <div className="flex flex-wrap items-center gap-2 py-4 border-b border-[var(--vg-border)]">
-            <span className="text-[12px] font-medium text-[var(--vg-ink-2)] mr-1">Try asking:</span>
+          {/* Quiet Inline Prompt Suggestions (no button stack wall) */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 py-2.5 border-b border-[var(--vg-border)] text-[12.5px]">
+            <span className="text-[var(--vg-ink-2)]">Try:</span>
             {SAMPLE_PROMPTS.map((item) => {
               const isSelected = query === item.query
               return (
@@ -294,47 +305,49 @@ export function InteractiveMemorySearch() {
                   type="button"
                   onClick={() => applySample(item)}
                   className={cn(
-                    'px-3.5 py-1.5 rounded-full text-[12.5px] font-medium border transition-colors',
+                    'py-0.5 transition-colors border-b',
                     isSelected
-                      ? 'bg-[#CDFF45] text-[#101211] border-[#101211]/15 font-semibold'
-                      : 'bg-[var(--vg-surface-2)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[#101211] dark:hover:text-[#F4F6F2]'
+                      ? 'text-[#101211] dark:text-[#CDFF45] font-semibold border-[#087F5B] dark:border-[#CDFF45]'
+                      : 'text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F4F6F2] border-transparent'
                   )}
                 >
                   {item.label}
                 </button>
               )
             })}
-            <button
-              type="button"
-              onClick={() => applySample(SAMPLE_PROMPTS[0])}
-              className="ml-auto inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)]"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset demo</span>
-            </button>
+            {isModified && (
+              <button
+                type="button"
+                onClick={() => applySample(SAMPLE_PROMPTS[0])}
+                className="ml-auto inline-flex items-center gap-1 text-[12px] text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)]"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
 
-          {/* Results Area OR Genuine Empty / Unsupported Query Guidance */}
+          {/* Results Area OR Clean Empty State */}
           {matches.length === 0 ? (
-            <div className="py-16 px-4 text-center space-y-4">
-              <div className="w-12 h-12 mx-auto rounded-2xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] flex items-center justify-center text-[var(--vg-ink-2)]">
-                <Search className="w-5 h-5" />
+            <div className="py-12 px-4 text-center space-y-3.5">
+              <div className="w-11 h-11 mx-auto rounded-2xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] flex items-center justify-center text-[var(--vg-ink-2)]">
+                <Search className="w-4 h-4" />
               </div>
-              <div className="max-w-md mx-auto space-y-1.5">
-                <p className="font-display text-lg font-bold text-[#101211] dark:text-[#F4F6F2]">
+              <div className="max-w-md mx-auto space-y-1">
+                <p className="font-display text-base font-bold text-[#101211] dark:text-[#F4F6F2]">
                   No matches for &ldquo;{query}&rdquo; in this sample set
                 </p>
-                <p className="text-[13.5px] text-[var(--vg-ink-2)] leading-relaxed">
-                  This deterministic public demo indexes six personal sample artifacts. Try one of the prompts above or explore your full library inside the Web Vault.
+                <p className="text-[13px] text-[var(--vg-ink-2)] leading-relaxed">
+                  Try one of the sample phrases above or search your full archive in the Web Vault.
                 </p>
               </div>
-              <div className="flex items-center justify-center gap-3 pt-2">
+              <div className="flex items-center justify-center gap-3 pt-1">
                 <button
                   type="button"
                   onClick={() => applySample(SAMPLE_PROMPTS[0])}
                   className={VG_COMPONENTS.buttons.secondarySm}
                 >
-                  Restore sample query
+                  Restore sample
                 </button>
                 <Link href="/app" className={VG_COMPONENTS.buttons.primarySm}>
                   Open Web Vault
@@ -342,14 +355,14 @@ export function InteractiveMemorySearch() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-6 items-start">
-              {/* Left Shared-Element Animated Result List */}
-              <div className="lg:col-span-5 flex flex-col gap-2.5">
-                <div className="flex items-center justify-between px-1 mb-1 text-[12px] text-[var(--vg-ink-2)]">
-                  <span className="font-medium">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-5 items-start">
+              {/* Left Quiet Result List */}
+              <div className="lg:col-span-5 flex flex-col gap-2">
+                <div className="flex items-center justify-between px-1 pb-0.5 text-[11.5px] text-[var(--vg-ink-2)]">
+                  <span>
                     {matches.length} matching {matches.length === 1 ? 'memory' : 'memories'}
                   </span>
-                  <span>Deterministic sample preview</span>
+                  <span>Sample index</span>
                 </div>
 
                 <LayoutGroup>
@@ -359,34 +372,31 @@ export function InteractiveMemorySearch() {
                       <motion.button
                         key={item.id}
                         layout={!reduced}
-                        transition={{ duration: 0.28, ease: VG_MOTION.ease }}
+                        transition={{ duration: 0.26, ease: VG_MOTION.ease }}
                         type="button"
                         onClick={() => setSelectedId(item.id)}
                         className={cn(
-                          'w-full text-left p-3 rounded-2xl border flex items-center gap-3.5 transition-colors',
+                          'w-full text-left p-2.5 rounded-2xl border flex items-center gap-3 transition-colors',
                           isSelected
-                            ? 'bg-[#F4F5F2] dark:bg-[#191D20] border-[#087F5B] dark:border-[#CDFF45] shadow-sm'
+                            ? 'bg-[#F4F5F2] dark:bg-[#191D20] border-[#087F5B] dark:border-[#CDFF45]'
                             : 'bg-[var(--vg-surface)] border-[var(--vg-border)] hover:border-[var(--vg-border-strong)]'
                         )}
                       >
-                        <div className="w-16 h-14 rounded-xl overflow-hidden bg-[var(--vg-surface-2)] shrink-0 border border-[var(--vg-border)]">
+                        <div className="w-14 h-12 rounded-xl overflow-hidden bg-[var(--vg-surface-2)] shrink-0 border border-[var(--vg-border)]">
                           <img src={item.thumb} alt={item.alt} className="w-full h-full object-cover" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[12px] font-semibold text-[#101211] dark:text-[#F4F6F2] truncate">
+                            <span className="font-mono text-[11.5px] font-semibold text-[#101211] dark:text-[#F4F6F2] truncate">
                               {item.filename}
                             </span>
                             <span className="text-[11px] font-mono text-[var(--vg-ink-2)] shrink-0">
                               {item.date}
                             </span>
                           </div>
-                          <p className="text-[12.5px] text-[var(--vg-ink-2)] line-clamp-1 mt-0.5">
+                          <p className="text-[12px] text-[var(--vg-ink-2)] line-clamp-1 mt-0.5">
                             <HighlightedText text={item.sceneSummary} tokens={tokens} />
                           </p>
-                          <span className="inline-block mt-1 text-[11px] font-medium text-[#087F5B] dark:text-[#46D6A4]">
-                            {item.categoryLabel}
-                          </span>
                         </div>
                       </motion.button>
                     )
@@ -394,70 +404,56 @@ export function InteractiveMemorySearch() {
                 </LayoutGroup>
               </div>
 
-              {/* Right Enlarging Memory Preview + Highlighted Citation */}
+              {/* Right Unified Image + Grounded Recall Pane */}
               {activeItem && (
                 <div className="lg:col-span-7">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeItem.id + mode}
-                      initial={reduced ? { opacity: 1 } : { opacity: 0.88, scale: 0.985 }}
+                      initial={reduced ? { opacity: 1 } : { opacity: 0.88, scale: 0.99 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={reduced ? { opacity: 1 } : { opacity: 0.88, scale: 0.985 }}
-                      transition={{ duration: 0.24, ease: VG_MOTION.ease }}
+                      exit={reduced ? { opacity: 1 } : { opacity: 0.88, scale: 0.99 }}
+                      transition={{ duration: 0.22, ease: VG_MOTION.ease }}
                       className="rounded-2xl overflow-hidden border border-[var(--vg-border)] bg-[#F4F5F2] dark:bg-[#090B0D]"
                     >
-                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--vg-surface-2)]">
+                      <div className="relative h-[220px] sm:h-[265px] xl:h-[285px] w-full overflow-hidden bg-[var(--vg-surface-2)]">
                         <img
                           src={activeItem.thumb}
                           alt={activeItem.alt}
-                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.03]"
+                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.025]"
                         />
-                        <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-[#090B0D]/88 via-[#090B0D]/42 to-transparent flex items-end justify-between gap-3">
-                          <div>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#CDFF45] text-[#101211]">
-                              <CheckCircle2 className="w-3 h-3" />
-                              <span>Matched Detail</span>
-                            </span>
-                            <p className="font-mono text-[12px] text-[#F4F6F2] mt-1.5">
-                              {activeItem.citation}
-                            </p>
-                          </div>
+                        <div className="vg-photo-caption absolute inset-x-0 bottom-0 px-4 py-3 bg-gradient-to-t from-[#090B0D]/85 via-[#090B0D]/35 to-transparent flex items-center justify-between gap-3">
+                          <span className="font-mono text-[11.5px] text-[#F4F6F2] truncate">
+                            {activeItem.citation}
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-[#CDFF45] text-[#101211] shrink-0">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Matched</span>
+                          </span>
                         </div>
                       </div>
 
-                      <div className="p-5 sm:p-6 space-y-4">
-                        <div className="rounded-xl p-4 bg-[#FFFFFF] dark:bg-[#111416] border border-[#087F5B]/30 dark:border-[#CDFF45]/35 space-y-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#087F5B] dark:text-[#CDFF45]">
-                              <MessageSquare className="w-3.5 h-3.5" />
-                              <span>Grounded Recall Answer</span>
-                            </span>
-                            <span className="text-[11px] text-[var(--vg-ink-2)]">Cited source</span>
+                      <div className="p-4 sm:p-5 bg-[#FFFFFF] dark:bg-[#111416] border-t border-[var(--vg-border)] space-y-3">
+                        <div className="space-y-1">
+                          <div className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#087F5B] dark:text-[#CDFF45]">
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>Grounded answer</span>
                           </div>
-                          <p className="text-[14.5px] leading-[1.6] text-[#101211] dark:text-[#F4F6F2] font-medium">
+                          <p className="text-[14px] sm:text-[14.5px] leading-[1.55] text-[#101211] dark:text-[#F4F6F2] font-medium">
                             <HighlightedText text={activeItem.aiAnswer} tokens={tokens} />
                           </p>
                         </div>
 
-                        <div className="rounded-xl p-3.5 bg-[#FFFFFF]/70 dark:bg-[#111416]/70 border border-[var(--vg-border)]">
-                          <p className="text-[11.5px] font-medium text-[var(--vg-ink-2)] mb-1">
-                            Extracted Text &amp; Context
+                        <div className="pt-2.5 border-t border-[var(--vg-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                          <p className="font-mono text-[11px] leading-snug text-[var(--vg-ink-2)] truncate">
+                            OCR: <HighlightedText text={activeItem.ocrExcerpt} tokens={tokens} />
                           </p>
-                          <p className="font-mono text-[12px] leading-[1.55] text-[#101211] dark:text-[#F4F6F2]">
-                            <HighlightedText text={activeItem.ocrExcerpt} tokens={tokens} />
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                          <span className="text-[12.5px] text-[var(--vg-ink-2)]">
-                            Sample preview dataset. Real vault runs locally without external API keys.
-                          </span>
                           <Link
                             href="/app"
-                            className="inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-[#087F5B] dark:text-[#CDFF45] hover:underline"
+                            className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-[#087F5B] dark:text-[#CDFF45] hover:underline shrink-0"
                           >
                             <span>Try in Web Vault</span>
-                            <ArrowUpRight className="w-4 h-4" />
+                            <ArrowUpRight className="w-3.5 h-3.5" />
                           </Link>
                         </div>
                       </div>

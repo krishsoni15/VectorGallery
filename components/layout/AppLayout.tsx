@@ -389,7 +389,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       {/* ─── Main Content Shell ─── */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Minimal Frosted Header */}
-        <header className="h-14 sm:h-16 border-b border-[#DDE2DC] dark:border-white/[0.08] px-3 sm:px-6 flex items-center justify-between bg-[#FFFFFF]/82 dark:bg-[#090B0A]/82 backdrop-blur-xl shrink-0 gap-2 sm:gap-3">
+        <header className="h-14 sm:h-16 border-b border-[#DDE2DC] dark:border-white/[0.08] px-3 sm:px-6 flex items-center justify-between bg-[#FFFFFF]/90 dark:bg-[#090B0A]/90 backdrop-blur-xl shrink-0 gap-2 sm:gap-3">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -465,7 +465,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         </main>
 
         {/* ─── Mobile Bottom Navigation ─── */}
-        <nav className="md:hidden flex items-center justify-around h-16 border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF]/92 dark:bg-[#090B0A]/92 backdrop-blur-xl shrink-0 px-1 z-20">
+        <nav className="md:hidden flex items-center justify-around h-16 border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF]/95 dark:bg-[#090B0A]/95 backdrop-blur-xl shrink-0 px-1 z-20">
           {[
             { key: 'home' as NavItemKey, label: 'Overview', icon: Home },
             { key: 'photos' as NavItemKey, label: 'Photos', icon: ImageIcon },

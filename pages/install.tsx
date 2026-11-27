@@ -103,7 +103,7 @@ export default function InstallPage() {
       <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] flex flex-col overflow-x-clip selection:bg-[#087F5B]/20 dark:selection:bg-[#CFFF49]/25">
         <SiteHeader />
 
-        <main className="relative flex-1 py-12 sm:py-16 lg:py-24 overflow-hidden flex items-center">
+        <main className="relative flex-1 py-10 sm:py-14 lg:py-16 overflow-hidden flex items-center">
           <LivingAuraCanvas
             variant="auto"
             intensity={0.78}
@@ -111,7 +111,7 @@ export default function InstallPage() {
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-[44%] z-[1] bg-gradient-to-b from-[#FFFFFF] via-[#FFFFFF]/80 to-transparent dark:from-[#090B0A] dark:via-[#090B0A]/80 dark:to-transparent"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[44%] z-[1] bg-gradient-to-b from-[#F4F5F2] via-[#F4F5F2]/80 to-transparent dark:from-[#090B0D] dark:via-[#090B0D]/80 dark:to-transparent"
           />
 
           <div className={cn(VG_LAYOUT.containers.wide, 'relative z-10 grid lg:grid-cols-12 gap-12 xl:gap-16 items-center')}>
@@ -121,7 +121,7 @@ export default function InstallPage() {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="lg:col-span-6 space-y-6"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[var(--vg-border)] text-[12px] font-mono uppercase tracking-[0.12em] text-[#087F5B] dark:text-[#CFFF49]">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFFFF] dark:bg-[#111416] border border-[var(--vg-border)] text-[12px] font-mono uppercase tracking-[0.12em] text-[#087F5B] dark:text-[#CDFF45]">
                 <Smartphone className="w-3.5 h-3.5" />
                 <span>Android Companion · v2.0.0</span>
               </div>

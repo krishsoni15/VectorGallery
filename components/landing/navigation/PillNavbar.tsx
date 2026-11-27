@@ -104,7 +104,7 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
           ? '-translate-y-full opacity-0 pointer-events-none'
           : 'translate-y-0 opacity-100',
         scrolled
-          ? 'bg-[#FFFFFF]/84 dark:bg-[#090B0D]/86 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#101211]/[0.08] dark:border-white/[0.10] shadow-[0_8px_24px_-14px_rgba(16,18,17,0.12)] dark:shadow-[0_10px_28px_-14px_rgba(0,0,0,0.68)]'
+          ? 'bg-[#FFFFFF]/95 dark:bg-[#090B0D]/95 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#101211]/[0.08] dark:border-white/[0.10] shadow-[0_8px_24px_-14px_rgba(16,18,17,0.12)] dark:shadow-[0_10px_28px_-14px_rgba(0,0,0,0.68)]'
           : 'bg-transparent border-b border-transparent'
       )}
     >
@@ -213,7 +213,7 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
             animate={{ opacity: 1, height: 'auto' }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="lg:hidden overflow-hidden border-t border-[var(--vg-border)] bg-[var(--vg-surface)]/95 backdrop-blur-xl px-5 py-4"
+            className="lg:hidden overflow-hidden border-t border-[var(--vg-border)] bg-[#FFFFFF]/95 dark:bg-[#111416]/95 backdrop-blur-xl px-5 py-4"
           >
             <div className="flex flex-col gap-1.5 text-[14.5px] font-medium text-[var(--vg-ink)]">
               {NAV_LINKS.map((item) => (

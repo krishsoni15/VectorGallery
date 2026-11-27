@@ -173,7 +173,7 @@ export function HeroLivingMatter() {
 
               <div
                 aria-hidden="true"
-                className="my-3 xl:my-4 w-full border-b border-[#101211]/18 dark:border-white/[0.15]"
+                className="my-3 xl:my-4 w-full border-b border-[#101211]/[0.18] dark:border-white/[0.15]"
               />
 
               <p className="text-[13.5px] sm:text-[14.5px] leading-[1.56] text-[var(--vg-ink-2)]">

@@ -83,7 +83,6 @@ html.dark {
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 84px;
-    transition: background-color 0.28s ease, color 0.28s ease;
   }
 
   html,

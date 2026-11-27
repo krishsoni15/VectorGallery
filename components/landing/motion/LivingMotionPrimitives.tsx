@@ -96,7 +96,7 @@ export function MagneticCircleButton({
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#101211]/12 group-hover:scale-105 transition-transform duration-300"
+            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#101211]/[0.12] group-hover:scale-105 transition-transform duration-300"
           />
           {innerContent}
         </a>
@@ -108,7 +108,7 @@ export function MagneticCircleButton({
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#101211]/12 group-hover:scale-105 transition-transform duration-300"
+            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#101211]/[0.12] group-hover:scale-105 transition-transform duration-300"
           />
           {innerContent}
         </button>
@@ -156,7 +156,7 @@ export function SplitTextReveal({
   return (
     <Component className={className} style={style}>
       {words.map((word, idx) => (
-        <span key={`${word}-${idx}`} className="inline-block overflow-hidden align-top pb-[0.14em] -mb-[0.14em] mr-[0.26em] last:mr-0">
+        <span key={`${word}-${idx}`} className="inline-block overflow-hidden align-top pt-[0.06em] -mt-[0.06em] pb-[0.24em] -mb-[0.24em] mr-[0.26em] last:mr-0">
           <motion.span
             className="inline-block"
             initial={{ y: '22%', opacity: 0.92 }}

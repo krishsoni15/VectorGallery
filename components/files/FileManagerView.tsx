@@ -407,7 +407,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
                       active
-                        ? 'bg-white/15 text-[#D4FF54] dark:bg-[#101211]/12 dark:text-[#101211]'
+                        ? 'bg-white/15 text-[#D4FF54] dark:bg-[#101211]/15 dark:text-[#101211]'
                         : 'bg-[#F2F3F0] dark:bg-white/[0.08] text-[#626B64] dark:text-[#9AA69E]'
                     }`}
                   >
