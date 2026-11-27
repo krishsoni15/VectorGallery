@@ -16,13 +16,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Lightweight 1-row Postgres heartbeat prevents Supabase Free Tier from auto-pausing on keepalive pings
   let dbReachable = !dbConfigured
+  let dbSchemaError: string | null = null
   if (dbConfigured) {
     try {
       const supabase = getAdminSupabase()
-      const { error } = await supabase.from('user_profiles').select('id').limit(1)
+      const { error } = await supabase.from('files').select('id').limit(1)
       dbReachable = !error
-    } catch {
+      if (error) dbSchemaError = error.message
+    } catch (e: any) {
       dbReachable = false
+      dbSchemaError = e?.message || 'Unreachable'
     }
   }
 
@@ -35,6 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       configured: dbConfigured,
       clientConfigured: isSupabaseConfigured(),
       reachable: dbReachable,
+      schemaReady: dbConfigured ? dbReachable : true,
+      ...(dbSchemaError ? { notice: dbSchemaError } : {}),
     },
     storage: {
       driver: process.env.STORAGE_DRIVER || (dbConfigured ? 'supabase' : 'local'),

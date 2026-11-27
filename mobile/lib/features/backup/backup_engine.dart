@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,14 +31,35 @@ class BackupEngine extends ChangeNotifier {
   double progress = 0.0;
   String? currentUploadingFile;
   String? lastStatusMessage;
+  String? lastErrorMessage;
   bool isPaused = false;
-  bool wifiOnly = false; // Default to false so user backup works immediately
+  bool wifiOnly = false;
+  String activeUserEmail = '';
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
-  void initialize({bool wifiOnlySetting = false}) {
+  void initialize({bool wifiOnlySetting = false, String? userEmail}) {
     wifiOnly = wifiOnlySetting;
-    _connectivitySub = _connectivity.onConnectivityChanged.listen(_handleConnectivityChanged);
+    if (userEmail != null) {
+      activeUserEmail = userEmail.trim().toLowerCase();
+    }
+    _connectivitySub ??= _connectivity.onConnectivityChanged.listen(_handleConnectivityChanged);
+  }
+
+  void setUserContext(String? email) {
+    final nextEmail = (email ?? '').trim().toLowerCase();
+    if (nextEmail != activeUserEmail) {
+      activeUserEmail = nextEmail;
+      status = BackupStatus.idle;
+      uploadedCount = 0;
+      duplicateCount = 0;
+      failedCount = 0;
+      progress = 0.0;
+      currentUploadingFile = null;
+      lastStatusMessage = null;
+      lastErrorMessage = null;
+      notifyListeners();
+    }
   }
 
   void _handleConnectivityChanged(List<ConnectivityResult> results) {
@@ -68,6 +90,24 @@ class BackupEngine extends ChangeNotifier {
     'jpg', 'jpeg', 'png', 'webp', 'mp4', 'pdf', 'txt', 'docx', 'xlsx', 'json', 'csv', 'md'
   };
 
+  Future<bool> _ensureAuthenticatedBeforeBackup() async {
+    final token = await _apiClient.getAccessToken();
+    if (token == null || token.isEmpty) {
+      status = BackupStatus.error;
+      lastErrorMessage = 'Sign in with your VectorGallery account in Settings before uploading.';
+      lastStatusMessage = lastErrorMessage;
+      notifyListeners();
+      return false;
+    }
+    if (activeUserEmail.isEmpty) {
+      final stored = await _apiClient.secureStorage.read(key: ApiClient.userEmailKey);
+      if (stored != null && stored.isNotEmpty) {
+        activeUserEmail = stored.trim().toLowerCase();
+      }
+    }
+    return true;
+  }
+
   // 1. Calculate SHA-256 of local file
   Future<String> computeFileHash(File file) async {
     final bytes = await file.readAsBytes();
@@ -79,7 +119,7 @@ class BackupEngine extends ChangeNotifier {
     if (!await file.exists()) return false;
 
     final hash = await computeFileHash(file);
-    final isUploaded = await _localDb.isHashUploaded(hash);
+    final isUploaded = await _localDb.isHashUploaded(hash, userEmail: activeUserEmail);
     if (isUploaded) {
       duplicateCount++;
       return false;
@@ -91,8 +131,9 @@ class BackupEngine extends ChangeNotifier {
       sha256Hash: hash,
       fileSize: length,
       category: category,
-      status: 'QUEUED',
+      status: QueueStatus.queued,
       createdAt: DateTime.now().toIso8601String(),
+      userEmail: activeUserEmail,
     ));
 
     return true;
@@ -100,12 +141,15 @@ class BackupEngine extends ChangeNotifier {
 
   // 3. User Action: Pick and upload photos from Gallery
   Future<int> pickAndUploadPhotos() async {
+    if (!await _ensureAuthenticatedBeforeBackup()) return -1;
     try {
       final List<XFile> images = await _imagePicker.pickMultiImage();
       if (images.isEmpty) return 0;
 
       status = BackupStatus.scanning;
-      lastStatusMessage = 'Selected ${images.length} photos. Preparing queue...';
+      duplicateCount = 0;
+      lastErrorMessage = null;
+      lastStatusMessage = 'Selected ${images.length} photo(s). Checking deduplication...';
       notifyListeners();
 
       int enqueued = 0;
@@ -116,14 +160,15 @@ class BackupEngine extends ChangeNotifier {
         if (added) enqueued++;
       }
 
-      lastStatusMessage = 'Enqueued $enqueued new photos (${images.length - enqueued} duplicates skipped).';
+      lastStatusMessage = 'Queued $enqueued new photo(s) (${images.length - enqueued} local duplicate(s)).';
       notifyListeners();
 
       await startQueueProcessing();
       return enqueued;
     } catch (e) {
       status = BackupStatus.error;
-      lastStatusMessage = 'Failed to pick photos: $e';
+      lastErrorMessage = 'Failed to pick photos: $e';
+      lastStatusMessage = lastErrorMessage;
       notifyListeners();
       return 0;
     }
@@ -131,6 +176,7 @@ class BackupEngine extends ChangeNotifier {
 
   // 4. User Action: Pick and upload documents
   Future<int> pickAndUploadDocuments() async {
+    if (!await _ensureAuthenticatedBeforeBackup()) return -1;
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
@@ -141,7 +187,9 @@ class BackupEngine extends ChangeNotifier {
       if (result == null || result.files.isEmpty) return 0;
 
       status = BackupStatus.scanning;
-      lastStatusMessage = 'Selected ${result.files.length} documents. Preparing queue...';
+      duplicateCount = 0;
+      lastErrorMessage = null;
+      lastStatusMessage = 'Selected ${result.files.length} document(s). Preparing queue...';
       notifyListeners();
 
       int enqueued = 0;
@@ -152,14 +200,15 @@ class BackupEngine extends ChangeNotifier {
         if (added) enqueued++;
       }
 
-      lastStatusMessage = 'Enqueued $enqueued documents (${result.files.length - enqueued} duplicates skipped).';
+      lastStatusMessage = 'Queued $enqueued document(s) (${result.files.length - enqueued} skipped).';
       notifyListeners();
 
       await startQueueProcessing();
       return enqueued;
     } catch (e) {
       status = BackupStatus.error;
-      lastStatusMessage = 'Failed to pick documents: $e';
+      lastErrorMessage = 'Failed to pick documents: $e';
+      lastStatusMessage = lastErrorMessage;
       notifyListeners();
       return 0;
     }
@@ -167,20 +216,25 @@ class BackupEngine extends ChangeNotifier {
 
   // 4b. User Action: Pick any folder via Storage Access Framework and back up all contents
   Future<int> pickFolderAndBackup() async {
+    if (!await _ensureAuthenticatedBeforeBackup()) return -1;
     try {
       final String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
       if (selectedDirectory == null) return 0;
       return await backupFolder(selectedDirectory);
     } catch (e) {
       status = BackupStatus.error;
-      lastStatusMessage = 'Folder selection notice: $e';
+      lastErrorMessage = 'Folder selection notice: $e';
+      lastStatusMessage = lastErrorMessage;
       notifyListeners();
       return 0;
     }
   }
 
   Future<int> backupFolder(String dirPath) async {
+    if (!await _ensureAuthenticatedBeforeBackup()) return -1;
     status = BackupStatus.scanning;
+    duplicateCount = 0;
+    lastErrorMessage = null;
     lastStatusMessage = 'Scanning folder: $dirPath...';
     notifyListeners();
 
@@ -202,7 +256,8 @@ class BackupEngine extends ChangeNotifier {
       }
     } catch (e) {
       status = BackupStatus.error;
-      lastStatusMessage = 'Error scanning folder: $e';
+      lastErrorMessage = 'Error scanning folder: $e';
+      lastStatusMessage = lastErrorMessage;
       notifyListeners();
       return 0;
     }
@@ -214,7 +269,7 @@ class BackupEngine extends ChangeNotifier {
       return 0;
     }
 
-    lastStatusMessage = 'Found ${foundFiles.length} file(s) in folder. Enqueuing...';
+    lastStatusMessage = 'Found ${foundFiles.length} file(s). Enqueuing...';
     notifyListeners();
 
     int enqueued = 0;
@@ -224,7 +279,7 @@ class BackupEngine extends ChangeNotifier {
       if (added) enqueued++;
     }
 
-    lastStatusMessage = 'Enqueued $enqueued new file(s) from folder for backup.';
+    lastStatusMessage = 'Queued $enqueued new file(s) from folder.';
     notifyListeners();
 
     await startQueueProcessing();
@@ -233,7 +288,10 @@ class BackupEngine extends ChangeNotifier {
 
   // 5. Automatic Device Scan: Scans standard Android media and download folders
   Future<int> scanAndBackupDevice() async {
+    if (!await _ensureAuthenticatedBeforeBackup()) return -1;
     status = BackupStatus.scanning;
+    duplicateCount = 0;
+    lastErrorMessage = null;
     lastStatusMessage = 'Scanning device storage for photos and documents...';
     notifyListeners();
 
@@ -265,25 +323,22 @@ class BackupEngine extends ChangeNotifier {
               final ext = entity.path.split('.').last.toLowerCase();
               if (allowedExtensions.contains(ext)) {
                 foundFiles.add(entity);
-                if (foundFiles.length >= 100) break; // Cap per batch to avoid overload
+                if (foundFiles.length >= 100) break;
               }
             }
           }
         }
-      } catch (_) {
-        // Scoped storage security exception on Android 13+ is caught gracefully
-      }
+      } catch (_) {}
       if (foundFiles.length >= 100) break;
     }
 
     if (foundFiles.isEmpty) {
-      // Scoped storage prevented direct directory reading: guide user to gallery picker
-      lastStatusMessage = 'Device folders are restricted by Android Scoped Storage. Opening photo gallery...';
+      lastStatusMessage = 'Android Scoped Storage active — opening gallery picker...';
       notifyListeners();
       return await pickAndUploadPhotos();
     }
 
-    lastStatusMessage = 'Found ${foundFiles.length} files. Enqueuing for backup...';
+    lastStatusMessage = 'Found ${foundFiles.length} files. Checking cloud deduplication...';
     notifyListeners();
 
     int enqueued = 0;
@@ -293,40 +348,125 @@ class BackupEngine extends ChangeNotifier {
       if (added) enqueued++;
     }
 
-    lastStatusMessage = 'Enqueued $enqueued new files for backup.';
+    lastStatusMessage = 'Queued $enqueued new files for cloud sync.';
     notifyListeners();
 
     await startQueueProcessing();
     return enqueued;
   }
 
-  // 6. Process the persistent upload queue with Exponential Backoff
-  Future<void> startQueueProcessing() async {
+  /// Syncs pending SHA-256 hashes against cloud `/api/v2/backup/sync` so items already
+  /// uploaded via Web or previous installs are marked COMPLETED immediately.
+  Future<Set<String>> _fetchExistingCloudHashes(List<QueueItem> pending) async {
+    if (pending.isEmpty) return {};
+    try {
+      final res = await _apiClient.dio.post(
+        '/api/v2/backup/sync',
+        data: {
+          'candidates': pending
+              .map((p) => {'sha256_hash': p.sha256Hash, 'local_path': p.localPath})
+              .toList(),
+        },
+      );
+      final existingList = (res.data is Map ? res.data['existing_hashes'] : null) as List?;
+      if (existingList == null) return {};
+      return existingList.map((e) => e.toString()).toSet();
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// Uploads a single file using direct pre-signed Supabase Storage when > 2.5MB
+  /// (avoiding Vercel's 4.5MB JSON body limit) and falling back to base64 JSON otherwise.
+  Future<void> _uploadFileBytes({
+    required String fileName,
+    required List<int> bytes,
+    required String mimeType,
+  }) async {
+    if (bytes.length > 2.5 * 1024 * 1024) {
+      try {
+        final signRes = await _apiClient.dio.post(
+          '/api/v2/files/signed-upload',
+          data: {'filename': fileName},
+        );
+        final signMap = signRes.data is Map ? signRes.data as Map : {};
+        if (signMap['directUpload'] == true &&
+            signMap['signedUrl'] != null &&
+            signMap['storageKey'] != null) {
+          final rawDio = Dio(BaseOptions(
+            connectTimeout: const Duration(seconds: 30),
+            receiveTimeout: const Duration(seconds: 120),
+          ));
+          await rawDio.put(
+            signMap['signedUrl'].toString(),
+            data: Stream.fromIterable([bytes]),
+            options: Options(
+              headers: {
+                'Content-Type': mimeType,
+                'Content-Length': bytes.length,
+                'x-upsert': 'true',
+              },
+            ),
+          );
+          await _apiClient.dio.post(
+            '/api/v2/files/upload',
+            data: {
+              'filename': fileName,
+              'mimeType': mimeType,
+              'storageKey': signMap['storageKey'].toString(),
+            },
+          );
+          return;
+        }
+      } catch (e) {
+        if (e is DioException && e.response?.statusCode == 401) rethrow;
+        // Fall through cleanly only when file might still fit or direct sign unavailable
+      }
+    }
+
+    final base64Payload = base64Encode(bytes);
+    await _apiClient.dio.post(
+      '/api/v2/files/upload',
+      data: {
+        'filename': fileName,
+        'base64': base64Payload,
+        'mimeType': mimeType,
+      },
+    );
+  }
+
+  // 6. Process the persistent upload queue with Cloud Hash Sync & Direct Uploads
+  Future<void> startQueueProcessing({bool retryPreviousFailures = false}) async {
     if (status == BackupStatus.uploading || isPaused) return;
+    if (!await _ensureAuthenticatedBeforeBackup()) return;
+
+    if (retryPreviousFailures) {
+      await _localDb.resetFailedForRetry(userEmail: activeUserEmail);
+    }
 
     status = BackupStatus.uploading;
     uploadedCount = 0;
     failedCount = 0;
     progress = 0.0;
+    lastErrorMessage = null;
     notifyListeners();
 
     try {
       while (!isPaused) {
-        final pending = await _localDb.getPending();
-        totalQueued = pending.length;
-
+        final pending = await _localDb.getPending(userEmail: activeUserEmail);
         if (pending.isEmpty) {
           status = BackupStatus.completed;
           lastStatusMessage = uploadedCount > 0
-              ? 'Backup finished: $uploadedCount file(s) backed up successfully!'
-              : 'Backup up to date. No new files to upload.';
+              ? 'Synced $uploadedCount file(s) to your VectorGallery vault!'
+              : duplicateCount > 0
+                  ? 'All selected files already synced ($duplicateCount duplicates skipped).'
+                  : 'Vault is up to date.';
           currentUploadingFile = null;
           progress = 1.0;
           notifyListeners();
           break;
         }
 
-        // Check Wi-Fi restriction if enabled
         if (wifiOnly) {
           final conn = await _connectivity.checkConnectivity();
           if (!conn.contains(ConnectivityResult.wifi)) {
@@ -337,63 +477,102 @@ class BackupEngine extends ChangeNotifier {
           }
         }
 
-        for (int i = 0; i < pending.length; i++) {
+        final cloudHashes = await _fetchExistingCloudHashes(pending);
+        final toUpload = <QueueItem>[];
+        for (final item in pending) {
+          if (cloudHashes.contains(item.sha256Hash)) {
+            if (item.id != null) {
+              await _localDb.updateStatus(item.id!, QueueStatus.completed);
+            }
+            duplicateCount++;
+          } else {
+            toUpload.add(item);
+          }
+        }
+
+        if (toUpload.isEmpty) {
+          continue;
+        }
+
+        totalQueued = toUpload.length;
+
+        for (int i = 0; i < toUpload.length; i++) {
           if (isPaused) break;
 
-          final item = pending[i];
+          final item = toUpload[i];
           final file = File(item.localPath);
           final fileName = file.uri.pathSegments.isNotEmpty ? file.uri.pathSegments.last : 'file_${item.id}';
 
           if (!await file.exists()) {
-            await _localDb.updateStatus(item.id!, 'FAILED', errorMessage: 'File not found on device');
+            if (item.id != null) {
+              await _localDb.updateStatus(item.id!, QueueStatus.failed, errorMessage: 'File removed from device');
+            }
             failedCount++;
             continue;
           }
 
           currentUploadingFile = fileName;
-          lastStatusMessage = 'Uploading ${i + 1} of ${pending.length}: $fileName';
-          progress = (i + 1) / pending.length;
+          lastStatusMessage = 'Syncing ${i + 1} of ${toUpload.length}: $fileName';
+          progress = i / toUpload.length;
           notifyListeners();
 
           bool uploaded = false;
           int retries = item.retryCount;
 
-          while (!uploaded && retries < 3 && !isPaused) {
+          while (!uploaded && retries < 2 && !isPaused) {
             try {
               final bytes = await file.readAsBytes();
-              final base64Payload = base64Encode(bytes);
-
-              final response = await _apiClient.dio.post(
-                '/api/v2/files/upload',
-                data: {
-                  'filename': fileName,
-                  'base64': base64Payload,
-                  'mimeType': inferMimeType(file.path),
-                },
+              await _uploadFileBytes(
+                fileName: fileName,
+                bytes: bytes,
+                mimeType: inferMimeType(file.path),
               );
 
-              if (response.statusCode == 200) {
-                uploaded = true;
-                uploadedCount++;
-                await _localDb.updateStatus(item.id!, QueueStatus.completed);
-              } else {
-                retries++;
-                final backoffSec = computeBackoffSeconds(retries, maxSeconds: 30);
-                await Future.delayed(Duration(seconds: backoffSec));
+              uploaded = true;
+              uploadedCount++;
+              if (item.id != null) {
+                await _localDb.updateStatus(item.id!, QueueStatus.completed, errorMessage: null);
               }
-            } catch (e) {
+              progress = (i + 1) / toUpload.length;
+              notifyListeners();
+            } on DioException catch (e) {
+              final code = e.response?.statusCode ?? 0;
+              final msg = ApiClient.extractErrorMessage(e);
+              lastErrorMessage = msg;
+
+              // Fail immediately on auth/client/schema errors instead of hanging UI with retries
+              if (code == 401 || code == 403 || code == 400 || code == 413 || msg.contains('SETUP_ALL_IN_ONE')) {
+                if (item.id != null) {
+                  await _localDb.updateStatus(item.id!, QueueStatus.failed, errorMessage: msg, retryCount: 2);
+                }
+                failedCount++;
+                status = BackupStatus.error;
+                lastStatusMessage = msg;
+                currentUploadingFile = null;
+                notifyListeners();
+                return;
+              }
+
               retries++;
-              final backoffSec = computeBackoffSeconds(retries, maxSeconds: 30);
-              await _localDb.updateStatus(
-                item.id!,
-                QueueStatus.failed,
-                errorMessage: e.toString(),
-                retryCount: retries,
-              );
-              if (retries >= 3) {
+              if (item.id != null) {
+                await _localDb.updateStatus(item.id!, QueueStatus.failed, errorMessage: msg, retryCount: retries);
+              }
+              if (retries >= 2) {
                 failedCount++;
               } else {
-                await Future.delayed(Duration(seconds: backoffSec));
+                await Future.delayed(Duration(seconds: computeBackoffSeconds(retries, maxSeconds: 8)));
+              }
+            } catch (e) {
+              final msg = ApiClient.extractErrorMessage(e);
+              lastErrorMessage = msg;
+              retries++;
+              if (item.id != null) {
+                await _localDb.updateStatus(item.id!, QueueStatus.failed, errorMessage: msg, retryCount: retries);
+              }
+              if (retries >= 2) {
+                failedCount++;
+              } else {
+                await Future.delayed(const Duration(seconds: 2));
               }
             }
           }
@@ -401,12 +580,20 @@ class BackupEngine extends ChangeNotifier {
       }
     } catch (e) {
       status = BackupStatus.error;
-      lastStatusMessage = 'Backup error: $e';
+      lastErrorMessage = ApiClient.extractErrorMessage(e);
+      lastStatusMessage = 'Sync error: $lastErrorMessage';
       notifyListeners();
     } finally {
       if (!isPaused && status != BackupStatus.error) {
-        status = BackupStatus.completed;
-        lastStatusMessage = 'Backup completed! $uploadedCount file(s) backed up.';
+        if (failedCount > 0 && uploadedCount == 0) {
+          status = BackupStatus.error;
+          lastStatusMessage = lastErrorMessage ?? 'Upload failed for $failedCount file(s).';
+        } else {
+          status = BackupStatus.completed;
+          lastStatusMessage = failedCount > 0
+              ? 'Synced $uploadedCount file(s), $failedCount failed: ${lastErrorMessage ?? ''}'
+              : 'Synced $uploadedCount file(s) successfully!';
+        }
         currentUploadingFile = null;
         progress = 1.0;
         notifyListeners();

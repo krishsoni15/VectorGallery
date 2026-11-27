@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { signSupabaseFileUrls } from '@/lib/storage/supabaseStorage'
 import { generateEmbedding, isProviderAvailable, EMBEDDING_PROVIDERS } from '@/lib/providers'
 import { getProviderCredential } from '@/lib/credentialResolver'
 import { getLocalFiles } from '@/lib/localMetadataStore'
@@ -309,10 +310,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
+    const signedResults = await signSupabaseFileUrls(supabase, results.slice(0, pageSize))
+
     return res.status(200).json({
       query: queryString,
-      count: results.length,
-      results: results.slice(0, pageSize),
+      count: signedResults.length,
+      results: signedResults,
     })
   } catch (err: any) {
     console.error('[Search V2 API] Error:', err)

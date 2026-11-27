@@ -9,9 +9,9 @@ import 'features/backup/backup_engine.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize background backup engine
   final backupEngine = BackupEngine();
   backupEngine.initialize(wifiOnlySetting: false);
+  await AppTheme.loadSavedTheme();
   await ApiClient().loadSavedBaseUrl();
 
   runApp(

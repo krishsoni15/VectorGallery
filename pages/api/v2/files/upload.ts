@@ -27,19 +27,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     const userId = user?.id || '00000000-0000-0000-0000-000000000000'
 
-    const { filename, base64, mimeType, folderId, embeddingProvider } = req.body
+    const { filename, base64, storageKey, mimeType, folderId, embeddingProvider } = req.body
 
     if (!filename || typeof filename !== 'string') {
       return res.status(400).json({ error: 'Filename is required' })
     }
 
-    const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase()
-    if (FORBIDDEN_EXTENSIONS.has(ext)) {
+    const dotIdx = filename.lastIndexOf('.')
+    const ext = dotIdx >= 0 ? filename.substring(dotIdx).toLowerCase() : ''
+    if (ext && FORBIDDEN_EXTENSIONS.has(ext)) {
       return res.status(400).json({ error: `File type ${ext} is not allowed for security reasons` })
     }
 
+    const detectedMime = mimeType || detectMime(filename)
+
+    if (typeof storageKey === 'string' && storageKey.trim().length > 0) {
+      const cleanKey = storageKey.replace(/\.\./g, '').replace(/^\/+/, '').trim()
+      if (!cleanKey.startsWith(`${userId}/`)) {
+        return res.status(403).json({ error: 'Forbidden: Invalid storage key ownership' })
+      }
+      const result = await processFile({
+        filename,
+        storageKey: cleanKey,
+        mimeType: detectedMime,
+        userId,
+        folderId: folderId || null,
+        embeddingProvider: embeddingProvider || 'gemini',
+      })
+      return res.status(200).json({
+        success: true,
+        file: result,
+      })
+    }
+
     if (!base64 || typeof base64 !== 'string') {
-      return res.status(400).json({ error: 'Base64 file data is required' })
+      return res.status(400).json({ error: 'Base64 file data or storageKey is required' })
     }
 
     let buffer: Buffer
@@ -52,8 +74,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (buffer.length > 50 * 1024 * 1024) {
       return res.status(413).json({ error: 'File size exceeds maximum 50MB limit' })
     }
-
-    const detectedMime = mimeType || detectMime(filename)
 
     const result = await processFile({
       filename,

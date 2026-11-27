@@ -37,34 +37,78 @@ export async function signSupabaseFileUrls<
 
 export class SupabaseStorageDriver implements IStorageDriver {
   private bucket: string
+  private bucketEnsured = false
 
   constructor(bucket = 'documents') {
     this.bucket = bucket
+  }
+
+  /** Ensures the private Supabase Storage bucket exists before object writes. */
+  async ensureBucket(): Promise<void> {
+    if (this.bucketEnsured) return
+    const supabase = getAdminSupabase()
+    const { data: buckets, error: listErr } = await supabase.storage.listBuckets()
+    if (!listErr && Array.isArray(buckets) && buckets.some((b) => b.id === this.bucket || b.name === this.bucket)) {
+      this.bucketEnsured = true
+      return
+    }
+    const { error: createErr } = await supabase.storage.createBucket(this.bucket, {
+      public: false,
+      fileSizeLimit: 52428800,
+    })
+    if (createErr && !createErr.message.toLowerCase().includes('already exists')) {
+      throw new Error(`Supabase storage bucket setup error (${this.bucket}): ${createErr.message}`)
+    }
+    this.bucketEnsured = true
+  }
+
+  async createSignedUploadUrl(key: string): Promise<{ signedUrl: string; token: string; path: string }> {
+    await this.ensureBucket()
+    const supabase = getAdminSupabase()
+    const safeKey = key.replace(/\.\./g, '').replace(/^\/+/, '')
+    const { data, error } = await supabase.storage.from(this.bucket).createSignedUploadUrl(safeKey, {
+      upsert: true,
+    })
+    if (error || !data) {
+      throw new Error(`Supabase signed upload error: ${error?.message || 'Unable to sign upload URL'}`)
+    }
+    return data
   }
 
   async upload(key: string, data: Buffer | Uint8Array, options?: StorageUploadOptions): Promise<StorageUploadResult> {
     const supabase = getAdminSupabase()
     const safeKey = key.replace(/\.\./g, '').replace(/^\/+/, '')
 
-    const { data: uploadData, error } = await supabase.storage
+    let { data: uploadData, error } = await supabase.storage
       .from(this.bucket)
       .upload(safeKey, data, {
         contentType: options?.contentType || 'application/octet-stream',
         upsert: options?.upsert ?? true,
       })
 
-    if (error) {
-      throw new Error(`Supabase storage upload error: ${error.message}`)
+    if (error && error.message.toLowerCase().includes('bucket not found')) {
+      this.bucketEnsured = false
+      await this.ensureBucket()
+      const retry = await supabase.storage
+        .from(this.bucket)
+        .upload(safeKey, data, {
+          contentType: options?.contentType || 'application/octet-stream',
+          upsert: options?.upsert ?? true,
+        })
+      uploadData = retry.data
+      error = retry.error
     }
 
-    const { data: publicData } = supabase.storage
-      .from(this.bucket)
-      .getPublicUrl(uploadData.path)
+    if (error || !uploadData) {
+      throw new Error(`Supabase storage upload error: ${error?.message || 'Upload failed'}`)
+    }
+
+    const signedUrl = await this.getSignedUrl(uploadData.path, 3600)
 
     return {
       path: uploadData.path,
       key: uploadData.path,
-      url: publicData.publicUrl,
+      url: signedUrl,
       sizeBytes: Buffer.byteLength(data),
     }
   }

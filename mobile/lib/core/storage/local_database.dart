@@ -10,9 +10,9 @@ class QueueStatus {
   static const String failed = 'FAILED';
 
   static const Map<String, List<String>> _validTransitions = {
-    queued: [uploading, failed],
+    queued: [uploading, failed, completed],
     uploading: [completed, failed, queued],
-    failed: [queued, uploading],
+    failed: [queued, uploading, completed],
     completed: [],
   };
 
@@ -32,6 +32,7 @@ class QueueItem {
   final int retryCount;
   final String? errorMessage;
   final String createdAt;
+  final String userEmail;
 
   QueueItem({
     this.id,
@@ -43,6 +44,7 @@ class QueueItem {
     this.retryCount = 0,
     this.errorMessage,
     required this.createdAt,
+    this.userEmail = '',
   });
 
   QueueItem copyWith({
@@ -55,6 +57,7 @@ class QueueItem {
     int? retryCount,
     String? errorMessage,
     String? createdAt,
+    String? userEmail,
   }) {
     return QueueItem(
       id: id ?? this.id,
@@ -66,6 +69,7 @@ class QueueItem {
       retryCount: retryCount ?? this.retryCount,
       errorMessage: errorMessage ?? this.errorMessage,
       createdAt: createdAt ?? this.createdAt,
+      userEmail: userEmail ?? this.userEmail,
     );
   }
 
@@ -80,6 +84,7 @@ class QueueItem {
       'retry_count': retryCount,
       'error_message': errorMessage,
       'created_at': createdAt,
+      'user_email': userEmail,
     };
   }
 
@@ -94,6 +99,7 @@ class QueueItem {
       retryCount: (map['retry_count'] as int?) ?? 0,
       errorMessage: map['error_message'] as String?,
       createdAt: map['created_at'] as String,
+      userEmail: (map['user_email'] as String?) ?? '',
     );
   }
 }
@@ -117,7 +123,7 @@ class LocalDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE upload_queue (
@@ -129,11 +135,21 @@ class LocalDatabase {
             status TEXT NOT NULL,
             retry_count INTEGER DEFAULT 0,
             error_message TEXT,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            user_email TEXT DEFAULT ''
           )
         ''');
         await db.execute('CREATE INDEX idx_queue_hash ON upload_queue(sha256_hash)');
         await db.execute('CREATE INDEX idx_queue_status ON upload_queue(status)');
+        await db.execute('CREATE INDEX idx_queue_user ON upload_queue(user_email)');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          try {
+            await db.execute("ALTER TABLE upload_queue ADD COLUMN user_email TEXT DEFAULT ''");
+            await db.execute('CREATE INDEX IF NOT EXISTS idx_queue_user ON upload_queue(user_email)');
+          } catch (_) {}
+        }
       },
     );
   }
@@ -142,8 +158,8 @@ class LocalDatabase {
     final db = await database;
     final existing = await db.query(
       'upload_queue',
-      where: 'sha256_hash = ? AND status != ?',
-      whereArgs: [item.sha256Hash, QueueStatus.failed],
+      where: 'sha256_hash = ? AND user_email = ? AND status != ?',
+      whereArgs: [item.sha256Hash, item.userEmail, QueueStatus.failed],
     );
     if (existing.isNotEmpty) {
       return existing.first['id'] as int;
@@ -151,12 +167,12 @@ class LocalDatabase {
     return await db.insert('upload_queue', item.toMap());
   }
 
-  Future<List<QueueItem>> getPending() async {
+  Future<List<QueueItem>> getPending({String userEmail = ''}) async {
     final db = await database;
     final maps = await db.query(
       'upload_queue',
-      where: 'status IN (?, ?)',
-      whereArgs: [QueueStatus.queued, QueueStatus.failed],
+      where: 'status IN (?, ?) AND (user_email = ? OR user_email = ?)',
+      whereArgs: [QueueStatus.queued, QueueStatus.failed, userEmail, ''],
       orderBy: 'id ASC',
       limit: 50,
     );
@@ -172,12 +188,27 @@ class LocalDatabase {
     await db.update('upload_queue', values, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<bool> isHashUploaded(String hash) async {
+  Future<void> resetFailedForRetry({String userEmail = ''}) async {
+    final db = await database;
+    await db.update(
+      'upload_queue',
+      {'status': QueueStatus.queued, 'retry_count': 0, 'error_message': null},
+      where: 'status = ? AND (user_email = ? OR user_email = ?)',
+      whereArgs: [QueueStatus.failed, userEmail, ''],
+    );
+  }
+
+  Future<void> deleteQueueItem(int id) async {
+    final db = await database;
+    await db.delete('upload_queue', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<bool> isHashUploaded(String hash, {String userEmail = ''}) async {
     final db = await database;
     final maps = await db.query(
       'upload_queue',
-      where: 'sha256_hash = ? AND status = ?',
-      whereArgs: [hash, QueueStatus.completed],
+      where: 'sha256_hash = ? AND user_email = ? AND status = ?',
+      whereArgs: [hash, userEmail, QueueStatus.completed],
       limit: 1,
     );
     return maps.isNotEmpty;

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppTheme {
+  static const String _themePrefKey = 'vm_theme_mode';
+
   // Obsidian Volt Dark Theme Design Tokens
   static const Color background = Color(0xFF090B0D);
   static const Color surface = Color(0xFF111416);
@@ -30,8 +33,24 @@ class AppTheme {
   // Global Theme Mode Notifier for Instant Dark / Light Switching
   static final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.dark);
 
-  static void toggleTheme(ThemeMode mode) {
+  static Future<void> loadSavedTheme() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_themePrefKey);
+      if (saved == 'light') {
+        themeModeNotifier.value = ThemeMode.light;
+      } else if (saved == 'dark') {
+        themeModeNotifier.value = ThemeMode.dark;
+      }
+    } catch (_) {}
+  }
+
+  static Future<void> toggleTheme(ThemeMode mode) async {
     themeModeNotifier.value = mode;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_themePrefKey, mode == ThemeMode.light ? 'light' : 'dark');
+    } catch (_) {}
   }
 
   static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
@@ -77,6 +96,21 @@ class AppTheme {
         unselectedItemColor: textMuted,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
+        selectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: borderSubtle),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: surfaceElevated,
+        contentTextStyle: const TextStyle(color: textPrimary, fontSize: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        behavior: SnackBarBehavior.floating,
       ),
       cardTheme: CardTheme(
         color: surface,
@@ -139,6 +173,21 @@ class AppTheme {
         unselectedItemColor: lightTextSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
+        selectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: lightSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: lightBorderSubtle),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: lightTextPrimary,
+        contentTextStyle: const TextStyle(color: Colors.white, fontSize: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        behavior: SnackBarBehavior.floating,
       ),
       cardTheme: CardTheme(
         color: lightSurface,

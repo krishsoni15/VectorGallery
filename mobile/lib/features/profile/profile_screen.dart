@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/brand_mark.dart';
 import '../auth/auth_provider.dart';
+import '../auth/auth_sheet.dart';
 import '../backup/backup_engine.dart';
 import '../guide/guide_sheet.dart';
 
@@ -22,16 +24,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _wifiOnly = false;
   bool _autoBackup = true;
   String _userName = 'Personal Vault';
-  String _userEmail = 'Local Sandbox Session';
+  String _userEmail = 'Not signed in · Tap Sign In to sync';
   String? _geminiApiKey;
+  List<dynamic> _devices = [];
   bool _isTestingConnection = false;
   String? _connectionStatus;
+  bool _connectionOk = true;
 
   @override
   void initState() {
     super.initState();
     _wifiOnly = _backupEngine.wifiOnly;
     _fetchProfile();
+    _fetchDevices();
     _loadApiKey();
   }
 
@@ -41,103 +46,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _saveApiKey(String key) async {
-    await _storage.write(key: 'vm_ai_api_key', value: key.trim());
+    final clean = key.trim();
+    if (clean.isEmpty) {
+      await _storage.delete(key: 'vm_ai_api_key');
+    } else {
+      await _storage.write(key: 'vm_ai_api_key', value: clean);
+      if (ref.read(authProvider).isAuthenticated) {
+        final inferred = clean.startsWith('gsk_')
+            ? 'groq'
+            : (clean.startsWith('sk-') ? 'openai' : 'gemini');
+        try {
+          await _api.dio.post('/api/auth/provider-keys', data: {
+            'provider': inferred,
+            'apiKey': clean,
+          });
+        } catch (_) {}
+      }
+    }
     if (mounted) {
-      setState(() => _geminiApiKey = key.trim());
+      setState(() => _geminiApiKey = clean);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Personal AI API key saved cleanly')),
+        SnackBar(content: Text(clean.isEmpty ? 'Reverted to Server Default AI' : 'Personal AI API key saved cleanly')),
       );
     }
   }
 
-  void _showAuthDialog({required bool isSignUp}) {
-    final nameCtrl = TextEditingController();
-    final emailCtrl = TextEditingController();
-    final passCtrl = TextEditingController();
-    bool submitSignUp = isSignUp;
-    String? dialogError;
-    bool submitting = false;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (modalCtx, setDialogState) => AlertDialog(
-          title: Text(submitSignUp ? 'Create Account' : 'Sign In to Sync'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (submitSignUp) ...[
-                  TextField(
-                    controller: nameCtrl,
-                    decoration: const InputDecoration(labelText: 'Full Name', hintText: 'Your name'),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                TextField(
-                  controller: emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'Email Address', hintText: 'you@example.com'),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: passCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Password', hintText: 'Min 6 characters'),
-                ),
-                if (dialogError != null) ...[
-                  const SizedBox(height: 10),
-                  Text(dialogError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
-                ],
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () => setDialogState(() {
-                    submitSignUp = !submitSignUp;
-                    dialogError = null;
-                  }),
-                  child: Text(submitSignUp ? 'Already have an account? Sign in' : 'New to VectorGallery? Create account'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
-              onPressed: submitting
-                  ? null
-                  : () async {
-                      setDialogState(() {
-                        submitting = true;
-                        dialogError = null;
-                      });
-                      final notifier = ref.read(authProvider.notifier);
-                      final ok = submitSignUp
-                          ? await notifier.signUp(nameCtrl.text, emailCtrl.text, passCtrl.text)
-                          : await notifier.signIn(emailCtrl.text, passCtrl.text);
-
-                      if (!modalCtx.mounted) return;
-                      if (ok) {
-                        Navigator.pop(ctx);
-                        await _fetchProfile();
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(submitSignUp ? 'Account created & vault synced!' : 'Signed in successfully!')),
-                          );
-                        }
-                      } else {
-                        setDialogState(() {
-                          submitting = false;
-                          dialogError = ref.read(authProvider).error ?? 'Authentication failed';
-                        });
-                      }
-                    },
-              child: Text(submitting ? 'Please wait...' : (submitSignUp ? 'Create Account' : 'Sign In')),
-            ),
-          ],
-        ),
-      ),
-    );
+  Future<void> _fetchDevices() async {
+    if (!ref.read(authProvider).isAuthenticated) {
+      if (mounted) setState(() => _devices = []);
+      return;
+    }
+    try {
+      final res = await _api.dio.get('/api/v2/devices');
+      if (res.statusCode == 200 && res.data is Map && mounted) {
+        setState(() {
+          _devices = (res.data['devices'] as List?) ?? [];
+        });
+      }
+    } catch (_) {}
   }
 
   void _showApiKeyDialog() {
@@ -165,12 +111,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.voltLime, foregroundColor: const Color(0xFF101211)),
             onPressed: () {
               Navigator.pop(ctx);
               _saveApiKey(controller.text);
             },
-            child: const Text('Save Key'),
+            child: const Text('Save Key', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -186,15 +132,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       final res = await _api.dio.get('/api/health');
       if (res.statusCode == 200 && mounted) {
-        final data = res.data;
+        final data = res.data is Map ? res.data as Map : {};
+        final db = data['database'] is Map ? data['database'] as Map : {};
+        final storage = data['storage'] is Map ? data['storage'] as Map : {};
+        final configured = db['configured'] == true;
+        final reachable = db['reachable'] == true;
         setState(() {
-          _connectionStatus = 'Connected: VectorGallery v${data['version'] ?? '2.0'} (${data['storage']?['driver'] ?? 'local'})';
+          _connectionOk = configured && reachable;
+          _connectionStatus = _connectionOk
+              ? 'Connected · v${data['version'] ?? '2.0'} (${storage['driver'] ?? 'supabase'} / DB Ready)'
+              : 'Reachable, DB issue: ${db['notice'] ?? 'Run supabase/SETUP_ALL_IN_ONE.sql in Supabase'}';
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _connectionStatus = 'Connection failed: $e';
+          _connectionOk = false;
+          _connectionStatus = ApiClient.extractErrorMessage(e);
         });
       }
     } finally {
@@ -202,14 +156,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _syncNow() async {
+    final notifier = ref.read(authProvider.notifier);
+    await notifier.registerDevice();
+    await _fetchProfile();
+    await _fetchDevices();
+    notifier.bumpSyncVersion();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vault & device paired with cloud')),
+      );
+    }
+  }
+
   Future<void> _fetchProfile() async {
+    if (!ref.read(authProvider).isAuthenticated) {
+      if (mounted) {
+        setState(() {
+          _userName = 'Personal Vault';
+          _userEmail = 'Not signed in · Tap Sign In to sync';
+        });
+      }
+      return;
+    }
     try {
       final res = await _api.dio.get('/api/v2/auth/profile');
       if (res.statusCode == 200 && res.data['profile'] != null && mounted) {
         final profile = res.data['profile'];
         setState(() {
           _userName = profile['full_name'] ?? 'Personal Vault';
-          _userEmail = profile['email'] ?? 'Local Sandbox Session';
+          _userEmail = profile['email'] ?? 'Synced Account';
           final settings = profile['backup_settings'];
           if (settings != null) {
             if (settings['wifi_only'] != null) _wifiOnly = settings['wifi_only'];
@@ -221,6 +197,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _saveSettings() async {
+    if (!ref.read(authProvider).isAuthenticated) return;
     try {
       await _api.dio.put('/api/v2/auth/profile', data: {
         'backup_settings': {
@@ -235,19 +212,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (prev?.syncVersion != next.syncVersion || prev?.isAuthenticated != next.isAuthenticated) {
+        _fetchProfile();
+        _fetchDevices();
+      }
+    });
+
     final surface = AppTheme.surfaceOf(context);
+    final elevated = AppTheme.elevatedOf(context);
     final border = AppTheme.borderOf(context);
     final primaryText = AppTheme.textPrimaryOf(context);
     final secondaryText = AppTheme.textSecondaryOf(context);
     final brand = AppTheme.brandOf(context);
     final warn = AppTheme.warnOf(context);
 
-    final shownName = auth.displayName ?? _userName;
-    final shownEmail = auth.email ?? _userEmail;
+    final shownName = auth.isAuthenticated ? (auth.displayName ?? _userName) : 'VectorGallery Guest';
+    final shownEmail = auth.isAuthenticated ? (auth.email ?? _userEmail) : 'Sign in with your website account';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        titleSpacing: 16,
+        title: const Row(
+          children: [
+            VectorGalleryBrandMark(size: 26),
+            SizedBox(width: 10),
+            Text('Settings'),
+          ],
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -265,10 +257,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: AppTheme.voltLime,
+                      backgroundColor: auth.isAuthenticated ? AppTheme.voltLime : elevated,
                       child: Text(
                         shownName.isNotEmpty ? shownName[0].toUpperCase() : 'V',
-                        style: const TextStyle(color: Color(0xFF101211), fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: auth.isAuthenticated ? const Color(0xFF101211) : primaryText,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -282,19 +277,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ],
                       ),
                     ),
-                    if (auth.isAuthenticated)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: brand.withOpacity(0.14),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text('Synced', style: TextStyle(color: brand, fontSize: 10.5, fontWeight: FontWeight.bold)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: auth.isAuthenticated ? brand.withOpacity(0.14) : warn.withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(20),
                       ),
+                      child: Text(
+                        auth.isAuthenticated ? 'Synced' : 'Local Only',
+                        style: TextStyle(
+                          color: auth.isAuthenticated ? brand : warn,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                if (!auth.isAuthenticated) ...[
-                  const SizedBox(height: 14),
+                const SizedBox(height: 14),
+                if (!auth.isAuthenticated)
                   Row(
                     children: [
                       Expanded(
@@ -305,7 +306,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
-                          onPressed: () => _showAuthDialog(isSignUp: true),
+                          onPressed: () => showVaultAuthSheet(context, ref, initialSignUp: true),
                           child: const Text('Create Account', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
                       ),
@@ -315,17 +316,71 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           style: OutlinedButton.styleFrom(
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
-                          onPressed: () => _showAuthDialog(isSignUp: false),
+                          onPressed: () => showVaultAuthSheet(context, ref, initialSignUp: false),
                           child: const Text('Sign In', style: TextStyle(fontSize: 12)),
                         ),
                       ),
                     ],
+                  )
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _syncNow,
+                      icon: Icon(Icons.sync_rounded, size: 16, color: brand),
+                      label: Text('Sync Now & Pair Device', style: TextStyle(fontSize: 12.5, color: primaryText, fontWeight: FontWeight.w600)),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: border),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                    ),
                   ),
-                ],
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+
+          // Connected Devices Summary (when signed in)
+          if (auth.isAuthenticated) ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              margin: const EdgeInsets.only(bottom: 14),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(color: brand.withOpacity(0.14), borderRadius: BorderRadius.circular(10)),
+                    child: Icon(Icons.devices_rounded, color: brand, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Connected Devices (${_devices.length})',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: primaryText),
+                        ),
+                        Text(
+                          _devices.isEmpty
+                              ? 'Tap Sync Now above to pair this phone cleanly'
+                              : _devices.map((d) => d['device_name']?.toString() ?? 'Android').join(', '),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, color: secondaryText),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // User Guide Entry Card
           InkWell(
@@ -374,10 +429,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: ValueListenableBuilder<ThemeMode>(
               valueListenable: AppTheme.themeModeNotifier,
               builder: (context, currentMode, _) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                return Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 10,
                   children: [
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.palette_outlined, color: brand, size: 20),
                         const SizedBox(width: 10),
@@ -388,13 +447,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       segments: const [
                         ButtonSegment(
                           value: ThemeMode.dark,
-                          icon: Icon(Icons.dark_mode, size: 16),
-                          label: Text('Dark', style: TextStyle(fontSize: 11)),
+                          icon: Icon(Icons.dark_mode, size: 15),
+                          label: Text('Dark', style: TextStyle(fontSize: 11.5)),
                         ),
                         ButtonSegment(
                           value: ThemeMode.light,
-                          icon: Icon(Icons.light_mode, size: 16),
-                          label: Text('Light', style: TextStyle(fontSize: 11)),
+                          icon: Icon(Icons.light_mode, size: 15),
+                          label: Text('Light', style: TextStyle(fontSize: 11.5)),
                         ),
                       ],
                       selected: {currentMode},
@@ -447,8 +506,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   (_geminiApiKey != null && _geminiApiKey!.isNotEmpty)
-                      ? 'Personal API key is stored securely on this device.'
-                      : 'Uses server AI keys when available or add your own free Groq/Gemini key.',
+                      ? 'Personal API key is stored on device & synced cleanly.'
+                      : 'Uses server AI keys when configured or add your own free Groq/Gemini key.',
                   style: TextStyle(fontSize: 12, color: secondaryText),
                 ),
                 const SizedBox(height: 12),
@@ -532,7 +591,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _connectionStatus!,
                     style: TextStyle(
                       fontSize: 12,
-                      color: _connectionStatus!.startsWith('Connected') ? brand : Colors.redAccent,
+                      color: _connectionOk ? brand : AppTheme.error,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -565,13 +624,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             actions: [
                               TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
                               ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
+                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.voltLime, foregroundColor: const Color(0xFF101211)),
                                 onPressed: () async {
                                   await _api.saveBaseUrl(urlController.text);
+                                  ref.read(authProvider.notifier).bumpSyncVersion();
                                   if (ctx.mounted) Navigator.pop(ctx);
-                                  if (mounted) setState(() => _connectionStatus = null);
+                                  if (mounted) {
+                                    setState(() => _connectionStatus = null);
+                                    _testConnection();
+                                  }
                                 },
-                                child: const Text('Save'),
+                                child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
@@ -586,7 +649,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
           ),
-
           if (auth.isAuthenticated) ...[
             const SizedBox(height: 24),
             OutlinedButton.icon(
@@ -594,18 +656,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 final messenger = ScaffoldMessenger.of(context);
                 await ref.read(authProvider.notifier).signOut();
                 if (mounted) {
-                  messenger.showSnackBar(const SnackBar(content: Text('Signed out successfully')));
+                  messenger.showSnackBar(const SnackBar(content: Text('Signed out cleanly')));
                 }
               },
-              icon: const Icon(Icons.logout, size: 16, color: Colors.redAccent),
-              label: const Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
+              icon: const Icon(Icons.logout, size: 16, color: AppTheme.error),
+              label: const Text('Sign Out', style: TextStyle(color: AppTheme.error)),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.redAccent),
+                side: const BorderSide(color: AppTheme.error),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
           ],
+          const SizedBox(height: 16),
         ],
       ),
     );

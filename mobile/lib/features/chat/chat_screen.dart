@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
+import '../auth/auth_provider.dart';
+import '../auth/auth_sheet.dart';
 
 class ChatMessage {
   final String role;
@@ -18,17 +22,17 @@ class ChatMessage {
   });
 }
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   final String? initialFileId;
   final String? initialFileName;
 
   const ChatScreen({super.key, this.initialFileId, this.initialFileName});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ApiClient _api = ApiClient();
@@ -39,6 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _selectedFileId;
   String? _selectedFileName;
   String? _customApiKey;
+  String _selectedProvider = 'auto';
 
   @override
   void initState() {
@@ -61,23 +66,51 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _saveCustomApiKey(String key) async {
-    await _storage.write(key: 'vm_ai_api_key', value: key.trim());
+    final clean = key.trim();
+    if (clean.isEmpty) {
+      await _storage.delete(key: 'vm_ai_api_key');
+    } else {
+      await _storage.write(key: 'vm_ai_api_key', value: clean);
+      // Sync to server encrypted provider keys when authenticated so Phone & Website share the key
+      if (ref.read(authProvider).isAuthenticated) {
+        final inferred = clean.startsWith('gsk_')
+            ? 'groq'
+            : (clean.startsWith('sk-') ? 'openai' : 'gemini');
+        try {
+          await _api.dio.post('/api/auth/provider-keys', data: {
+            'provider': inferred,
+            'apiKey': clean,
+          });
+        } catch (_) {}
+      }
+    }
     if (mounted) {
-      setState(() => _customApiKey = key.trim());
-      final modelName = key.trim().startsWith('gsk_') ? 'Groq Llama 3.3' : 'Google Gemini';
+      setState(() => _customApiKey = clean);
+      final modelName = clean.isEmpty
+          ? 'Server Default AI'
+          : (clean.startsWith('gsk_') ? 'Groq Llama 3.3' : (clean.startsWith('sk-') ? 'OpenAI GPT-4o' : 'Google Gemini'));
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$modelName API key saved cleanly')),
+        SnackBar(content: Text('$modelName updated cleanly')),
       );
     }
   }
 
   String _getModelLabel() {
-    if (_customApiKey == null || _customApiKey!.isEmpty) {
-      return 'System AI Ready (Gemini / Groq)';
+    if (_customApiKey != null && _customApiKey!.isNotEmpty) {
+      if (_customApiKey!.startsWith('gsk_')) return 'Groq Llama 3.3 (Personal)';
+      if (_customApiKey!.startsWith('sk-')) return 'OpenAI GPT-4o (Personal)';
+      return 'Google Gemini (Personal)';
     }
-    if (_customApiKey!.startsWith('gsk_')) return 'Groq Llama 3.3 (Personal)';
-    if (_customApiKey!.startsWith('sk-')) return 'OpenAI GPT-4o (Personal)';
-    return 'Google Gemini (Personal)';
+    switch (_selectedProvider) {
+      case 'groq':
+        return 'Groq Llama 3.3 (Server)';
+      case 'gemini':
+        return 'Google Gemini (Server)';
+      case 'cohere':
+        return 'Cohere Command (Server)';
+      default:
+        return 'System AI Ready (Auto)';
+    }
   }
 
   void _showApiKeyDialog() {
@@ -91,7 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Optional: enter a Gemini (AIzaSy...) or Groq (gsk_...) key, or leave blank to use your configured server defaults.',
+              'Optional: enter a Gemini (AIzaSy...) or Groq (gsk_...) key, or leave blank to use configured server defaults.',
               style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryOf(ctx)),
             ),
             const SizedBox(height: 12),
@@ -105,12 +138,12 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.voltLime, foregroundColor: const Color(0xFF101211)),
             onPressed: () {
               Navigator.pop(ctx);
               _saveCustomApiKey(controller.text);
             },
-            child: const Text('Save Key'),
+            child: const Text('Save Key', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -121,6 +154,11 @@ class _ChatScreenState extends State<ChatScreen> {
     final trimmed = query.trim();
     if (trimmed.isEmpty || _isSending) return;
 
+    if (!ref.read(authProvider).isAuthenticated) {
+      final ok = await showVaultAuthSheet(context, ref);
+      if (!ok || !mounted) return;
+    }
+
     _inputController.clear();
     setState(() {
       _messages.add(ChatMessage(role: 'user', content: trimmed));
@@ -129,11 +167,16 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     _scrollToBottom();
 
-    final provider = (_customApiKey != null && _customApiKey!.startsWith('gsk_'))
-        ? 'groq'
-        : (_customApiKey != null && _customApiKey!.startsWith('sk-'))
-            ? 'openai'
-            : 'gemini';
+    String provider = _selectedProvider == 'auto' ? 'gemini' : _selectedProvider;
+    if (_customApiKey != null && _customApiKey!.isNotEmpty) {
+      if (_customApiKey!.startsWith('gsk_')) {
+        provider = 'groq';
+      } else if (_customApiKey!.startsWith('sk-')) {
+        provider = 'openai';
+      } else {
+        provider = 'gemini';
+      }
+    }
 
     final payload = {
       'query': trimmed,
@@ -143,8 +186,12 @@ class _ChatScreenState extends State<ChatScreen> {
     };
 
     try {
-      final response = await _api.dio.post('/api/v2/chat', data: payload);
-      final rawData = response.data.toString();
+      final response = await _api.dio.post<String>(
+        '/api/v2/chat',
+        data: payload,
+        options: Options(responseType: ResponseType.plain),
+      );
+      final rawData = response.data ?? '';
       String aggregatedContent = '';
       List<dynamic> citations = [];
 
@@ -154,34 +201,42 @@ class _ChatScreenState extends State<ChatScreen> {
           if (jsonStr.isEmpty || jsonStr == '[DONE]') continue;
           try {
             final parsed = jsonDecode(jsonStr);
-            if (parsed['type'] == 'token') {
-              aggregatedContent += parsed['content'] ?? '';
-            } else if (parsed['type'] == 'citations') {
-              citations = parsed['citations'] ?? [];
+            if (parsed is Map) {
+              if (parsed['type'] == 'token') {
+                aggregatedContent += (parsed['content'] ?? '').toString();
+              } else if (parsed['type'] == 'citations') {
+                citations = (parsed['citations'] as List?) ?? [];
+              } else if (parsed['type'] == 'error') {
+                final errMsg = (parsed['error'] ?? parsed['message'] ?? '').toString();
+                if (errMsg.isNotEmpty) aggregatedContent += '\n\n⚠️ $errMsg';
+              }
             }
           } catch (_) {}
         }
       }
 
-      if (aggregatedContent.isEmpty) {
-        aggregatedContent = 'Response received, but content was empty.';
+      if (aggregatedContent.trim().isEmpty) {
+        aggregatedContent = rawData.trim().isNotEmpty && !rawData.trimLeft().startsWith('data:')
+            ? rawData
+            : 'Response received, but no matching content was returned. Try uploading or indexing a file first.';
       }
 
       if (mounted) {
         setState(() {
           _messages[_messages.length - 1] = ChatMessage(
             role: 'assistant',
-            content: aggregatedContent,
+            content: aggregatedContent.trim(),
             citations: citations.isNotEmpty ? citations : null,
           );
         });
       }
     } catch (e) {
+      final friendly = ApiClient.extractErrorMessage(e);
       if (mounted) {
         setState(() {
           _messages[_messages.length - 1] = ChatMessage(
             role: 'assistant',
-            content: 'Unable to reach VectorGallery AI server: $e\n\nCheck Settings → Host Server URL or Sign In.',
+            content: 'Unable to reach VectorGallery AI server:\n$friendly\n\nCheck Settings → Host Server URL or Sign In.',
           );
         });
       }
@@ -247,6 +302,15 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (prev?.syncVersion != next.syncVersion && !next.isAuthenticated) {
+        setState(() {
+          _selectedFileId = null;
+          _selectedFileName = null;
+        });
+      }
+    });
+
     final isDark = AppTheme.isDark(context);
     final surface = AppTheme.surfaceOf(context);
     final elevated = AppTheme.elevatedOf(context);
@@ -274,6 +338,17 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.tune_rounded, color: primaryText, size: 20),
+            tooltip: 'Select AI Provider',
+            onSelected: (val) => setState(() => _selectedProvider = val),
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'auto', child: Text('Auto (Recommended)')),
+              PopupMenuItem(value: 'gemini', child: Text('Google Gemini')),
+              PopupMenuItem(value: 'groq', child: Text('Groq (Llama 3.3)')),
+              PopupMenuItem(value: 'cohere', child: Text('Cohere')),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.key_outlined),
             tooltip: 'Configure AI Key',
@@ -310,7 +385,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
             ),
-
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -364,7 +438,6 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                               ),
                       ),
-
                       if (msg.citations != null && msg.citations!.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Wrap(
@@ -404,7 +477,6 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-
           if (_messages.length <= 2)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -426,7 +498,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
             ),
-
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -463,11 +534,10 @@ class _SuggestionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brand = AppTheme.brandOf(context);
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ActionChip(
-        label: Text(label, style: TextStyle(fontSize: 11.5, color: brand, fontWeight: FontWeight.w600)),
+        label: Text(label, style: TextStyle(fontSize: 11.5, color: AppTheme.textSecondaryOf(context))),
         backgroundColor: AppTheme.surfaceOf(context),
         side: BorderSide(color: AppTheme.borderOf(context)),
         onPressed: onTap,

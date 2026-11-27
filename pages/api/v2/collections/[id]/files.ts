@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { signSupabaseFileUrls } from '@/lib/storage/supabaseStorage'
 import { findLocalFileById, getLocalFiles } from '@/lib/localMetadataStore'
 import {
   addFilesToLocalCollection,
@@ -133,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const { data: smartFiles, error } = await fileQuery.order('created_at', { ascending: false })
         if (error) throw error
-        return res.status(200).json({ files: smartFiles || [] })
+        return res.status(200).json({ files: await signSupabaseFileUrls(supabase, smartFiles || []) })
       }
 
       const { data: relations, error: relErr } = await supabase
@@ -157,7 +158,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('created_at', { ascending: false })
 
       if (filesErr) throw filesErr
-      return res.status(200).json({ files: customFiles || [] })
+      return res.status(200).json({ files: await signSupabaseFileUrls(supabase, customFiles || []) })
     }
 
     if (isSmartVirtual) {

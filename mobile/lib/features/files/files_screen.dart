@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_theme.dart';
+import '../auth/auth_provider.dart';
+import '../auth/auth_sheet.dart';
 import '../backup/backup_engine.dart';
-import '../chat/chat_screen.dart';
 import '../memories/memories_screen.dart';
+import 'file_detail_sheet.dart';
 
-class FilesScreen extends StatefulWidget {
+class FilesScreen extends ConsumerStatefulWidget {
   final String initialCategory;
 
   const FilesScreen({super.key, this.initialCategory = 'all'});
 
   @override
-  State<FilesScreen> createState() => _FilesScreenState();
+  ConsumerState<FilesScreen> createState() => _FilesScreenState();
 }
 
-class _FilesScreenState extends State<FilesScreen> {
+class _FilesScreenState extends ConsumerState<FilesScreen> {
   final ApiClient _api = ApiClient();
   final BackupEngine _backupEngine = BackupEngine();
   List<dynamic> _files = [];
   bool _isLoading = false;
+  String? _loadError;
   late String _selectedCategory;
   bool _isGridMode = true;
 
@@ -53,41 +57,42 @@ class _FilesScreenState extends State<FilesScreen> {
   }
 
   Future<void> _fetchFiles() async {
-    setState(() => _isLoading = true);
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
     try {
-      final Map<String, dynamic> query = {};
+      final Map<String, dynamic> query = {
+        'is_trashed': _selectedCategory == 'trash' ? 'true' : 'false',
+      };
       if (_selectedCategory == 'favorites') {
         query['is_favorite'] = 'true';
-      } else if (_selectedCategory != 'all') {
+      } else if (_selectedCategory != 'all' && _selectedCategory != 'trash') {
         query['category'] = _selectedCategory;
       }
 
       final res = await _api.dio.get('/api/v2/files', queryParameters: query);
       if (res.statusCode == 200 && mounted) {
         setState(() {
-          _files = res.data['files'] ?? [];
+          _files = (res.data is Map ? res.data['files'] : null) ?? [];
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load library: $e')),
-        );
+        final auth = ref.read(authProvider);
+        if (!auth.isAuthenticated) {
+          setState(() {
+            _files = [];
+            _loadError = null;
+          });
+        } else {
+          setState(() => _loadError = ApiClient.extractErrorMessage(e));
+        }
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  bool _isImageFile(Map<String, dynamic> file) {
-    final category = file['category']?.toString() ?? '';
-    final mime = file['mime_type']?.toString() ?? '';
-    final name = (file['original_name'] ?? file['name'] ?? '').toString().toLowerCase();
-    return (file['thumbnail_url']?.toString().isNotEmpty ?? false) &&
-        (category == 'photos' ||
-            category == 'screenshots' ||
-            mime.startsWith('image/') ||
-            RegExp(r'\.(png|jpe?g|webp|gif|bmp|avif)$').hasMatch(name));
   }
 
   Future<void> _toggleFavorite(String id, bool currentFavorite, String fileName) async {
@@ -100,266 +105,25 @@ class _FilesScreenState extends State<FilesScreen> {
           SnackBar(content: Text(!currentFavorite ? 'Starred "$fileName"' : 'Unstarred "$fileName"')),
         );
         _fetchFiles();
+        ref.read(authProvider.notifier).bumpSyncVersion();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Favorite toggle failed: $e')),
+          SnackBar(content: Text(ApiClient.extractErrorMessage(e))),
         );
       }
     }
   }
 
-  Future<void> _renameFile(String id, String currentName) async {
-    final controller = TextEditingController(text: currentName);
-    final newName = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Rename File'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'File Name'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accent, foregroundColor: Colors.white),
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Rename'),
-          ),
-        ],
-      ),
-    );
-
-    if (newName != null && newName.isNotEmpty && newName != currentName) {
-      try {
-        final res = await _api.dio.patch('/api/v2/files/$id', data: {'original_name': newName});
-        if (res.statusCode == 200 && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Renamed to "$newName"')),
-          );
-          _fetchFiles();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Rename failed: $e')),
-          );
-        }
+  Future<void> _startUpload(Future<int> Function() action) async {
+    final code = await action();
+    if (code == -1 && mounted) {
+      final ok = await showVaultAuthSheet(context, ref);
+      if (ok && mounted) {
+        await action();
       }
     }
-  }
-
-  Future<void> _deleteFile(String id, String fileName) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Move to Trash?'),
-        content: Text('Move "$fileName" to Trash? You can restore it anytime on web.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Move to Trash'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    try {
-      final res = await _api.dio.delete('/api/v2/files/$id');
-      if (res.statusCode == 200 && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Moved "$fileName" to Trash')),
-        );
-        _fetchFiles();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Delete failed: $e')),
-        );
-      }
-    }
-  }
-
-  void _showFileDetails(Map<String, dynamic> file) {
-    final id = file['id']?.toString() ?? '';
-    final name = file['original_name']?.toString() ?? file['name']?.toString() ?? 'File';
-    final size = file['size_bytes'] != null ? '${((file['size_bytes'] as num) / 1024).toStringAsFixed(1)} KB' : 'Unknown';
-    final mime = file['mime_type']?.toString() ?? 'Unknown';
-    final category = file['category']?.toString() ?? 'documents';
-    final hash = file['sha256_hash']?.toString() ?? 'N/A';
-    final text = file['extracted_text']?.toString() ?? '';
-    final isFavorite = file['is_favorite'] == true;
-    final thumbnailUrl = file['thumbnail_url']?.toString() ?? '';
-    final baseUrl = _api.dio.options.baseUrl;
-    final fullImageUrl = thumbnailUrl.startsWith('http') ? thumbnailUrl : '$baseUrl$thumbnailUrl';
-
-    final surface = AppTheme.surfaceOf(context);
-    final elevated = AppTheme.elevatedOf(context);
-    final border = AppTheme.borderOf(context);
-    final primaryText = AppTheme.textPrimaryOf(context);
-    final secondaryText = AppTheme.textSecondaryOf(context);
-    final brand = AppTheme.brandOf(context);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.92,
-        minChildSize: 0.4,
-        expand: false,
-        builder: (_, scrollCtrl) => Padding(
-          padding: const EdgeInsets.all(20),
-          child: ListView(
-            controller: scrollCtrl,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: brand.withOpacity(0.14),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(_getCategoryIcon(category), color: brand, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryText)),
-                        Text('$category • $size', style: TextStyle(color: secondaryText, fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(isFavorite ? Icons.star : Icons.star_border, color: isFavorite ? Colors.amber : secondaryText),
-                    tooltip: isFavorite ? 'Starred' : 'Star file',
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _toggleFavorite(id, isFavorite, name);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              if (_isImageFile(file)) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    height: 220,
-                    width: double.infinity,
-                    color: elevated,
-                    child: Image.network(
-                      fullImageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.broken_image_outlined, color: secondaryText, size: 36),
-                            const SizedBox(height: 4),
-                            Text('Preview unavailable', style: TextStyle(color: secondaryText, fontSize: 11)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              Divider(color: border),
-              const SizedBox(height: 10),
-              _DetailRow(label: 'MIME Type', value: mime),
-              _DetailRow(label: 'SHA-256', value: hash.length > 24 ? '${hash.substring(0, 24)}...' : hash),
-
-              if (text.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text('Indexed Text Excerpt', style: TextStyle(color: secondaryText, fontSize: 12, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: elevated,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: border),
-                  ),
-                  child: Text(
-                    text.length > 350 ? '${text.substring(0, 350)}...' : text,
-                    style: TextStyle(fontSize: 12.5, color: primaryText, height: 1.45),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 20),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => ChatScreen(initialFileId: id, initialFileName: name)),
-                        );
-                      },
-                      icon: const Icon(Icons.auto_awesome, size: 16),
-                      label: const Text('Ask AI', style: TextStyle(fontSize: 12)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _renameFile(id, name);
-                    },
-                    icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: const Text('Rename', style: TextStyle(fontSize: 12)),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _deleteFile(id, name);
-                    },
-                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 16),
-                    label: const Text('Trash', style: TextStyle(color: Colors.redAccent, fontSize: 12)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.redAccent),
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _showUploadPicker() {
@@ -372,14 +136,14 @@ class _FilesScreenState extends State<FilesScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Add Files to Vault', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: primaryText)),
+              Text('Add Files to Cloud Vault', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: primaryText)),
               const SizedBox(height: 14),
               ListTile(
                 leading: Container(
@@ -391,7 +155,7 @@ class _FilesScreenState extends State<FilesScreen> {
                 subtitle: Text('Pick images from device gallery', style: TextStyle(fontSize: 12, color: secondaryText)),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _backupEngine.pickAndUploadPhotos();
+                  _startUpload(_backupEngine.pickAndUploadPhotos);
                 },
               ),
               Divider(color: border),
@@ -405,7 +169,7 @@ class _FilesScreenState extends State<FilesScreen> {
                 subtitle: Text('Pick PDF, TXT, DOCX, XLSX files', style: TextStyle(fontSize: 12, color: secondaryText)),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _backupEngine.pickAndUploadDocuments();
+                  _startUpload(_backupEngine.pickAndUploadDocuments);
                 },
               ),
             ],
@@ -415,21 +179,15 @@ class _FilesScreenState extends State<FilesScreen> {
     );
   }
 
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case 'photos':
-        return Icons.photo_outlined;
-      case 'screenshots':
-        return Icons.screenshot_outlined;
-      case 'videos':
-        return Icons.videocam_outlined;
-      default:
-        return Icons.insert_drive_file_outlined;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (prev?.syncVersion != next.syncVersion || prev?.isAuthenticated != next.isAuthenticated) {
+        _fetchFiles();
+      }
+    });
+
     final surface = AppTheme.surfaceOf(context);
     final elevated = AppTheme.elevatedOf(context);
     final border = AppTheme.borderOf(context);
@@ -437,6 +195,7 @@ class _FilesScreenState extends State<FilesScreen> {
     final secondaryText = AppTheme.textSecondaryOf(context);
     final brand = AppTheme.brandOf(context);
     final baseUrl = _api.dio.options.baseUrl;
+    final gridColumns = MediaQuery.of(context).size.width > 640 ? 4 : 3;
 
     return Scaffold(
       appBar: AppBar(
@@ -450,11 +209,13 @@ class _FilesScreenState extends State<FilesScreen> {
             label: Text('Albums', style: TextStyle(color: brand, fontSize: 12.5, fontWeight: FontWeight.w600)),
           ),
           IconButton(
+            visualDensity: VisualDensity.compact,
             icon: Icon(_isGridMode ? Icons.view_list_rounded : Icons.grid_view_rounded, size: 20),
             tooltip: _isGridMode ? 'List view' : 'Photo grid view',
             onPressed: () => setState(() => _isGridMode = !_isGridMode),
           ),
           IconButton(
+            visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.refresh, size: 20),
             tooltip: 'Refresh Library',
             onPressed: _fetchFiles,
@@ -465,8 +226,9 @@ class _FilesScreenState extends State<FilesScreen> {
         onPressed: _showUploadPicker,
         backgroundColor: AppTheme.voltLime,
         foregroundColor: const Color(0xFF101211),
+        elevation: 2,
         icon: const Icon(Icons.cloud_upload_outlined),
-        label: const Text('Upload', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: const Text('Upload', style: TextStyle(fontWeight: FontWeight.w800)),
       ),
       body: Column(
         children: [
@@ -474,14 +236,16 @@ class _FilesScreenState extends State<FilesScreen> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
-              children: ['all', 'photos', 'screenshots', 'documents', 'favorites', 'videos'].map((cat) {
+              children: ['all', 'photos', 'screenshots', 'documents', 'favorites', 'videos', 'trash'].map((cat) {
                 final isSelected = _selectedCategory == cat;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
                     avatar: cat == 'favorites'
                         ? Icon(Icons.star, size: 14, color: isSelected ? Colors.amber : secondaryText)
-                        : null,
+                        : cat == 'trash'
+                            ? Icon(Icons.delete_outline, size: 14, color: isSelected ? AppTheme.error : secondaryText)
+                            : null,
                     label: Text(cat[0].toUpperCase() + cat.substring(1)),
                     selected: isSelected,
                     onSelected: (_) {
@@ -489,11 +253,11 @@ class _FilesScreenState extends State<FilesScreen> {
                       _fetchFiles();
                     },
                     backgroundColor: surface,
-                    selectedColor: brand.withOpacity(0.16),
-                    checkmarkColor: brand,
-                    side: BorderSide(color: isSelected ? brand : border),
+                    selectedColor: cat == 'trash' ? AppTheme.error.withOpacity(0.14) : brand.withOpacity(0.16),
+                    checkmarkColor: cat == 'trash' ? AppTheme.error : brand,
+                    side: BorderSide(color: isSelected ? (cat == 'trash' ? AppTheme.error : brand) : border),
                     labelStyle: TextStyle(
-                      color: isSelected ? brand : secondaryText,
+                      color: isSelected ? (cat == 'trash' ? AppTheme.error : brand) : secondaryText,
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
                     ),
@@ -502,6 +266,20 @@ class _FilesScreenState extends State<FilesScreen> {
               }).toList(),
             ),
           ),
+          if (_loadError != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.error.withOpacity(0.35)),
+                ),
+                child: Text(_loadError!, style: const TextStyle(fontSize: 12, color: AppTheme.error)),
+              ),
+            ),
           Expanded(
             child: RefreshIndicator(
               onRefresh: _fetchFiles,
@@ -511,48 +289,67 @@ class _FilesScreenState extends State<FilesScreen> {
                   : _files.isEmpty
                       ? ListView(
                           children: [
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.16),
                             Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.folder_open, size: 58, color: secondaryText.withOpacity(0.5)),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    _selectedCategory == 'all'
-                                        ? 'No files backed up yet'
-                                        : _selectedCategory == 'favorites'
-                                            ? 'No starred favorite files yet'
-                                            : 'No files in "$_selectedCategory"',
-                                    style: TextStyle(color: secondaryText),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton.icon(
-                                    onPressed: _showUploadPicker,
-                                    icon: const Icon(Icons.add, size: 16),
-                                    label: const Text('Upload Your First File'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppTheme.voltLime,
-                                      foregroundColor: const Color(0xFF101211),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 28),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      auth.isAuthenticated ? Icons.folder_open : Icons.lock_outline_rounded,
+                                      size: 54,
+                                      color: secondaryText.withOpacity(0.6),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      !auth.isAuthenticated
+                                          ? 'Sign in to access your synced cloud library'
+                                          : _selectedCategory == 'all'
+                                              ? 'No files backed up yet'
+                                              : _selectedCategory == 'favorites'
+                                                  ? 'No starred favorite files yet'
+                                                  : _selectedCategory == 'trash'
+                                                      ? 'Trash is empty'
+                                                      : 'No files in "$_selectedCategory"',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: primaryText, fontWeight: FontWeight.w600, fontSize: 14),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      onPressed: () => auth.isAuthenticated
+                                          ? _showUploadPicker()
+                                          : showVaultAuthSheet(context, ref),
+                                      icon: Icon(auth.isAuthenticated ? Icons.add : Icons.login_rounded, size: 16),
+                                      label: Text(
+                                        auth.isAuthenticated ? 'Upload Your First File' : 'Sign In & Sync',
+                                        style: const TextStyle(fontWeight: FontWeight.w800),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppTheme.voltLime,
+                                        foregroundColor: const Color(0xFF101211),
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         )
                       : _isGridMode
                           ? GridView.builder(
-                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 88),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
+                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 92),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: gridColumns,
                                 crossAxisSpacing: 6,
                                 mainAxisSpacing: 6,
                               ),
                               itemCount: _files.length,
                               itemBuilder: (context, index) {
                                 final f = Map<String, dynamic>.from(_files[index] as Map);
-                                final isImg = _isImageFile(f);
+                                final isImg = isRenderableImageFile(f);
                                 final thumbUrl = f['thumbnail_url']?.toString() ?? '';
                                 final fullUrl = thumbUrl.startsWith('http') ? thumbUrl : '$baseUrl$thumbUrl';
                                 final name = f['original_name']?.toString() ?? 'File';
@@ -560,9 +357,18 @@ class _FilesScreenState extends State<FilesScreen> {
                                 final isFav = f['is_favorite'] == true;
 
                                 return GestureDetector(
-                                  onTap: () => _showFileDetails(f),
+                                  onTap: () => showVaultFileDetailSheet(
+                                    context: context,
+                                    file: f,
+                                    api: _api,
+                                    isTrashItem: _selectedCategory == 'trash',
+                                    onChanged: () {
+                                      _fetchFiles();
+                                      ref.read(authProvider.notifier).bumpSyncVersion();
+                                    },
+                                  ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
                                     child: Stack(
                                       fit: StackFit.expand,
                                       children: [
@@ -572,7 +378,7 @@ class _FilesScreenState extends State<FilesScreen> {
                                             fit: BoxFit.cover,
                                             errorBuilder: (_, __, ___) => Container(
                                               color: elevated,
-                                              child: Icon(_getCategoryIcon(cat), color: brand),
+                                              child: Icon(categoryIconFor(cat), color: brand),
                                             ),
                                           )
                                         else
@@ -582,7 +388,7 @@ class _FilesScreenState extends State<FilesScreen> {
                                             child: Column(
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
-                                                Icon(_getCategoryIcon(cat), color: brand, size: 26),
+                                                Icon(categoryIconFor(cat), color: brand, size: 26),
                                                 const SizedBox(height: 6),
                                                 Text(
                                                   name,
@@ -611,7 +417,7 @@ class _FilesScreenState extends State<FilesScreen> {
                               },
                             )
                           : ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 92),
                               itemCount: _files.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 8),
                               itemBuilder: (context, index) {
@@ -620,82 +426,71 @@ class _FilesScreenState extends State<FilesScreen> {
                                 final name = f['original_name']?.toString() ?? 'File';
                                 final cat = f['category']?.toString() ?? 'documents';
                                 final isFav = f['is_favorite'] == true;
+                                final isImg = isRenderableImageFile(f);
+                                final thumbUrl = f['thumbnail_url']?.toString() ?? '';
+                                final fullUrl = thumbUrl.startsWith('http') ? thumbUrl : '$baseUrl$thumbUrl';
                                 final size = f['size_bytes'] != null
                                     ? '${((f['size_bytes'] as num) / 1024).toStringAsFixed(1)} KB'
                                     : '';
+
                                 return ListTile(
-                                  onTap: () => _showFileDetails(f),
+                                  onTap: () => showVaultFileDetailSheet(
+                                    context: context,
+                                    file: f,
+                                    api: _api,
+                                    isTrashItem: _selectedCategory == 'trash',
+                                    onChanged: () {
+                                      _fetchFiles();
+                                      ref.read(authProvider.notifier).bumpSyncVersion();
+                                    },
+                                  ),
                                   tileColor: surface,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                     side: BorderSide(color: border),
                                   ),
-                                  leading: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: brand.withOpacity(0.12),
-                                      borderRadius: BorderRadius.circular(10),
+                                  leading: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      width: 42,
+                                      height: 42,
+                                      color: elevated,
+                                      child: isImg
+                                          ? Image.network(
+                                              fullUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Icon(categoryIconFor(cat), color: brand, size: 20),
+                                            )
+                                          : Icon(categoryIconFor(cat), color: brand, size: 20),
                                     ),
-                                    child: Icon(_getCategoryIcon(cat), color: brand, size: 20),
                                   ),
                                   title: Text(
                                     name,
-                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: primaryText),
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5, color: primaryText),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   subtitle: Text(
                                     '$cat ${size.isNotEmpty ? '• $size' : ''}',
-                                    style: TextStyle(fontSize: 11, color: secondaryText),
+                                    style: TextStyle(fontSize: 11.5, color: secondaryText),
                                   ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      IconButton(
-                                        icon: Icon(
-                                          isFav ? Icons.star : Icons.star_border,
-                                          size: 18,
-                                          color: isFav ? Colors.amber : secondaryText,
+                                      if (_selectedCategory != 'trash')
+                                        IconButton(
+                                          icon: Icon(
+                                            isFav ? Icons.star_rounded : Icons.star_border_rounded,
+                                            size: 19,
+                                            color: isFav ? Colors.amber : secondaryText,
+                                          ),
+                                          onPressed: () => _toggleFavorite(id, isFav, name),
                                         ),
-                                        onPressed: () => _toggleFavorite(id, isFav, name),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.more_vert, size: 18, color: secondaryText),
-                                        onPressed: () => _showFileDetails(f),
-                                      ),
+                                      Icon(Icons.more_vert, size: 18, color: secondaryText),
                                     ],
                                   ),
                                 );
                               },
                             ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(fontSize: 12, color: AppTheme.textSecondaryOf(context))),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'monospace',
-              color: AppTheme.textPrimaryOf(context),
             ),
           ),
         ],

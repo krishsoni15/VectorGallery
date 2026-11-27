@@ -390,12 +390,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       {/* ─── Main Content Shell ─── */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Clean Minimal Google Photos Style Header */}
-        <header className="h-14 sm:h-16 border-b border-[#DDE2DC] dark:border-white/[0.08] px-3 sm:px-6 flex items-center justify-between bg-[#FFFFFF]/92 dark:bg-[#090B0D]/92 backdrop-blur-xl shrink-0 gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <header className="h-14 sm:h-16 border-b border-[#DDE2DC] dark:border-white/[0.08] px-2.5 sm:px-6 flex items-center justify-between bg-[#FFFFFF]/92 dark:bg-[#090B0D]/92 backdrop-blur-xl shrink-0 gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Open navigation menu"
-              className="md:hidden p-2 rounded-full text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.06]"
+              className="md:hidden p-1.5 sm:p-2 rounded-full text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#E7E9E5] dark:hover:bg-white/[0.06]"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -405,10 +405,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </div>
 
           {/* Centered Clean Search Pill */}
-          <div className="flex-1 min-w-0 max-w-xl mx-1 sm:mx-4">
+          <div className="flex-1 min-w-0 max-w-xl mx-0.5 sm:mx-4">
             <button
               onClick={onOpenSearch}
-              className="w-full flex items-center justify-between px-3.5 sm:px-4 py-2 rounded-full bg-[#F2F3F0] dark:bg-[#131715] hover:bg-[#E7E9E5]/80 dark:hover:bg-[#1A1F1D] border border-[#DDE2DC] dark:border-white/[0.10] text-xs transition-colors group"
+              className="w-full flex items-center justify-between px-3 sm:px-4 py-2 rounded-full bg-[#F2F3F0] dark:bg-[#131715] hover:bg-[#E7E9E5]/80 dark:hover:bg-[#1A1F1D] border border-[#DDE2DC] dark:border-white/[0.10] text-xs transition-colors group"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <Search className="w-3.5 h-3.5 text-[#626B64] dark:text-[#9AA69E] group-hover:text-[#101211] dark:group-hover:text-[#CDFF45] transition-colors shrink-0" />
@@ -426,7 +426,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={onOpenUpload}
-              className="vg-cta-lime flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-[#D4FF54] hover:bg-[#C6F43E] dark:bg-[#CDFF45] dark:hover:bg-[#DCFF73] text-[#101211] text-xs font-semibold transition-all shadow-sm"
+              className="vg-cta-lime flex items-center gap-1.5 px-2.5 sm:px-4 py-2 rounded-full bg-[#D4FF54] hover:bg-[#C6F43E] dark:bg-[#CDFF45] dark:hover:bg-[#DCFF73] text-[#101211] text-xs font-semibold transition-all shadow-sm"
             >
               <UploadCloud className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Upload</span>
@@ -450,7 +450,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               onClick={toggleTheme}
               title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
               aria-label="Toggle color theme"
-              className="w-9 h-9 rounded-full border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] flex items-center justify-center text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CDFF45] transition-colors"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] flex items-center justify-center text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CDFF45] transition-colors"
             >
               {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
@@ -472,7 +472,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         </main>
 
         {/* ─── Mobile Bottom Navigation ─── */}
-        <nav className="md:hidden flex items-center justify-around h-16 border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF]/95 dark:bg-[#090B0D]/95 backdrop-blur-xl shrink-0 px-1 z-20">
+        <nav className="md:hidden flex items-center justify-around min-h-[64px] pb-[env(safe-area-inset-bottom)] border-t border-[#DDE2DC] dark:border-white/[0.08] bg-[#FFFFFF]/95 dark:bg-[#090B0D]/95 backdrop-blur-xl shrink-0 px-1 z-20">
           {[
             { key: 'home' as NavItemKey, label: 'Overview', icon: Home },
             { key: 'photos' as NavItemKey, label: 'Photos', icon: ImageIcon },
@@ -485,18 +485,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <button
                 key={tab.key}
                 onClick={() => onSelectTab(tab.key)}
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl transition-colors min-w-0 ${
                   isActive ? 'text-[#101211] dark:text-[#CDFF45] font-semibold' : 'text-[#626B64] dark:text-[#9AA69E]'
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-[10px]">{tab.label}</span>
+                <span className="text-[10px] truncate">{tab.label}</span>
               </button>
             )
           })}
           <button
             onClick={onOpenSearch}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CDFF45]"
+            className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl min-w-0 text-[#626B64] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#CDFF45]"
           >
             <Search className="w-5 h-5" />
             <span className="text-[10px]">Search</span>

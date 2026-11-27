@@ -199,8 +199,8 @@ export async function generateEmbedding(
             console.warn('[Providers] Gemini embedding failed, falling back to Cohere')
             return generateEmbedding(text, 'cohere', taskType, 0)
           }
-          if (res.status === 429 && attempt < 5) {
-            await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000))
+          if (res.status === 429 && attempt < 1) {
+            await new Promise(r => setTimeout(r, 1500))
             return generateEmbedding(text, providerId, taskType, attempt + 1, apiKeyOverride)
           }
           throw new Error(`Gemini ${res.status}: ${JSON.stringify(err)}`)
@@ -245,8 +245,8 @@ export async function generateEmbedding(
         })
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
-          if (res.status === 429 && attempt < 5) {
-            await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000))
+          if (res.status === 429 && attempt < 1) {
+            await new Promise(r => setTimeout(r, 1500))
             return generateEmbedding(text, providerId, taskType, attempt + 1)
           }
           throw new Error(`Cohere ${res.status}: ${JSON.stringify(err)}`)

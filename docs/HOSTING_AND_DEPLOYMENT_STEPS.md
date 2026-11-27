@@ -11,14 +11,9 @@ Because Vercel runs **serverless functions** (ephemeral filesystem — no persis
 ### 1. Create Your Free Supabase Project & Tables
 1. Go to [supabase.com](https://supabase.com/) → **New Project** (e.g., `vectorgallery-prod`).
 2. Wait ~2 minutes for the database to start, then open **SQL Editor** in the left sidebar.
-3. Copy and run the SQL files from `supabase/migrations/` **one-by-one in this exact order**:
-   1. `supabase/migrations/20230406025118_init.sql`
-   2. `supabase/migrations/20260521092518_hybrid_search.sql`
-   3. `supabase/migrations/20260521160800_ultra_upgrade.sql`
-   4. `supabase/migrations/20260908_auth_and_keys.sql`
-   5. `supabase/migrations/20261117_vectormind_v2_core.sql`
-   6. `supabase/migrations/20261117_vectormind_v2_extensions.sql`
-4. Open **Storage** in Supabase → click **New bucket** → name it **`documents`** → keep **Public bucket = OFF** (private & secure; VectorGallery generates per-user signed URLs automatically).
+3. Paste and run the unified all-in-one setup script **[supabase/SETUP_ALL_IN_ONE.sql](../supabase/SETUP_ALL_IN_ONE.sql)** once (it idempotently creates `pgvector`, all core + v2 tables, triggers, `hybrid_search` RPC, RLS policies, and the private `documents` storage bucket).
+   *(Alternatively, run the incremental migration files in `supabase/migrations/` in chronological order.)*
+4. Open **Storage** in Supabase → verify a private bucket named **`documents`** exists (**Public bucket = OFF**; VectorGallery generates per-user signed URLs automatically).
 5. Open **Project Settings → API** and copy these 3 credentials:
    - **Project URL** (`https://xxxx.supabase.co`)
    - **anon / public key**

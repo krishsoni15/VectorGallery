@@ -73,9 +73,59 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
     setUploading(true)
     setError(null)
-    setProgress(20)
+    setProgress(15)
 
     try {
+      // Use direct signed Supabase upload for files > 2.5MB to stay well below Vercel's 4.5MB body cap
+      if (selectedFile.size > 2.5 * 1024 * 1024) {
+        const signRes = await fetch('/api/v2/files/signed-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: selectedFile.name }),
+        })
+        const signJson = await signRes.json().catch(() => ({}))
+        if (signRes.ok && signJson?.directUpload && signJson?.signedUrl && signJson?.storageKey) {
+          setProgress(40)
+          const putRes = await fetch(signJson.signedUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': selectedFile.type || 'application/octet-stream',
+              'x-upsert': 'true',
+            },
+            body: selectedFile,
+          })
+          if (!putRes.ok) {
+            throw new Error(`Direct cloud storage upload failed (${putRes.status})`)
+          }
+          setProgress(75)
+          const ingestRes = await fetch('/api/v2/files/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: selectedFile.name,
+              mimeType: selectedFile.type,
+              storageKey: signJson.storageKey,
+            }),
+          })
+          setProgress(92)
+          const ingestJson = await ingestRes.json()
+          if (!ingestRes.ok) {
+            throw new Error(ingestJson.error || 'Upload ingestion failed')
+          }
+          setProgress(100)
+          setSuccess(true)
+          setTimeout(() => {
+            onUploadSuccess()
+            setSelectedFile(null)
+            setUploading(false)
+            setSuccess(false)
+            setProgress(0)
+            onClose()
+          }, 700)
+          return
+        }
+      }
+
       const reader = new FileReader()
       reader.onerror = () => {
         setError('Unable to read the selected file.')
