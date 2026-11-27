@@ -101,6 +101,27 @@ a {
   text-decoration: none;
 }
 
+/* Override Chrome yellow/slate autofill wash so inputs match Liquid Silver & Carbon surfaces */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #101211 !important;
+  caret-color: #101211;
+  transition: background-color 9999s ease-out 0s;
+}
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark textarea:-webkit-autofill,
+html.dark select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #181c1a inset !important;
+  -webkit-text-fill-color: #f3f5f1 !important;
+  caret-color: #f3f5f1;
+}
+
 /* ═══════════════════════════════════════════════════════════
    PROJECT LIVING MATTER SHELL (.vg-shell)
    Liquid Silver (#F2F3F0 / #D1D5D2) & Liquid Carbon (#090B0A / #202522)
@@ -693,6 +714,7 @@ html.light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
    ═══════════════════════════════════════════════════════════ */
 html.light .vm-app-shell,
 html.light .vm-app-shell main,
+html.light .vm-app-shell [class*="bg-[#090B0A]"],
 html.light .vm-app-shell [class*="bg-[#090A0D]"],
 html.light .vm-app-shell [class*="bg-[#0A0C0F]"],
 html.light .vm-app-shell [class*="bg-[#0A0C10]"],
@@ -705,6 +727,8 @@ html.light .vm-app-shell [class*="bg-slate-950"] {
 html.light .vm-app-shell aside,
 html.light .vm-app-shell header,
 html.light .vm-app-shell nav,
+html.light .vm-app-shell [class*="bg-[#131715]"],
+html.light .vm-app-shell [class*="bg-[#181C1A]"],
 html.light .vm-app-shell [class*="bg-[#0E1015]"],
 html.light .vm-app-shell [class*="bg-[#0C0E14]"],
 html.light .vm-app-shell [class*="bg-[#0F1117]"],
@@ -838,6 +862,12 @@ html.light .vm-app-shell .bg-emerald-500 *,
 html.light .vm-app-shell .bg-red-600 *,
 html.light .vm-app-shell [class*="from-emerald-500"] * {
   color: #FFFFFF !important;
+}
+
+html.light .vm-app-shell .vg-cta-lime,
+html.light .vm-app-shell .vg-cta-lime * {
+  background-color: #D4FF54 !important;
+  color: #101211 !important;
 }
 
 html.light .vm-app-shell .bg-rose-500 { background-color: #F43F5E !important; }

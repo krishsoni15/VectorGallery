@@ -13,9 +13,10 @@ import {
   Zap,
 } from 'lucide-react'
 import { useAuth } from '@/lib/AuthContext'
+import { AuthShowcasePanel } from '@/components/auth/AuthShowcasePanel'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
-import { VG_COMPONENTS } from '@/components/landing/design-system'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import { VG_COMPONENTS, VG_SPHERE_THEME_SPEC } from '@/components/landing/design-system'
+import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
 import { cn } from '@/lib/utils'
 
 export default function LoginPage() {
@@ -100,55 +101,24 @@ export default function LoginPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#087F5B]/20 dark:selection:bg-[#58D6A8]/25">
-        {/* Left Studio Photo Panel */}
-        <div className="photo-overlay hidden lg:flex lg:col-span-6 relative overflow-hidden bg-[#0B0D0C] flex-col justify-between p-12">
-          <div className="absolute inset-0 pointer-events-none">
-            <img
-              src="/landing/photos/aura-sunlit-interior.webp"
-              alt="Sunlit modern interior workspace with framed photography"
-              className="w-full h-full object-cover opacity-60"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D0C] via-[#0B0D0C]/45 to-[#0B0D0C]/75 pointer-events-none" />
-
-          <div className="relative z-10 flex items-center justify-between">
-            <Link href="/" className="shrink-0">
-              <VectorGalleryLogo size="sm" variant="on-dark" />
-            </Link>
-            <span className="text-[12px] font-medium text-[#C4EDE1]">
-              Personal Cloud Access
-            </span>
-          </div>
-
-          <div className="relative z-10 max-w-md space-y-4">
-            <p
-              className="font-display text-4xl xl:text-5xl font-bold tracking-[-0.03em] leading-[1.06] text-[#F2F3EF]"
-              style={{ textWrap: 'balance' }}
-            >
-              A calm home for everything you{'\u00A0'}keep.
-            </p>
-            <p className="text-[15.5px] text-[#F2F3EF]/80 leading-relaxed">
-              Return to your photo library, scanned pages, and personal notes across desktop and Android.
-            </p>
-          </div>
-
-          <div className="relative z-10 flex items-center gap-4 text-[12px] text-[#A3ADA5]">
-            <span>Private workspace</span>
-            <span>·</span>
-            <span>Automatic Android backup</span>
-          </div>
-        </div>
+      <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#087F5B]/20 dark:selection:bg-[#CFFF49]/25">
+        <AuthShowcasePanel
+          badgeText="Personal Cloud"
+          headline="Your personal library, searchable in seconds."
+          description="Return to your photos, OCR-indexed receipts, handwritten notes, and automatic Android camera roll backups."
+          footerLeft="Encrypted workspace · Zero lock-in"
+          footerRight="Local or cloud storage"
+        />
 
         {/* Right Form Canvas */}
-        <div className="lg:col-span-6 flex flex-col justify-between px-6 sm:px-12 lg:px-20 py-8">
-          <div className="flex items-center justify-between">
+        <div className="lg:col-span-6 flex flex-col justify-between bg-[var(--vg-surface)] px-6 sm:px-12 lg:px-16 xl:px-24 py-7 sm:py-9">
+          <div className="flex items-center justify-between gap-3">
             <Link href="/" className="lg:hidden inline-flex items-center">
               <VectorGalleryLogo size="sm" variant="horizontal" />
             </Link>
             <Link
               href="/"
-              className="hidden lg:inline-flex text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-colors"
+              className="hidden lg:inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-colors"
             >
               ← Back to VectorGallery
             </Link>
@@ -156,12 +126,12 @@ export default function LoginPage() {
             <div className="flex items-center gap-2.5">
               <Link
                 href="/install"
-                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-medium bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[var(--vg-ink)] hover:border-[#087F5B]/45 dark:hover:border-[#58D6A8]/45 transition-colors"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-medium bg-[#F2F3F0] dark:bg-[#202522] border border-[#DDE2DC] dark:border-white/[0.10] text-[#101211] dark:text-[#F3F5F1] hover:border-[#087F5B]/45 dark:hover:border-[#CFFF49]/45 transition-colors"
               >
-                <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#58D6A8]" />
+                <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
                 <span>Android App</span>
               </Link>
-              <ThemeToggle />
+              <ThemeSwitch />
             </div>
           </div>
 
@@ -169,10 +139,27 @@ export default function LoginPage() {
             initial={{ opacity: 0.92, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full max-w-[380px] mx-auto py-12"
+            className="w-full max-w-[410px] mx-auto py-8 sm:py-12"
           >
-            <div className="space-y-2 mb-9">
-              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.03em] text-[var(--vg-ink)]">
+            {/* Mobile Mini Sculpture Anchor */}
+            <div className="lg:hidden flex items-center gap-3.5 mb-7 p-3.5 rounded-2xl bg-[var(--vg-bg)] border border-[var(--vg-border)]">
+              <img
+                src={VG_SPHERE_THEME_SPEC.heroVideoPoster}
+                alt="VectorGallery Memory Sphere"
+                className="w-12 h-12 object-contain shrink-0"
+              />
+              <div>
+                <p className="font-display text-sm font-bold text-[var(--vg-ink)]">Personal AI Cloud</p>
+                <p className="text-xs text-[var(--vg-ink-2)]">Photos, OCR documents &amp; Android sync</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 mb-8">
+              <div className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#087F5B] dark:text-[#CFFF49]">
+                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                <span>Vault Sign In</span>
+              </div>
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.036em] text-[var(--vg-ink)]">
                 Welcome back
               </h1>
               <p className="text-[14.5px] text-[var(--vg-ink-2)]">
@@ -203,7 +190,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.12] text-[14px] text-[#101211] dark:text-[#F3F5F1] placeholder:text-[#626B64] dark:placeholder:text-[#828E86] focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49] focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#CFFF49]/25 transition-colors"
                   />
                 </div>
               </div>
@@ -224,7 +211,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-[14px] text-[var(--vg-ink)] placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:border-[var(--vg-brand)] focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#58D6A8]/25 transition-all"
+                    className="w-full h-12 pl-10 pr-11 rounded-xl bg-[#FFFFFF] dark:bg-[#181C1A] border border-[#DDE2DC] dark:border-white/[0.12] text-[14px] text-[#101211] dark:text-[#F3F5F1] placeholder:text-[#626B64] dark:placeholder:text-[#828E86] focus:outline-none focus:border-[#087F5B] dark:focus:border-[#CFFF49] focus:ring-2 focus:ring-[#087F5B]/20 dark:focus:ring-[#CFFF49]/25 transition-colors"
                   />
                   <button
                     type="button"
@@ -240,7 +227,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className={cn(VG_COMPONENTS.buttons.primary, 'w-full disabled:opacity-50 mt-2')}
+                className={cn(VG_COMPONENTS.buttons.limePill, 'w-full disabled:opacity-50 mt-2')}
               >
                 {loading ? (
                   <>
@@ -265,9 +252,9 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleGuestAccess}
-              className="w-full h-11 px-5 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface-2)] hover:bg-[#E9EBE5] dark:hover:bg-[#252A26] hover:border-[var(--vg-border-strong)] text-[13.5px] font-medium flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
+              className="w-full h-11 px-5 rounded-full border border-[#DDE2DC] dark:border-white/[0.12] bg-[#F2F3F0] dark:bg-[#202522] hover:bg-[#E7E9E5] dark:hover:bg-[#2A302C] text-[#101211] dark:text-[#F3F5F1] text-[13.5px] font-medium flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]"
             >
-              <Zap className="w-4 h-4 text-[#087F5B] dark:text-[#58D6A8]" />
+              <Zap className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" />
               <span>Continue in Local Sandbox</span>
             </button>
             <p className="mt-2 text-[11.5px] text-center text-[var(--vg-ink-muted)]">
@@ -278,7 +265,7 @@ export default function LoginPage() {
               New to VectorGallery?{' '}
               <Link
                 href="/signup"
-                className="font-semibold text-[#087F5B] dark:text-[#58D6A8] hover:underline underline-offset-4"
+                className="font-semibold text-[#087F5B] dark:text-[#CFFF49] hover:underline underline-offset-4"
               >
                 Create an account
               </Link>
@@ -287,7 +274,7 @@ export default function LoginPage() {
 
           <div className="flex items-center justify-between text-[12px] text-[var(--vg-ink-3)]">
             <span>Your files, your storage choice</span>
-            <Link href="/install" className="hover:text-[#087F5B] dark:hover:text-[#58D6A8] transition-colors">
+            <Link href="/install" className="hover:text-[#087F5B] dark:hover:text-[#CFFF49] transition-colors">
               Android companion →
             </Link>
           </div>

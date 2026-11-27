@@ -5,7 +5,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Menu, Smartphone, X } from 'lucide-react'
 import { AccountMenu } from '@/components/AccountMenu'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
+import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
 import { cn } from '@/lib/utils'
 
 interface SiteHeaderProps {
@@ -39,22 +40,25 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
         scrolled
-          ? 'bg-[#FFFFFF]/90 dark:bg-[#090B0A]/90 backdrop-blur-2xl border-b border-[#DDE2DC] dark:border-white/[0.10] shadow-sm'
-          : 'vg-transparent-header bg-transparent border-b border-transparent'
+          ? 'bg-[#FFFFFF]/90 dark:bg-[#090B0A]/90 backdrop-blur-2xl border-b border-[var(--vg-border)] shadow-sm'
+          : 'vg-transparent-header bg-[#FFFFFF]/95 dark:bg-[#090B0A]/95 border-b border-transparent'
       )}
     >
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-7 lg:px-10 h-16 flex items-center justify-between gap-4">
+      <div className={cn(VG_LAYOUT.containers.navbar, 'h-16 lg:h-[74px] flex items-center justify-between gap-4')}>
         <Link href="/" className="shrink-0">
-          <VectorGalleryLogo size="sm" variant="horizontal" />
+          <VectorGalleryLogo size="md" variant="horizontal" />
         </Link>
 
         {!minimal && (
-          <nav className="hidden md:flex items-center gap-6 text-[13.5px] font-medium text-[#555E58] dark:text-[#9AA69E]">
+          <nav
+            aria-label="Secondary navigation"
+            className="hidden md:inline-flex items-center gap-0.5 xl:gap-1 px-2.5 py-1.5 rounded-full bg-[#F2F3F0] dark:bg-[#131715] border border-[#DDE2DC] dark:border-white/[0.10]"
+          >
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
+                className={cn(VG_COMPONENTS.buttons.ghost, 'text-[13.5px] whitespace-nowrap')}
               >
                 {item.label}
               </Link>
@@ -62,20 +66,27 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
             <Link
               href="/install"
               className={cn(
-                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-[13px] transition-colors',
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] transition-colors whitespace-nowrap',
                 router.pathname === '/install'
-                  ? 'border-[#101211]/15 bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] font-semibold'
-                  : 'border-[#DDE2DC] dark:border-white/[0.10] bg-[#FFFFFF] dark:bg-[#131715] hover:border-[#087F5B]/45 dark:hover:border-[#CFFF49]/45 text-[#101211] dark:text-[#F3F5F1]'
+                  ? 'bg-[#D4FF54] dark:bg-[#CFFF49] text-[#101211] font-semibold'
+                  : 'text-[var(--vg-ink)] hover:bg-[#FFFFFF]/80 dark:hover:bg-[#202522]'
               )}
             >
-              <Smartphone className="w-3.5 h-3.5 text-[#087F5B] dark:text-[#CFFF49]" />
+              <Smartphone
+                className={cn(
+                  'w-3.5 h-3.5',
+                  router.pathname === '/install'
+                    ? 'text-[#101211]'
+                    : 'text-[#087F5B] dark:text-[#CFFF49]'
+                )}
+              />
               <span>Android App</span>
             </Link>
           </nav>
         )}
 
         <div className="flex items-center gap-2.5">
-          <ThemeToggle />
+          <ThemeSwitch />
 
           {!minimal && (
             <div className="hidden sm:flex items-center gap-2">
@@ -130,7 +141,7 @@ export function SiteHeader({ minimal = false }: SiteHeaderProps) {
                 <Link
                   href="/install"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-between py-2.5 text-sm font-medium text-[#087F5B] dark:text-[#58D6A8]"
+                  className="flex items-center justify-between py-2.5 text-sm font-medium text-[#087F5B] dark:text-[#CFFF49]"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Smartphone className="w-4 h-4" />

@@ -3,7 +3,9 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useAuth } from '@/lib/AuthContext'
-import { AccountMenu } from '@/components/AccountMenu'
+import { SiteHeader } from '@/components/SiteHeader'
+import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
+import { cn } from '@/lib/utils'
 
 interface ProviderKeyStatus {
   configured: boolean
@@ -183,56 +185,29 @@ export default function AccountPage() {
 
   if (authLoading || (!user && fetching)) {
     return (
-      <div className="vm-app-shell min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="vg-shell min-h-screen bg-[var(--vg-bg)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin" />
-          <p className="text-sm font-medium text-slate-400">Loading account portal...</p>
+          <div className="w-10 h-10 border-4 border-[#087F5B]/20 dark:border-[#CFFF49]/20 border-t-[#087F5B] dark:border-t-[#CFFF49] rounded-full animate-spin" />
+          <p className="text-sm font-medium text-[var(--vg-ink-2)]">Loading account portal...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="vm-app-shell min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] font-sans selection:bg-[#087F5B]/20 dark:selection:bg-[#CFFF49]/25">
       <Head>
-        <title>Account & API Keys — VectorGallery</title>
+        <title>Account &amp; API Keys — VectorGallery</title>
       </Head>
 
-      {/* Header Navigation */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/app" className="flex items-center gap-3 group">
-            <img
-              src="/vectorgallery-icon.svg"
-              alt="VectorGallery"
-              className="w-9 h-9 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300"
-            />
-            <span className="text-xl font-extrabold bg-gradient-to-r from-white via-slate-200 to-emerald-400 bg-clip-text text-transparent tracking-tight">
-              VectorGallery
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-4">
-            <Link
-              href="/app"
-              className="text-sm font-medium text-slate-300 hover:text-white transition-colors flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-900"
-            >
-              <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Workspaces
-            </Link>
-            <AccountMenu />
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Main Container */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className={cn(VG_LAYOUT.containers.standard, 'py-10 sm:py-14')}>
         {/* Banner Alert */}
         {saveSuccess && (
-          <div className="mb-8 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-3 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
-            <svg className="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-8 p-4 rounded-2xl bg-[#C4EDE1]/60 dark:bg-[#131715] border border-[#087F5B]/30 dark:border-[#CFFF49]/35 text-[#066649] dark:text-[#CFFF49] text-sm flex items-center gap-3 shadow-sm">
+            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span className="font-medium">{saveSuccess}</span>
@@ -240,25 +215,28 @@ export default function AccountPage() {
         )}
 
         {/* User Profile Card */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-900/90 to-emerald-950/30 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl mb-10 relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="bg-[var(--vg-surface)] border border-[var(--vg-border-strong)] rounded-3xl p-6 sm:p-8 shadow-[var(--vg-shadow-card)] mb-10 relative overflow-hidden">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-xl shadow-emerald-500/20 shrink-0">
-                <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-2xl font-black text-emerald-400">
-                  {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                </div>
+              <div className="w-16 h-16 rounded-2xl bg-[#D4FF54] dark:bg-[#CFFF49] flex items-center justify-center text-2xl font-display font-bold text-[#101211] shadow-sm shrink-0">
+                {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">Account & Personal Keys</h1>
-                <p className="text-sm text-slate-400 mt-1">{user?.email}</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-[var(--vg-ink)] tracking-[-0.03em]">
+                  Account &amp; Personal Keys
+                </h1>
+                <p className="text-sm text-[var(--vg-ink-2)] mt-1">{user?.email}</p>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#C4EDE1]/70 dark:bg-[#202522] border border-[#087F5B]/20 dark:border-[#CFFF49]/30 text-[#066649] dark:text-[#CFFF49] text-xs font-semibold">
                     Encrypted Key Storage Active
                   </span>
                 </div>
               </div>
             </div>
+
+            <Link href="/app" className={VG_COMPONENTS.buttons.limePill}>
+              <span>Back to Workspaces</span>
+            </Link>
           </div>
         </div>
 
@@ -266,8 +244,12 @@ export default function AccountPage() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">AI Provider API Keys</h2>
-              <p className="text-sm text-slate-400">Configure your personal API keys for Gemini, Groq, OpenAI, and Cohere.</p>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-[var(--vg-ink)] tracking-[-0.025em]">
+                AI Provider API Keys
+              </h2>
+              <p className="text-sm text-[var(--vg-ink-2)]">
+                Configure your personal API keys for Gemini, Groq, OpenAI, and Cohere.
+              </p>
             </div>
           </div>
 
@@ -277,21 +259,21 @@ export default function AccountPage() {
               return (
                 <div
                   key={provider.id}
-                  className="bg-slate-900/70 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-6 transition-all shadow-lg flex flex-col justify-between"
+                  className="bg-[var(--vg-surface)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] rounded-2xl p-6 transition-all shadow-[var(--vg-shadow-card)] flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center font-bold text-emerald-400">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] flex items-center justify-center font-display font-bold text-[#087F5B] dark:text-[#CFFF49]">
                           {provider.name.charAt(0)}
                         </div>
                         <div>
-                          <h3 className="font-bold text-white text-base">{provider.name}</h3>
+                          <h3 className="font-display font-bold text-[var(--vg-ink)] text-base">{provider.name}</h3>
                           <a
                             href={provider.signupUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-emerald-400 hover:underline flex items-center gap-1"
+                            className="text-xs text-[#087F5B] dark:text-[#CFFF49] hover:underline flex items-center gap-1"
                           >
                             Get API Key
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,41 +284,41 @@ export default function AccountPage() {
                       </div>
 
                       {status.source === 'personal' ? (
-                        <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                        <span className="px-3 py-1 rounded-full bg-[#C4EDE1]/70 dark:bg-[#202522] border border-[#087F5B]/25 dark:border-[#CFFF49]/30 text-[#066649] dark:text-[#CFFF49] text-xs font-semibold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-current" />
                           Personal Key
                         </span>
                       ) : status.source === 'env' ? (
-                        <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs font-semibold flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-teal-400" />
+                        <span className="px-3 py-1 rounded-full bg-[#E7E9E5] dark:bg-[#202522] border border-[var(--vg-border)] text-[var(--vg-ink)] text-xs font-semibold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#39D9A0]" />
                           System Default
                         </span>
                       ) : (
-                        <span className="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-semibold flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-slate-500" />
+                        <span className="px-3 py-1 rounded-full bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[var(--vg-ink-2)] text-xs font-semibold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-[var(--vg-ink-muted)]" />
                           Not Configured
                         </span>
                       )}
                     </div>
 
-                    <p className="text-xs text-slate-400 mb-4">{provider.description}</p>
+                    <p className="text-xs text-[var(--vg-ink-2)] mb-4">{provider.description}</p>
 
                     {status.source === 'personal' && status.key_last4 && (
-                      <div className="mb-4 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs text-slate-300 font-mono flex items-center justify-between">
-                        <span className="text-slate-400">Key ending:</span>
-                        <span className="text-emerald-400 font-bold">•••• •••• •••• {status.key_last4}</span>
+                      <div className="mb-4 p-2.5 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-xs text-[var(--vg-ink)] font-mono flex items-center justify-between">
+                        <span className="text-[var(--vg-ink-2)]">Key ending:</span>
+                        <span className="text-[#087F5B] dark:text-[#CFFF49] font-bold">•••• •••• •••• {status.key_last4}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 pt-3 border-t border-slate-800/60">
+                  <div className="flex items-center gap-3 pt-3 border-t border-[var(--vg-border)]">
                     <button
                       onClick={() => {
                         setModalProvider({ id: provider.id, name: provider.name })
                         setApiKeyInput('')
                         setModalError(null)
                       }}
-                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      className="flex-1 py-2.5 px-3 rounded-xl bg-[var(--vg-surface-2)] hover:bg-[#D4FF54] dark:hover:bg-[#CFFF49] hover:text-[#101211] border border-[var(--vg-border)] text-[var(--vg-ink)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -348,11 +330,8 @@ export default function AccountPage() {
                       <button
                         onClick={() => handleRemoveKey(provider.id, provider.name)}
                         disabled={actionLoading === provider.id}
-                        className="py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        className="py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
                         Remove
                       </button>
                     )}
@@ -364,12 +343,12 @@ export default function AccountPage() {
         </div>
 
         {/* Security Box */}
-        <div className="mt-12 p-6 rounded-3xl bg-slate-900/50 border border-slate-800 text-xs text-slate-400 space-y-2">
-          <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-            <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-10 p-6 rounded-3xl bg-[var(--vg-surface)] border border-[var(--vg-border)] text-xs text-[var(--vg-ink-2)] space-y-2 shadow-sm">
+          <h4 className="font-display text-sm font-bold text-[var(--vg-ink)] flex items-center gap-2">
+            <svg className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            Security & Key Storage Guarantee
+            Security &amp; Key Storage Guarantee
           </h4>
           <p>
             Your API keys are encrypted at rest using AES-256-GCM symmetric encryption using a server-side encryption key. Raw keys are never sent to the browser after saving, and are decrypted strictly on the backend when executing authorized requests.
@@ -379,15 +358,15 @@ export default function AccountPage() {
 
       {/* Modal for adding/updating key */}
       {modalProvider && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-[#090B0A]/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[var(--vg-surface)] border border-[var(--vg-border-strong)] w-full max-w-md rounded-3xl p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-extrabold text-white">
+              <h3 className="font-display text-lg font-bold text-[var(--vg-ink)]">
                 Add {modalProvider.name} Key
               </h3>
               <button
                 onClick={() => setModalProvider(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] p-1 rounded-lg hover:bg-[var(--vg-surface-2)]"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -396,14 +375,14 @@ export default function AccountPage() {
             </div>
 
             {modalError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs">
                 {modalError}
               </div>
             )}
 
             <form onSubmit={handleSaveKey} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-[var(--vg-ink-2)] mb-1.5 uppercase tracking-wider">
                   API Key String
                 </label>
                 <div className="relative">
@@ -413,12 +392,12 @@ export default function AccountPage() {
                     value={apiKeyInput}
                     onChange={(e) => setApiKeyInput(e.target.value)}
                     placeholder="Paste your key here..."
-                    className="w-full px-4 py-2.5 pr-10 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+                    className="w-full px-4 py-2.5 pr-10 rounded-xl bg-[var(--vg-surface-2)] border border-[var(--vg-border)] text-[var(--vg-ink)] text-xs font-mono placeholder:text-[var(--vg-ink-muted)] focus:outline-none focus:ring-2 focus:ring-[#087F5B]/30 dark:focus:ring-[#CFFF49]/30 focus:border-[var(--vg-brand)]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowKey(!showKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--vg-ink-3)] hover:text-[var(--vg-ink)] text-xs"
                   >
                     {showKey ? 'Hide' : 'Show'}
                   </button>
@@ -429,14 +408,14 @@ export default function AccountPage() {
                 <button
                   type="button"
                   onClick={() => setModalProvider(null)}
-                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[var(--vg-surface-2)] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading === modalProvider.id || !apiKeyInput.trim()}
-                  className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50"
+                  className={cn(VG_COMPONENTS.buttons.limePill, 'h-10 px-5 text-xs disabled:opacity-50')}
                 >
                   {actionLoading === modalProvider.id ? 'Encrypting & Saving...' : 'Save Encrypted Key'}
                 </button>

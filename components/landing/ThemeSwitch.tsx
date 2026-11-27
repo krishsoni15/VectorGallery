@@ -94,7 +94,7 @@ export function ThemeSwitch({ mode = 'compact', className }: ThemeSwitchProps) {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={cn(
-        'relative inline-flex items-center justify-center w-9 h-9 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
+        'relative inline-flex items-center justify-center w-9 h-9 rounded-full border border-[#DDE2DC] dark:border-white/[0.12] bg-[#FFFFFF] dark:bg-[#131715] hover:bg-[#E7E9E5] dark:hover:bg-[#202522] text-[#101211] dark:text-[#F3F5F1] transition-colors duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--vg-brand)]',
         className
       )}
     >

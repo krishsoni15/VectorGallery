@@ -95,20 +95,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="p-5 sm:p-8 lg:p-10 max-w-7xl 2xl:max-w-[1800px] w-full mx-auto space-y-10 animate-fadeIn">
-      {/* ─── 1. Open Editorial Welcome Band (Zero Heavy Box) ─── */}
+      {/* ─── 1. Project Living Matter Welcome Band ─── */}
       <div className="relative pb-8 border-b border-white/[0.08] flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-400">
-            <Zap className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.18em] text-[#087F5B] dark:text-[#CFFF49]">
+            <span className="w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#CFFF49]" />
             <span>VectorGallery Vault</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-[-0.03em] text-white">
+          <h2 className="font-display text-3xl sm:text-4xl xl:text-[2.65rem] font-bold tracking-[-0.036em] leading-[1.06] text-white">
             {getGreeting()},{' '}
-            <span className="font-serif italic font-normal text-emerald-300">
+            <span className="text-[#087F5B] dark:text-[#CFFF49]">
               {userName}
             </span>
           </h2>
-          <p className="text-sm text-zinc-400 leading-relaxed">
+          <p className="text-sm sm:text-[15px] text-zinc-400 leading-relaxed">
             Your personal archive is synchronized. Ask questions across your documents, optical OCR captures, or browse your camera timeline.
           </p>
         </div>
@@ -116,9 +116,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="flex flex-wrap items-center gap-3 shrink-0">
           <button
             onClick={onOpenSearch}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-sm font-medium text-white transition-all group"
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.12] text-sm font-medium text-white transition-all group"
           >
-            <Search className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <Search className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49] group-hover:scale-110 transition-transform" />
             <span>Ask vault anything...</span>
             <kbd className="text-[11px] bg-black/40 px-2 py-0.5 rounded-full font-mono text-zinc-400 ml-1">
               ⌘K
@@ -127,7 +127,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           <button
             onClick={onOpenUpload}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white transition-all shadow-sm"
+            className="vg-cta-lime flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#CFFF49] hover:bg-[#DCFF73] text-sm font-semibold text-[#090B0A] transition-all shadow-sm"
           >
             <UploadCloud className="w-4 h-4" />
             <span>Upload Files</span>
@@ -268,7 +268,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3.5">
             {stats.recent_files.map((file: any) => {
               const displayName = file.original_name || file.name || 'Vault memory'
               const thumbKey = String(file.thumbnail_url || file.id)
@@ -278,39 +278,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div
                   key={file.id}
                   onClick={() => onSelectFile(file)}
-                  className="group relative aspect-[4/5] rounded-xl overflow-hidden bg-zinc-900/70 border border-white/[0.08] cursor-pointer"
+                  className="group rounded-2xl overflow-hidden bg-[#131715] border border-white/[0.08] hover:border-[#CFFF49]/40 transition-colors cursor-pointer flex flex-col"
                 >
                   {canRenderImg ? (
                     <>
-                      <img
-                        src={file.thumbnail_url}
-                        alt={displayName}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                        loading="lazy"
-                        onError={() =>
-                          setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
-                        }
-                      />
-                      {/* Clean Photo Scrim Overlay */}
-                      <div className="photo-overlay absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/85 via-black/40 to-transparent">
-                        <p className="text-[11px] font-medium text-[#FFFFFF] truncate">
+                      <div className="relative aspect-square w-full overflow-hidden bg-[#090B0A]">
+                        <img
+                          src={file.thumbnail_url}
+                          alt={displayName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                          loading="lazy"
+                          onError={() =>
+                            setBrokenThumbs((prev) => ({ ...prev, [thumbKey]: true }))
+                          }
+                        />
+                      </div>
+                      <div className="px-2.5 py-2 border-t border-white/[0.06]">
+                        <p className="text-[11px] font-medium text-zinc-100 truncate">
                           {displayName}
                         </p>
-                        <p className="text-[9px] text-[#D4D4D8]/80 font-mono">
+                        <p className="text-[9.5px] text-zinc-400 font-mono mt-0.5">
                           {new Date(file.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </>
                   ) : (
-                    <div className="vm-doc-fallback w-full h-full flex flex-col justify-between p-3 bg-gradient-to-br from-[#14211B] to-[#0B1410]">
+                    <div className="vm-doc-fallback w-full h-full min-h-[180px] flex flex-col justify-between p-3 bg-gradient-to-br from-[#131715] to-[#090B0A]">
                       <div className="flex-1 flex items-center justify-center">
-                        <FileText className="w-8 h-8 text-emerald-400/85 group-hover:text-emerald-400 transition-colors" />
+                        <FileText className="w-8 h-8 text-[#087F5B] dark:text-[#CFFF49]/85 group-hover:scale-110 transition-transform" />
                       </div>
                       <div className="pt-2 border-t border-white/[0.06]">
                         <p className="text-[11px] font-medium text-zinc-100 truncate">
                           {displayName}
                         </p>
-                        <p className="text-[9px] text-zinc-400 font-mono">
+                        <p className="text-[9.5px] text-zinc-400 font-mono mt-0.5">
                           {new Date(file.created_at).toLocaleDateString()}
                         </p>
                       </div>

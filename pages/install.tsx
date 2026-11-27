@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { LiveQrCode } from '@/components/LiveQrCode'
-import { VG_COMPONENTS } from '@/components/landing/design-system'
+import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
+import { LivingAuraCanvas } from '@/components/landing/shaders/LivingAuraCanvas'
 import { APK_EXPECTED_SHA256, RELEASES_URL } from '@/components/landing/tokens'
 import { cn } from '@/lib/utils'
 
@@ -99,44 +100,49 @@ export default function InstallPage() {
         />
       </Head>
 
-      <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] flex flex-col overflow-x-clip selection:bg-[#087F5B]/20 dark:selection:bg-[#58D6A8]/25">
+      <div className="vg-shell min-h-screen bg-[var(--vg-bg)] text-[var(--vg-ink)] flex flex-col overflow-x-clip selection:bg-[#087F5B]/20 dark:selection:bg-[#CFFF49]/25">
         <SiteHeader />
 
-        <main className="relative flex-1 px-5 sm:px-8 py-12 sm:py-20 overflow-hidden">
+        <main className="relative flex-1 py-12 sm:py-16 lg:py-24 overflow-hidden flex items-center">
+          <LivingAuraCanvas
+            variant="auto"
+            intensity={0.78}
+            className="absolute inset-0 z-0 pointer-events-none"
+          />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -top-24 inset-x-0 h-[520px] bg-[radial-gradient(ellipse_75%_55%_at_62%_22%,rgba(166,217,208,0.22),transparent_72%)] dark:bg-[radial-gradient(ellipse_75%_55%_at_62%_22%,rgba(88,214,168,0.12),transparent_72%)]"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[44%] z-[1] bg-gradient-to-b from-[#FFFFFF] via-[#FFFFFF]/80 to-transparent dark:from-[#090B0A] dark:via-[#090B0A]/80 dark:to-transparent"
           />
 
-          <div className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-12 gap-14 items-center">
+          <div className={cn(VG_LAYOUT.containers.wide, 'relative z-10 grid lg:grid-cols-12 gap-12 xl:gap-16 items-center')}>
             <motion.div
               initial={{ opacity: 0.92, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="lg:col-span-6 space-y-6"
             >
-              <div className="inline-flex items-center gap-2 text-[13px] font-medium text-[#087F5B] dark:text-[#58D6A8]">
-                <Smartphone className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFFFF] dark:bg-[#131715] border border-[var(--vg-border)] text-[12px] font-mono uppercase tracking-[0.12em] text-[#087F5B] dark:text-[#CFFF49]">
+                <Smartphone className="w-3.5 h-3.5" />
                 <span>Android Companion · v2.0.0</span>
               </div>
 
               <h1
-                className="font-display text-4xl sm:text-6xl font-bold tracking-[-0.036em] leading-[1.02] text-[var(--vg-ink)]"
-                style={{ textWrap: 'balance' }}
+                className="font-display font-bold tracking-[-0.04em] leading-[1.0] text-[var(--vg-ink)]"
+                style={{ fontSize: 'clamp(2.45rem, 5vw, 4.75rem)', textWrap: 'balance' }}
               >
                 VectorGallery in your{'\u00A0'}pocket.
               </h1>
 
-              <p className="text-[16px] text-[var(--vg-ink-2)] leading-relaxed max-w-lg">
+              <p className="text-[16px] sm:text-[17.5px] text-[var(--vg-ink-2)] leading-relaxed max-w-xl">
                 Automatic Wi-Fi backup that skips duplicates, keeps originals safe on your phone, and brings every memory straight to your desktop library.
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="flex flex-wrap items-center gap-3.5 pt-1">
                 {hasLocalApk ? (
                   <button
                     type="button"
                     onClick={triggerDownload}
-                    className={cn(VG_COMPONENTS.buttons.primary, 'px-7')}
+                    className={cn(VG_COMPONENTS.buttons.limePill, 'px-7')}
                   >
                     <Download className="w-4 h-4" />
                     <span>
@@ -150,7 +156,7 @@ export default function InstallPage() {
                     href={RELEASES_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className={cn(VG_COMPONENTS.buttons.primary, 'px-7')}
+                    className={cn(VG_COMPONENTS.buttons.limePill, 'px-7')}
                   >
                     <Download className="w-4 h-4" />
                     <span>Download from GitHub Releases</span>

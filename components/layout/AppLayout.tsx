@@ -215,17 +215,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       )}
 
       {/* ─── Desktop Left Navigation Sidebar ─── */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-white/[0.07] bg-[#0E1015]/80 backdrop-blur-xl select-none">
+      <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-white/[0.08] bg-[#131715]/95 backdrop-blur-xl select-none">
         {/* Brand & Logo Header */}
-        <div className="flex items-center justify-between px-5 h-16 border-b border-white/[0.07]">
+        <div className="flex items-center justify-between px-5 h-16 border-b border-white/[0.08]">
           <Link href="/app" className="flex items-center gap-2.5 group">
             <img
               src="/vectorgallery-icon.svg"
               alt="VectorGallery"
-              className="w-8 h-8 rounded-xl shadow-[0_0_16px_rgba(16,185,129,0.3)] group-hover:scale-105 transition-transform"
+              className="w-8 h-8 rounded-xl shadow-[0_0_16px_rgba(207,255,73,0.18)] group-hover:scale-105 transition-transform"
             />
             <div>
-              <span className="font-semibold text-sm tracking-tight text-white block leading-none">
+              <span className="font-display font-bold text-sm tracking-tight text-white block leading-none">
                 VectorGallery
               </span>
               <span className="text-[10px] text-zinc-400 font-mono tracking-wider block mt-0.5">
@@ -236,7 +236,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <button
             onClick={onOpenUpload}
             title="Upload File (Cmd+U)"
-            className="w-7 h-7 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 flex items-center justify-center transition-colors border border-emerald-500/20"
+            className="w-7 h-7 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-[#087F5B] dark:text-[#CFFF49] flex items-center justify-center transition-colors border border-white/[0.10]"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -260,14 +260,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   onClick={() => handleNavClick(item)}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
                     isActive
-                      ? 'bg-emerald-500/15 text-emerald-400 font-semibold shadow-sm'
+                      ? 'bg-emerald-500/15 text-[#087F5B] dark:text-[#CFFF49] font-semibold shadow-sm'
                       : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon
                       className={`w-4 h-4 transition-colors ${
-                        isActive ? 'text-emerald-400' : 'text-zinc-400 group-hover:text-zinc-200'
+                        isActive ? 'text-[#087F5B] dark:text-[#CFFF49]' : 'text-zinc-400 group-hover:text-zinc-200'
                       }`}
                     />
                     <span>{item.label}</span>
@@ -350,8 +350,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
       {/* ─── Main Content Shell ─── */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Top Header (Google Photos Style) */}
-        <header className="h-16 border-b border-white/[0.07] px-4 sm:px-6 flex items-center justify-between bg-[#0B0D12]/60 backdrop-blur-md shrink-0 gap-3">
+        {/* Top Header */}
+        <header className="h-16 border-b border-white/[0.08] px-4 sm:px-6 flex items-center justify-between bg-[#090B0A]/85 backdrop-blur-xl shrink-0 gap-3">
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -359,19 +359,19 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-sm font-semibold text-zinc-100 capitalize hidden sm:flex items-center gap-2">
+            <h1 className="font-display text-sm font-bold text-zinc-100 capitalize hidden sm:flex items-center gap-2">
               {activeTab === 'home' ? 'Digital Memory Dashboard' : activeTab.replace('-', ' ')}
             </h1>
           </div>
 
-          {/* Centered Google Photos Style Search Pill */}
+          {/* Centered Search Pill */}
           <div className="flex-1 max-w-2xl mx-2 sm:mx-6">
             <button
               onClick={onOpenSearch}
-              className="w-full flex items-center justify-between px-4 py-2 sm:py-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-xs text-zinc-300 transition-all shadow-inner group"
+              className="w-full flex items-center justify-between px-4 py-2 sm:py-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09] text-xs text-zinc-300 transition-all group"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <Search className="w-4 h-4 text-zinc-400 group-hover:text-emerald-400 transition-colors shrink-0" />
+                <Search className="w-4 h-4 text-zinc-400 group-hover:text-[#087F5B] dark:group-hover:text-[#CFFF49] transition-colors shrink-0" />
                 <span className="truncate text-zinc-400 group-hover:text-zinc-200">
                   Search photos, screenshots, receipts, and optical OCR...
                 </span>
@@ -382,11 +382,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             </button>
           </div>
 
-          {/* Right Action Tools: Upload, Settings, Profile */}
+          {/* Right Action Tools: Upload, Theme, Settings, Profile */}
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onOpenUpload}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all shadow-[0_0_14px_rgba(16,185,129,0.25)] hover:scale-[1.02]"
+              className="vg-cta-lime flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#CFFF49] hover:bg-[#DCFF73] text-[#090B0A] text-xs font-semibold transition-all shadow-sm hover:scale-[1.02]"
             >
               <UploadCloud className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Upload</span>
@@ -396,7 +396,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               onClick={toggleTheme}
               title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
               aria-label="Toggle color theme"
-              className="p-2 rounded-full hover:bg-white/[0.06] text-zinc-400 hover:text-emerald-400 transition-colors"
+              className="p-2 rounded-full hover:bg-white/[0.06] text-zinc-400 hover:text-[#087F5B] dark:hover:text-[#CFFF49] transition-colors"
             >
               {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
@@ -409,14 +409,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <Settings className="w-4 h-4" />
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-emerald-600/30 border border-emerald-500/40 text-xs font-bold text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-emerald-600/30 border border-emerald-500/40 text-xs font-bold text-[#087F5B] dark:text-[#CFFF49] flex items-center justify-center shrink-0">
               {userDisplayName.charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
 
         {/* Scrollable View Content */}
-        <main className="flex-1 overflow-y-auto bg-[#090A0D] custom-scrollbar">
+        <main className="flex-1 overflow-y-auto bg-[#090B0A] custom-scrollbar">
           {children}
         </main>
 
