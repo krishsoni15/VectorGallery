@@ -4,8 +4,10 @@ const isDev = process.env.NODE_ENV !== 'production'
 const nextConfig = {
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   reactStrictMode: false,
+  poweredByHeader: false,
+  compress: true,
   async headers() {
-    // Skip CSP headers in development — they block Next.js HMR/Fast Refresh
+    // Skip CSP headers in development so Next.js HMR / Fast Refresh keeps working
     if (isDev) return []
 
     return [
@@ -21,8 +23,25 @@ const nextConfig = {
             value: 'SAMEORIGIN',
           },
           {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
+          },
+          {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src 'self' https://*.supabase.co; connect-src 'self' ws: wss: ws://localhost:* ws://127.0.0.1:* http://localhost:* https://*.supabase.co https://*.supabase.net https://generativelanguage.googleapis.com https://api.cohere.com https://api.openai.com https://api.groq.com https://*.upstash.io;",
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self' https://*.supabase.co; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; connect-src 'self' ws: wss: ws://localhost:* ws://127.0.0.1:* http://localhost:* https://*.supabase.co https://*.supabase.net https://generativelanguage.googleapis.com https://api.cohere.com https://api.openai.com https://api.groq.com https://*.upstash.io;",
           },
         ],
       },

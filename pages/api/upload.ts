@@ -12,7 +12,7 @@ import { invalidateWorkspaceCache } from '../../lib/semanticCache'
 import { recursiveCharacterChunker } from '../../lib/chunker'
 import { withValidation, UploadRequestSchema } from '../../lib/validateRequest'
 import { withRateLimit } from '../../lib/rateLimiter'
-import { extractTextFromImage } from '../../lib/ocr'
+import { extractTextFromImage } from '../../lib/intelligence/ocr'
 import { getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '../../lib/supabase'
 import { getProviderCredential } from '../../lib/credentialResolver'
 import { z } from 'zod'
@@ -96,6 +96,9 @@ async function uploadHandler(
       return res.end()
     }
 
+    // Resolve authenticated user once for per-user OCR and embedding credentials
+    const user = await getServerUser(req)
+
     // Get project config
     let embeddingProvider = (bodyEmbeddingProvider || 'cohere') as EmbeddingProviderId
     try {
@@ -146,7 +149,8 @@ async function uploadHandler(
           '.gif': 'image/gif',
         }
         const mimeType = mimeMap[ext] || 'image/png'
-        rawText = await extractTextFromImage(buffer, mimeType)
+        const geminiUserKey = await getProviderCredential({ userId: user?.id, provider: 'gemini' })
+        rawText = await extractTextFromImage(buffer, mimeType, geminiUserKey)
       } catch (e: any) {
         sendStreamEvent({ status: 'error', error: `AI OCR Extraction failed: ${e.message}`, step: 'ocr_parse' })
         return res.end()
@@ -318,8 +322,7 @@ async function uploadHandler(
 
     sendStreamEvent({ status: 'started', chunksTotal: chunks.length })
 
-    // Extract user & resolve embedding credential
-    const user = await getServerUser(req)
+    // Resolve embedding credential using authenticated user
     const personalEmbedKey = await getProviderCredential({ userId: user?.id, provider: embeddingProvider })
 
     // Embed all chunks using high-performance batching

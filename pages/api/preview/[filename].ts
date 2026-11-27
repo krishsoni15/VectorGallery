@@ -1,62 +1,103 @@
+import fs from 'fs'
+import path from 'path'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createClient } from '@supabase/supabase-js'
+import { getLocalFiles } from '@/lib/localMetadataStore'
+import { getAdminSupabase, getServerUser, isServiceRoleConfigured } from '@/lib/supabase'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const SAFE_CONTENT_TYPES: Record<string, string> = {
+  pdf: 'application/pdf',
+  txt: 'text/plain; charset=utf-8',
+  md: 'text/markdown; charset=utf-8',
+  json: 'application/json; charset=utf-8',
+  csv: 'text/csv; charset=utf-8',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  // Serve potentially executable markup safely as inert text
+  html: 'text/plain; charset=utf-8',
+  htm: 'text/plain; charset=utf-8',
+  svg: 'text/plain; charset=utf-8',
+  xml: 'text/plain; charset=utf-8',
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { filename } = req.query
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.setHeader('Allow', ['GET', 'HEAD'])
+    return res.status(405).json({ error: `Method ${req.method} not allowed` })
+  }
 
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN')
-  
-  if (!filename || typeof filename !== 'string') {
+  const user = await getServerUser(req)
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized: Authentication required' })
+  }
+
+  const rawFilename = req.query.filename
+  if (!rawFilename || typeof rawFilename !== 'string') {
     return res.status(400).json({ error: 'Missing filename' })
   }
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    return res.status(500).json({ error: 'Server configuration error' })
+  // Normalize strictly to a single basename to prevent directory traversal
+  const safeName = path.basename(rawFilename).replace(/[\r\n"\\]/g, '')
+  if (!safeName || safeName !== rawFilename || safeName === '.' || safeName === '..') {
+    return res.status(400).json({ error: 'Invalid filename' })
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN')
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.setHeader('Cache-Control', 'private, max-age=300')
 
-  // Attempt to download the file directly
-  let { data, error } = await supabase.storage
-    .from('documents')
-    .download(filename)
+  const ext = safeName.toLowerCase().split('.').pop() || ''
+  const resolvedType = SAFE_CONTENT_TYPES[ext] || 'application/octet-stream'
 
-  // Fallback: If not found, maybe it's in a folder with the active project ID?
-  // We don't have the projectId here, so we just return a 404 with proper headers
+  // Local vault fallback when Supabase service role is not configured
+  if (!isServiceRoleConfigured()) {
+    const ownedFiles = getLocalFiles(user.id)
+    const owned = ownedFiles.find(
+      (f) =>
+        !f.is_trashed &&
+        (f.storage_key === safeName ||
+          path.basename(f.storage_key || '') === safeName ||
+          f.thumbnail_url === `/uploads/${user.id}/${safeName}`)
+    )
+
+    if (!owned) {
+      return res.status(404).json({ error: 'File not found' })
+    }
+
+    const uploadsRoot = path.resolve(process.cwd(), 'public', 'uploads', user.id)
+    const localPath = path.resolve(uploadsRoot, path.basename(owned.storage_key || safeName))
+    if (!localPath.startsWith(uploadsRoot + path.sep) || !fs.existsSync(localPath)) {
+      return res.status(404).json({ error: 'File not found' })
+    }
+
+    const buffer = fs.readFileSync(localPath)
+    res.setHeader('Content-Type', resolvedType)
+    res.setHeader('Content-Disposition', `inline; filename="${safeName}"`)
+    return res.status(200).send(buffer)
+  }
+
+  const supabase = getAdminSupabase()
+  const { data: ownedRecord } = await supabase
+    .from('files')
+    .select('id, storage_key')
+    .eq('user_id', user.id)
+    .eq('storage_key', safeName)
+    .eq('is_trashed', false)
+    .maybeSingle()
+
+  if (!ownedRecord) {
+    return res.status(404).json({ error: 'File not found' })
+  }
+
+  const { data, error } = await supabase.storage.from('documents').download(safeName)
   if (error || !data) {
-    res.setHeader('Content-Type', 'text/html')
-    return res.status(404).send(`
-      <div style="font-family: sans-serif; padding: 2rem; text-align: center; color: #888;">
-        <h2>File not found</h2>
-        <p>The document could not be located in storage.</p>
-        <p style="font-size: 0.8em; color: #aaa;">Error: ${error?.message || 'Unknown'}</p>
-      </div>
-    `)
+    return res.status(404).json({ error: 'File not found' })
   }
 
-  // Convert Blob to Buffer and stream it back
-  const arrayBuffer = await data.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
-
-  // Set appropriate content type
-  const ext = filename.toLowerCase().split('.').pop()
-  const contentTypes: Record<string, string> = {
-    pdf: 'application/pdf',
-    txt: 'text/plain',
-    md: 'text/markdown',
-    json: 'application/json',
-    csv: 'text/csv',
-    html: 'text/html',
-    xml: 'application/xml',
-  }
-
-  res.setHeader('Content-Type', contentTypes[ext || ''] || 'application/octet-stream')
-  res.setHeader('Content-Disposition', `inline; filename="${filename}"`)
-  res.setHeader('Cache-Control', 'public, max-age=3600')
+  const buffer = Buffer.from(await data.arrayBuffer())
+  res.setHeader('Content-Type', resolvedType)
+  res.setHeader('Content-Disposition', `inline; filename="${safeName}"`)
   return res.status(200).send(buffer)
 }

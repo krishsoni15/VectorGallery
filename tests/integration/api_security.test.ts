@@ -6,6 +6,10 @@ import restoreHandler from '../../pages/api/v2/files/restore'
 import searchHandler from '../../pages/api/v2/search/index'
 import chatHandler from '../../pages/api/v2/chat/index'
 import healthHandler from '../../pages/api/health'
+import previewHandler from '../../pages/api/preview/[filename]'
+import proxyHandler from '../../pages/api/proxy'
+import signupHandler from '../../pages/api/auth/signup'
+import profileHandler from '../../pages/api/v2/auth/profile'
 import { deleteLocalFile } from '../../lib/localMetadataStore'
 import { createMockReqRes } from '../helpers/mockNextApi'
 
@@ -137,5 +141,81 @@ describe('API Security, Upload Guardrails & Offline Grounding', () => {
     expect(getStatus()).toBe(200)
     expect(getData()?.status).toBe('ok')
     expect(getData()?.storage?.ready).toBe(true)
+  })
+
+  it('requires authentication on /api/preview and blocks path traversal', async () => {
+    const unauth = createMockReqRes({
+      method: 'GET',
+      query: { filename: 'sample.jpg' },
+    })
+    await previewHandler(unauth.req, unauth.res)
+    expect(unauth.getStatus()).toBe(401)
+
+    const forged = createMockReqRes({
+      method: 'GET',
+      headers: { authorization: 'Bearer vg_local_forged.invalid_sig' },
+      query: { filename: 'sample.jpg' },
+    })
+    await previewHandler(forged.req, forged.res)
+    expect(forged.getStatus()).toBe(401)
+
+    const signup = createMockReqRes({
+      method: 'POST',
+      body: { email: `sec-${Date.now()}@example.com`, password: 'StrongPassword123!', name: 'Sec Test' },
+    })
+    await signupHandler(signup.req, signup.res)
+    expect(signup.getStatus()).toBe(201)
+    const token = signup.getData()?.session?.access_token as string
+
+    try {
+      const traversal = createMockReqRes({
+        method: 'GET',
+        headers: { authorization: `Bearer ${token}` },
+        query: { filename: '../etc/passwd' },
+      })
+      await previewHandler(traversal.req, traversal.res)
+      expect(traversal.getStatus()).toBe(400)
+    } finally {
+      const cleanup = createMockReqRes({
+        method: 'DELETE',
+        headers: { authorization: `Bearer ${token}` },
+      })
+      await profileHandler(cleanup.req, cleanup.res).catch(() => {})
+    }
+  })
+
+  it('requires authentication on /api/proxy and blocks loopback SSRF targets', async () => {
+    const unauth = createMockReqRes({
+      method: 'GET',
+      query: { url: 'https://example.com/photo.jpg' },
+    })
+    await proxyHandler(unauth.req, unauth.res)
+    expect(unauth.getStatus()).toBe(401)
+
+    const signup = createMockReqRes({
+      method: 'POST',
+      body: { email: `ssrf-${Date.now()}@example.com`, password: 'StrongPassword123!', name: 'SSRF Test' },
+    })
+    await signupHandler(signup.req, signup.res)
+    expect(signup.getStatus()).toBe(201)
+    const token = signup.getData()?.session?.access_token as string
+
+    try {
+      for (const blockedUrl of ['http://127.0.0.1:3000/', 'http://localhost:3000/api/health']) {
+        const ssrf = createMockReqRes({
+          method: 'GET',
+          headers: { authorization: `Bearer ${token}` },
+          query: { url: blockedUrl },
+        })
+        await proxyHandler(ssrf.req, ssrf.res)
+        expect(ssrf.getStatus()).toBe(403)
+      }
+    } finally {
+      const cleanup = createMockReqRes({
+        method: 'DELETE',
+        headers: { authorization: `Bearer ${token}` },
+      })
+      await profileHandler(cleanup.req, cleanup.res).catch(() => {})
+    }
   })
 })

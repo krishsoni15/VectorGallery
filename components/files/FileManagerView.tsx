@@ -41,6 +41,48 @@ interface FileManagerViewProps {
   onBulkAction?: (action: 'trash' | 'restore' | 'favorite' | 'unfavorite' | 'delete', selectedIds: string[]) => void
 }
 
+const isWishPhotoFile = (f: any) => {
+  const text = `${f.original_name} ${f.extracted_text || ''} ${f.metadata?.summary || ''}`.toLowerCase()
+  return /new\s*year|diwali|nutan|varshabhinandan|શુભકામના|દિવાળી|સાલ\s*મુબારક|sal\s*mubarak|greeting|wish/.test(text)
+}
+
+/** Extracts chronological grouping key and human-readable label for a file. */
+const extractFileDateKey = (file: any): { key: string; label: string; location?: string } => {
+  let date = new Date(file.created_at)
+  const nameMatch = file.original_name?.match(/IMG-(\d{4})(\d{2})(\d{2})/) || file.original_name?.match(/Screenshot_(\d{4})-(\d{2})-(\d{2})/)
+  if (nameMatch) {
+    const [, y, m, d] = nameMatch
+    date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10))
+  }
+
+  const today = new Date()
+  const isToday = date.toDateString() === today.toDateString()
+
+  const yesterday = new Date()
+  yesterday.setDate(today.getDate() - 1)
+  const isYesterday = date.toDateString() === yesterday.toDateString()
+
+  const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+
+  let label = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })
+  if (isToday) label = `Today, ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
+  else if (isYesterday) label = `Yesterday, ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
+
+  let location: string | undefined = undefined
+  const lower = `${file.original_name} ${file.extracted_text || ''} ${file.metadata?.summary || ''}`.toLowerCase()
+  if (file.category === 'screenshots' || lower.includes('screenshot')) {
+    location = 'Mobile Screen Capture'
+  } else if (file.category === 'documents' || /\.(pdf|docx?|txt|csv)$/i.test(file.original_name || '')) {
+    location = 'Document Archive'
+  } else if (file.category === 'videos' || file.mime_type?.startsWith('video/')) {
+    location = 'Video Memory'
+  } else if (isWishPhotoFile(file)) {
+    location = 'Celebrations & Cards'
+  }
+
+  return { key, label, location }
+}
+
 export const FileManagerView: React.FC<FileManagerViewProps> = ({
   files,
   loading,
@@ -72,16 +114,11 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
 
   const isPhotosMode = activeCategory === 'photos'
 
-  const isWishPhoto = (f: any) => {
-    const text = `${f.original_name} ${f.extracted_text || ''} ${f.metadata?.summary || ''}`.toLowerCase()
-    return /new\s*year|diwali|nutan|varshabhinandan|શુભકામના|દિવાળી|સાલ\s*મુબારક|sal\s*mubarak|greeting|wish/.test(text)
-  }
-
   // Filter and Sort
   const filteredFiles = files.filter((f) => {
     if (isPhotosMode) {
       if (photoAlbum === 'camera' && f.category !== 'photos') return false
-      if (photoAlbum === 'wishes' && !isWishPhoto(f)) return false
+      if (photoAlbum === 'wishes' && !isWishPhotoFile(f)) return false
       if (photoAlbum === 'screenshots' && !(f.category === 'screenshots' || (f.original_name || '').toLowerCase().includes('screenshot'))) return false
       if (photoAlbum === 'favorites' && !f.is_favorite) return false
     }
@@ -104,51 +141,13 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
       : new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 
-  // Google Photos Date & Thematic Extractor
-  const getFileDateKey = (file: any): { key: string; label: string; location?: string } => {
-    let date = new Date(file.created_at)
-    const nameMatch = file.original_name?.match(/IMG-(\d{4})(\d{2})(\d{2})/) || file.original_name?.match(/Screenshot_(\d{4})-(\d{2})-(\d{2})/)
-    if (nameMatch) {
-      const [_, y, m, d] = nameMatch
-      date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d))
-    }
-
-    const today = new Date()
-    const isToday = date.toDateString() === today.toDateString()
-
-    const yesterday = new Date()
-    yesterday.setDate(today.getDate() - 1)
-    const isYesterday = date.toDateString() === yesterday.toDateString()
-
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-
-    let label = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })
-    if (isToday) label = `Today, ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
-    else if (isYesterday) label = `Yesterday, ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
-
-    // Derive general media context label without hardcoding personal locations
-    let location: string | undefined = undefined
-    const lower = `${file.original_name} ${file.extracted_text || ''} ${file.metadata?.summary || ''}`.toLowerCase()
-    if (file.category === 'screenshots' || lower.includes('screenshot')) {
-      location = 'Mobile Screen Capture'
-    } else if (file.category === 'documents' || /\.(pdf|docx?|txt|csv)$/i.test(file.original_name || '')) {
-      location = 'Document Archive'
-    } else if (file.category === 'videos' || file.mime_type?.startsWith('video/')) {
-      location = 'Video Memory'
-    } else if (isWishPhoto(file)) {
-      location = 'Celebrations & Cards'
-    }
-
-    return { key, label, location }
-  }
-
   // Group sorted files by timeline date (Google Photos Timeline)
   const groupedTimeline = useMemo(() => {
     const groups: { dateKey: string; label: string; location?: string; items: any[] }[] = []
     const map = new Map<string, { dateKey: string; label: string; location?: string; items: any[] }>()
 
     sortedFiles.forEach((file) => {
-      const { key, label, location } = getFileDateKey(file)
+      const { key, label, location } = extractFileDateKey(file)
       if (!map.has(key)) {
         const group = { dateKey: key, label, location, items: [] as any[] }
         map.set(key, group)
@@ -384,7 +383,7 @@ export const FileManagerView: React.FC<FileManagerViewProps> = ({
               {
                 id: 'wishes' as const,
                 label: 'Celebrations',
-                count: files.filter(isWishPhoto).length,
+                count: files.filter(isWishPhotoFile).length,
               },
               {
                 id: 'favorites' as const,

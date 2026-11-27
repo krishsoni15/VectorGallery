@@ -44,7 +44,7 @@ export default function InstallPage() {
   const { user } = useAuth()
   const [downloadStarted, setDownloadStarted] = useState(false)
   const [hasLocalApk, setHasLocalApk] = useState<boolean>(true)
-  const [apkSizeMb, setApkSizeMb] = useState<string>('107.8 MB')
+  const [apkSizeMb, setApkSizeMb] = useState<string>('22.4 MB')
   const [activeStep, setActiveStep] = useState<string>('01')
   const [copiedSha, setCopiedSha] = useState(false)
 
