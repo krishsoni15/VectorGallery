@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { ArrowRight, Smartphone } from 'lucide-react'
-import { VG_LAYOUT, VG_MOTION, VG_TYPOGRAPHY } from '@/components/landing/design-system'
+import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
+import { createHeroTimeline } from '@/components/landing/motion/HeroTimeline'
 import {
   InteractiveTriadIndex,
   MagneticCircleButton,
-  useClientReducedMotion,
   type TriadItem,
 } from '@/components/landing/motion/LivingMotionPrimitives'
+import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { MemorySphereCanvas } from '@/components/landing/sculpture/MemorySphereCanvas'
 import { LivingAuraCanvas } from '@/components/landing/shaders/LivingAuraCanvas'
 
@@ -17,162 +17,131 @@ const HERO_TRIAD: TriadItem[] = [
     numeral: '01',
     label: 'Capture',
     href: '#scroll-story',
-    hint: 'Auto-backup photos, screenshots & PDFs',
+    hint: 'Automatic mobile camera & screenshot backup',
   },
   {
     numeral: '02',
     label: 'Connect',
     href: '#search',
-    hint: 'AI vision & OCR index every visual detail',
+    hint: 'Optical text and visual details linked naturally',
   },
   {
     numeral: '03',
     label: 'Remember',
     href: '#showcase',
-    hint: 'Ask in plain words, find instantly',
+    hint: 'Ask in plain words without remembering folders',
   },
 ]
 
-const STACKED_THUMBNAILS = [
-  { src: '/landing/photos/aura-coastal-path.webp', alt: 'Coastal cliff memory capture' },
-  { src: '/landing/photos/aura-journal-desk.webp', alt: 'Handwritten journal capture' },
-  { src: '/landing/photos/aura-ticket-coastal.webp', alt: 'Travel boarding pass OCR capture' },
+const PROVENANCE_CAPTURES = [
+  { src: '/landing/photos/aura-celebration-toast.webp', alt: 'Evening terrace celebration toast' },
+  { src: '/landing/photos/aura-journal-desk.webp', alt: 'Handwritten journal notebook spread' },
+  { src: '/landing/photos/aura-ticket-coastal.webp', alt: 'Coastal rail pass scan' },
 ]
 
 /**
- * Project Living Matter Hero Composition.
- * Structural two-band architecture eliminating seam collisions at all viewports:
- * - Zone 1 (z-10): Rounded studio upper shelf housing the monumental VECTORGALLERY. typographic wall + subtle ambient depth relief
- * - Zone 2 (z-20/z-30): Living Silver/Carbon lower stage where the enlarged Memory Sphere rises cleanly in front of the
- *   shelf horizon and wordmark with pointer counter-parallax, flanked by edge-aligned UI quadrants safely below the shelf curve.
+ * Project Liquid Intelligence — Unified Studio Hero.
+ * Full-bleed metallic Liquid Titanium / Obsidian Volt studio space with oversized shadow-free VECTORGALLERY wordmark,
+ * real-time articulated Three.js Memory Sphere centerpiece, concise emotional editorial copy,
+ * GSAP choreographed launch sequence, and responsive mobile framing.
  */
 export function HeroLivingMatter() {
-  const reduced = useClientReducedMotion()
+  const reduced = useReducedMotion()
   const [activeTriad, setActiveTriad] = useState(0)
+  const [entranceProgress, setEntranceProgress] = useState(0)
 
-  const wordShiftXRaw = useMotionValue(0)
-  const wordShiftYRaw = useMotionValue(0)
-  const sphereShiftXRaw = useMotionValue(0)
-  const sphereShiftYRaw = useMotionValue(0)
-
-  const wordShiftX = useSpring(wordShiftXRaw, { stiffness: 90, damping: 22 })
-  const wordShiftY = useSpring(wordShiftYRaw, { stiffness: 90, damping: 22 })
-  const sphereShiftX = useSpring(sphereShiftXRaw, { stiffness: 105, damping: 20 })
-  const sphereShiftY = useSpring(sphereShiftYRaw, { stiffness: 105, damping: 20 })
+  const wordmarkRef = useRef<HTMLHeadingElement>(null)
+  const copyRef = useRef<HTMLDivElement>(null)
+  const triadRef = useRef<HTMLDivElement>(null)
+  const ctaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (reduced || typeof window === 'undefined') return
-    const handlePointerMove = (e: PointerEvent) => {
-      const nx = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1
-      const ny = (e.clientY / Math.max(1, window.innerHeight)) * 2 - 1
-      // Opposite subtle translation gives true foreground/background Z-plane separation
-      wordShiftXRaw.set(-nx * 8)
-      wordShiftYRaw.set(-ny * 5)
-      sphereShiftXRaw.set(nx * 9)
-      sphereShiftYRaw.set(ny * 6)
+    if (reduced) {
+      setEntranceProgress(1)
+      return
     }
-    window.addEventListener('pointermove', handlePointerMove, { passive: true })
-    return () => window.removeEventListener('pointermove', handlePointerMove)
-  }, [reduced, wordShiftXRaw, wordShiftYRaw, sphereShiftXRaw, sphereShiftYRaw])
+    const dispose = createHeroTimeline({
+      wordmarkEl: wordmarkRef.current,
+      copyEl: copyRef.current,
+      triadEl: triadRef.current,
+      ctaEl: ctaRef.current,
+      onEntranceProgress: (p) => setEntranceProgress(p),
+    })
+    return dispose
+  }, [reduced])
 
   return (
     <section
       id="overview"
       aria-labelledby="hero-monument-heading"
-      className="relative overflow-hidden bg-[#FFFFFF] dark:bg-[#090B0A] lg:min-h-[calc(100vh-76px)] flex flex-col border-b border-[var(--vg-border)]"
+      className="relative overflow-hidden bg-[#F4F5F2] dark:bg-[#090B0D] lg:min-h-[calc(100vh-74px)] flex flex-col justify-between border-b border-[var(--vg-border)] scroll-mt-20"
     >
-      {/* Full-bleed Liquid Silver / Liquid Carbon Atmospheric Wave Backdrop visible across lower zone & shelf corners */}
+      {/* Unified Studio Atmospheric Shader Canvas */}
       <LivingAuraCanvas
         variant="auto"
-        intensity={0.98}
+        intensity={0.96}
         className="absolute inset-0 z-0 pointer-events-none"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[2] vg-grain opacity-30"
+        className="pointer-events-none absolute inset-0 z-[1] vg-grain opacity-25"
       />
 
-      {/* ZONE 1: Seamless Pure Studio Upper Horizon Shelf wrapping VECTORGALLERY. cleanly above all lower UI text */}
-      <div className="relative z-10 w-full rounded-b-[28px] sm:rounded-b-[38px] lg:rounded-b-[44px] bg-[#FFFFFF] dark:bg-[#090B0A] shadow-[0_12px_36px_-26px_rgba(16,18,17,0.08)] dark:shadow-[0_18px_42px_-24px_rgba(0,0,0,0.65)]">
-        <div
-          className={`${VG_LAYOUT.containers.heroStage} relative pt-2 sm:pt-3 lg:pt-3 xl:pt-4 2xl:pt-6 pb-4 sm:pb-5 lg:pb-5 xl:pb-6 2xl:pb-7`}
-        >
-          {/* Minimalist ambient optical bounce directly behind overlapping sphere center */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none hidden lg:block absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[12%] w-[36%] h-[78%] z-[15] rounded-full blur-3xl opacity-55 dark:opacity-65"
-            style={{
-              background:
-                'radial-gradient(ellipse at 50% 72%, rgba(207,255,73,0.14) 0%, rgba(16,18,17,0.05) 45%, transparent 74%)',
-            }}
-          />
-
-          <motion.div
-            initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.02, ease: VG_MOTION.ease }}
-            style={reduced ? undefined : { x: wordShiftX, y: wordShiftY }}
-            className="relative z-10 w-full flex justify-center will-change-transform"
-          >
-            <h1
-              id="hero-monument-heading"
-              className="relative font-display font-bold uppercase text-center select-none whitespace-nowrap w-full max-w-full"
-              style={{
-                fontSize: VG_TYPOGRAPHY.scale.monumentalWordmark.fontSize,
-                lineHeight: VG_TYPOGRAPHY.scale.monumentalWordmark.lineHeight,
-                letterSpacing: VG_TYPOGRAPHY.scale.monumentalWordmark.letterSpacing,
-              }}
-            >
-              <span className="relative inline-block py-[0.04em] -my-[0.04em] bg-gradient-to-b from-[#0E100F] via-[#171B19] to-[#2B312E] dark:from-[#FFFFFF] dark:via-[#F3F5F1] dark:to-[#C6CFCA] bg-clip-text text-transparent">
-                VECTORGALLERY
-              </span>
-              <span className="relative text-[#101211] dark:text-[#CFFF49]">.</span>
-            </h1>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* ZONE 2: Lower Atmospheric Stage — Goldilocks Memory Sphere rising across Zone 1 while text stays cleanly balanced */}
+      {/* Unified Canvas Layout Container */}
       <div
-        className={`${VG_LAYOUT.containers.heroStage} relative z-20 flex-1 flex flex-col justify-between pt-4 sm:pt-6 lg:pt-6 xl:pt-8 2xl:pt-10 pb-6 sm:pb-8 lg:pb-8 xl:pb-10 2xl:pb-12`}
+        className={`${VG_LAYOUT.containers.heroStage} relative z-10 flex-1 flex flex-col justify-between pt-1 sm:pt-3 lg:pt-2 xl:pt-4 pb-6 sm:pb-8 lg:pb-9 xl:pb-12`}
       >
-        {/* Mobile/Tablet Sphere placement cleanly bridging shelf horizon above stacked info */}
-        <div className="lg:hidden relative z-20 -mt-7 sm:-mt-10 mb-3 flex justify-center pointer-events-none">
+        {/* TOP TIER: Oversized Razor-Sharp VECTORGALLERY. Wordmark (No drop shadow or boxed bar) */}
+        <div className="relative z-10 w-full flex justify-center pt-1 pb-2 sm:pb-3 lg:pb-0">
+          <h1
+            ref={wordmarkRef}
+            id="hero-monument-heading"
+            className="font-display font-bold uppercase text-center select-none whitespace-nowrap w-full max-w-full tracking-[-0.048em] leading-[0.88] text-[#101211] dark:text-[#F4F6F2]"
+            style={{
+              fontSize: 'clamp(2.25rem, 11.2vw, 13.6rem)',
+            }}
+          >
+            <span>VECTORGALLERY</span>
+            <span className="text-[#087F5B] dark:text-[#CDFF45]">.</span>
+          </h1>
+        </div>
+
+        {/* CENTER STAGE: Iconic Smooth Studio Memory Sphere Sculpture */}
+        {/* Mobile & Tablet Placement */}
+        <div className="lg:hidden relative z-20 -mt-1 mb-3 flex justify-center">
           <MemorySphereCanvas
             mode="hero"
             priority
-            className="w-[min(86vw,320px)] sm:w-[410px] md:w-[490px]"
+            entranceProgress={entranceProgress}
+            className="w-[min(80vw,310px)] sm:w-[390px] md:w-[440px]"
           />
         </div>
 
-        {/* Desktop Balanced Floating Sculpture Layer — Goldilocks proportion with open whitespace around side UI */}
-        <motion.div
-          style={reduced ? undefined : { x: sphereShiftX, y: sphereShiftY }}
-          className="hidden lg:flex pointer-events-none absolute inset-x-0 top-0 -mt-[56px] xl:-mt-[70px] 2xl:-mt-[88px] justify-center z-20 will-change-transform"
-        >
+        {/* Desktop Centered Dominant Sculpture overlapping lower baseline of wordmark smoothly */}
+        <div className="hidden lg:flex pointer-events-none absolute inset-x-0 top-[9%] xl:top-[10%] justify-center z-20">
           <MemorySphereCanvas
             mode="hero"
             priority
-            className="w-[clamp(440px,38vw,690px)]"
+            entranceProgress={entranceProgress}
+            showPauseControl
+            className="w-[clamp(470px,42vw,720px)]"
           />
-        </motion.div>
+        </div>
 
-        {/* Edge-Aligned Studio UI Quadrants safely flanking Sphere & cleanly clear of Zone 1 curve */}
-        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-stretch gap-7 sm:gap-8 lg:gap-4 lg:min-h-[325px] xl:min-h-[375px] 2xl:min-h-[450px]">
-          {/* LEFT QUADRANT: Core Product Provenance + Promise + Actions */}
-          <motion.div
-            initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08, ease: VG_MOTION.ease }}
-            className="lg:col-span-4 flex flex-col justify-between gap-6 sm:gap-8 lg:gap-10 xl:gap-14"
+        {/* BOTTOM FLANKING QUADRANTS: Balanced Editorial Copy + Primary Actions + Triad + Magnetic CTA */}
+        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-end gap-6 sm:gap-8 lg:gap-4 lg:pt-[190px] xl:pt-[225px] 2xl:pt-[275px]">
+          {/* LEFT QUADRANT: Product Descriptor + Main Promise + Action Row */}
+          <div
+            ref={copyRef}
+            className="lg:col-span-4 flex flex-col justify-between gap-6 lg:gap-10"
           >
-            {/* Provenance captures + clear product category */}
-            <div className="flex items-center gap-3.5 xl:gap-4">
+            {/* Compact Product Provenance */}
+            <div className="flex items-center gap-3.5">
               <div className="flex -space-x-2.5 shrink-0">
-                {STACKED_THUMBNAILS.map((item) => (
+                {PROVENANCE_CAPTURES.map((item) => (
                   <div
                     key={item.src}
-                    className="w-9 h-9 xl:w-11 xl:h-11 rounded-full overflow-hidden border-2 border-[#FFFFFF] dark:border-[#090B0A] shadow-sm bg-[var(--vg-surface-2)]"
+                    className="w-9 h-9 xl:w-10 xl:h-10 rounded-full overflow-hidden border-2 border-[#FFFFFF] dark:border-[#090B0D] shadow-sm bg-[var(--vg-surface-2)]"
                   >
                     <img
                       src={item.src}
@@ -183,80 +152,81 @@ export function HeroLivingMatter() {
                 ))}
               </div>
               <div className="leading-tight">
-                <p className="text-[14px] xl:text-[15.5px] font-bold tracking-[-0.02em] text-[#101211] dark:text-[#F3F5F1]">
-                  Personal AI Cloud &amp; Vault
+                <p className="text-[14px] xl:text-[15px] font-semibold tracking-[-0.018em] text-[#101211] dark:text-[#F4F6F2]">
+                  Personal AI Cloud
                 </p>
-                <p className="text-[12px] xl:text-[13px] text-[var(--vg-ink-2)] mt-0.5">
-                  Open-source · Photos, OCR docs &amp; Android sync
+                <p className="text-[12.5px] text-[var(--vg-ink-2)] mt-0.5">
+                  Photos, documents &amp; Android sync
                 </p>
               </div>
             </div>
 
-            {/* Bottom-Left Product Promise + Dotted Hairline + Unambiguous Explainer */}
-            <div className="max-w-[420px] lg:max-w-[310px] xl:max-w-[355px] 2xl:max-w-[450px]">
-              <p className="font-display text-[21px] sm:text-[23px] lg:text-[22px] xl:text-[28px] 2xl:text-[34px] font-bold leading-[1.12] tracking-[-0.032em] text-[#101211] dark:text-[#F3F5F1]">
-                Every photo, note &amp; receipt.
-                <br />
-                Found in seconds by meaning.
+            {/* Editorial Manifesto Copy */}
+            <div className="max-w-[430px] lg:max-w-[335px] xl:max-w-[390px] 2xl:max-w-[450px]">
+              <p className="font-display text-[22px] sm:text-[24px] lg:text-[23px] xl:text-[27px] 2xl:text-[31px] font-bold leading-[1.12] tracking-[-0.03em] text-[#101211] dark:text-[#F4F6F2]">
+                EVERYTHING WORTH KEEPING.
+              </p>
+
+              <p className="mt-2.5 text-[14.5px] sm:text-[15.5px] font-medium leading-[1.45] text-[#101211]/85 dark:text-[#F4F6F2]/90">
+                Photos, files and memories — intelligently connected.
               </p>
 
               <div
                 aria-hidden="true"
-                className="my-3 xl:my-4 w-full border-b-2 border-dotted border-[#101211]/35 dark:border-[#F3F5F1]/30"
+                className="my-3 xl:my-4 w-full border-b border-[#101211]/18 dark:border-white/[0.15]"
               />
 
-              <p className="text-[14px] sm:text-[14.5px] lg:text-[13.5px] xl:text-[15px] 2xl:text-[16px] leading-[1.54] text-[var(--vg-ink-2)]">
-                Search camera rolls, scanned receipts, and handwritten notes using plain language AI — synced automatically from Android to storage you own.
+              <p className="text-[13.5px] sm:text-[14.5px] leading-[1.56] text-[var(--vg-ink-2)]">
+                Find what you remember, without remembering where you saved it.
               </p>
 
-              <div className="mt-4 xl:mt-5 flex flex-wrap items-center gap-3.5">
+              <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Link
                   href="/app"
-                  className="inline-flex items-center gap-2 h-10 xl:h-11 px-5 rounded-full bg-[#101211] text-[#F3F5F1] dark:bg-[#F3F5F1] dark:text-[#090B0A] text-[13.5px] xl:text-[14px] font-semibold tracking-[-0.01em] hover:opacity-90 transition-all shadow-sm"
+                  className={VG_COMPONENTS.buttons.limePill}
                 >
-                  <span>Open Web Vault</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Get started</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
+                <a
+                  href="#scroll-story"
+                  className="inline-flex items-center gap-1.5 h-12 px-4 rounded-full text-[13.5px] font-medium text-[#101211] dark:text-[#F4F6F2] hover:bg-[#FFFFFF]/70 dark:hover:bg-white/[0.08] border border-[var(--vg-border)] transition-colors"
+                >
+                  <span>Explore the experience</span>
+                </a>
                 <Link
                   href="/install"
-                  className="inline-flex items-center gap-1.5 h-10 xl:h-11 px-3.5 rounded-full text-[13.5px] xl:text-[14px] font-medium text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#F3F5F1] transition-colors"
+                  className="inline-flex items-center gap-1.5 h-10 px-2.5 text-[13px] font-medium text-[var(--vg-ink-2)] hover:text-[#101211] dark:hover:text-[#CDFF45] transition-colors"
                 >
                   <Smartphone className="w-3.5 h-3.5" />
-                  <span>Android APK</span>
+                  <span>Download Android</span>
                 </Link>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* RIGHT QUADRANT: Workflow Triad + Live Step Hint + Magnetic Circular Lime CTA */}
-          <motion.div
-            initial={reduced ? { opacity: 1 } : { opacity: 0.94, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.14, ease: VG_MOTION.ease }}
-            className="lg:col-span-4 lg:col-start-9 flex flex-row lg:flex-col items-center lg:items-end justify-between gap-6"
-          >
-            {/* Top-Right Numbered Triad + concise active explanation */}
-            <div className="flex flex-col lg:items-end gap-2.5">
+          {/* RIGHT QUADRANT: Interactive Triad + Magnetic Circular Volt-Lime CTA */}
+          <div className="lg:col-span-4 lg:col-start-9 flex flex-row lg:flex-col items-end justify-between lg:h-full gap-6">
+            <div ref={triadRef} className="flex flex-col lg:items-end gap-2">
               <InteractiveTriadIndex
                 items={HERO_TRIAD}
                 activeIndex={activeTriad}
                 onSelect={setActiveTriad}
               />
-              <p className="hidden sm:block text-[12px] xl:text-[13px] font-mono text-[var(--vg-ink-2)] lg:text-right max-w-[220px] leading-snug">
+              <p className="hidden sm:block text-[12px] text-[var(--vg-ink-2)] lg:text-right max-w-[230px] leading-snug">
                 {HERO_TRIAD[activeTriad]?.hint}
               </p>
             </div>
 
-            {/* Bottom-Right Magnetic Acid-Lime Circular CTA */}
-            <div className="shrink-0">
+            <div ref={ctaRef} className="shrink-0">
               <MagneticCircleButton
                 label="Explore"
-                sublabel="See how it works"
+                sublabel="See the story"
                 href="#scroll-story"
                 size="lg"
               />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

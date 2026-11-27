@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Github, Menu, Star, X } from 'lucide-react'
+import { ArrowRight, Github, Menu, X } from 'lucide-react'
 import { VectorGalleryLogo } from '@/components/brand/VectorGalleryLogo'
 import { VG_COMPONENTS, VG_LAYOUT } from '@/components/landing/design-system'
-import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
+import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { ThemeSwitch } from '@/components/landing/ThemeSwitch'
 import { REPO_URL } from '@/components/landing/tokens'
 import { cn } from '@/lib/utils'
@@ -15,27 +15,60 @@ interface PillNavbarProps {
 }
 
 const NAV_LINKS = [
-  { href: '#overview', label: 'Overview' },
-  { href: '#scroll-story', label: 'How it works' },
-  { href: '#search', label: 'Search' },
-  { href: '#showcase', label: 'Workspace' },
-  { href: '#mobile', label: 'Mobile' },
+  { id: 'showcase', href: '#search', label: 'Product' },
+  { id: 'scroll-story', href: '#scroll-story', label: 'Experience' },
+  { id: 'mobile', href: '#mobile', label: 'Mobile' },
+  { id: 'privacy', href: '#privacy', label: 'Open source' },
 ]
 
 /**
- * Clean minimal pill navigation inspired directly by the Liquid Silver studio benchmark.
+ * Refined Floating Inner Navigation Dock with animated active-section indicator,
+ * scroll-reactive blur surface, and clean accessible mobile drawer.
  */
 export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
   void hasLocalApk
   const [scrolled, setScrolled] = useState(false)
+  const [activeId, setActiveId] = useState<string>('overview')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const reduced = useClientReducedMotion()
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 18)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') return
+    const sectionMap: Record<string, string> = {
+      overview: 'overview',
+      'scroll-story': 'scroll-story',
+      search: 'showcase',
+      showcase: 'showcase',
+      mobile: 'mobile',
+      privacy: 'privacy',
+    }
+    const targets = Object.keys(sectionMap)
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el))
+
+    if (targets.length === 0) return
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        if (visible[0]?.target?.id) {
+          setActiveId(sectionMap[visible[0].target.id] || 'overview')
+        }
+      },
+      { rootMargin: '-28% 0px -52% 0px', threshold: [0.05, 0.25, 0.5] }
+    )
+
+    targets.forEach((el) => io.observe(el))
+    return () => io.disconnect()
   }, [])
 
   useEffect(() => {
@@ -53,8 +86,8 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
         scrolled
-          ? 'bg-[#FFFFFF]/82 dark:bg-[#090B0A]/82 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#101211]/[0.08] dark:border-white/[0.10] shadow-[0_8px_28px_-14px_rgba(16,18,17,0.12)] dark:shadow-[0_10px_32px_-14px_rgba(0,0,0,0.65)]'
-          : 'bg-[#FFFFFF] dark:bg-[#090B0A] border-b border-transparent'
+          ? 'bg-[#FFFFFF]/82 dark:bg-[#090B0D]/84 backdrop-blur-2xl backdrop-saturate-150 border-b border-[#101211]/[0.08] dark:border-white/[0.10] shadow-[0_8px_28px_-14px_rgba(16,18,17,0.12)] dark:shadow-[0_10px_32px_-14px_rgba(0,0,0,0.65)]'
+          : 'bg-transparent border-b border-transparent'
       )}
     >
       <a href="#main-content" className="vg-skip-link">
@@ -62,44 +95,60 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
       </a>
 
       <div className={cn(VG_LAYOUT.containers.navbar, 'h-16 lg:h-[74px] flex items-center justify-between gap-4')}>
-        {/* Left: Brand Logo (flush with monumental wordmark left rail) */}
+        {/* Left: Brand Wordmark + Original Symbol */}
         <Link
           href="/"
           aria-label="VectorGallery Home"
-          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49] rounded-full"
+          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45] rounded-full"
         >
           <VectorGalleryLogo variant="animated" size="md" />
         </Link>
 
-        {/* Center: Minimalist Floating Navigation Pill */}
+        {/* Center: Floating Inner Dock with Active Section Indicator */}
         <nav
           aria-label="Primary navigation"
-          className="hidden lg:inline-flex items-center gap-0.5 px-2 py-1 rounded-full bg-[#F2F3F0]/90 dark:bg-white/[0.06] backdrop-blur-xl border border-[#101211]/[0.06] dark:border-white/[0.10]"
+          className="hidden lg:inline-flex items-center gap-0.5 p-1 rounded-full bg-[#FFFFFF]/82 dark:bg-[#111416]/82 backdrop-blur-2xl border border-[#101211]/[0.08] dark:border-white/[0.10] shadow-sm"
         >
-          {NAV_LINKS.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={cn(VG_COMPONENTS.buttons.ghost, 'text-[13px] xl:text-[13.5px] px-3 xl:px-3.5 py-1.5 whitespace-nowrap')}
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((item) => {
+            const isActive = activeId === item.id
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setActiveId(item.id)}
+                className={cn(
+                  'relative px-4 py-1.5 rounded-full text-[13px] xl:text-[13.5px] font-medium transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]',
+                  isActive
+                    ? 'text-[#101211] dark:text-[#F4F6F2] font-semibold'
+                    : 'text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2]'
+                )}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId={reduced ? undefined : 'nav-active-pill'}
+                    transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+                    className="absolute inset-0 rounded-full bg-[#E9EDE8] dark:bg-white/[0.11] -z-10"
+                  />
+                )}
+                <span>{item.label}</span>
+              </a>
+            )
+          })}
         </nav>
 
-        {/* Right Controls: Restrained Utility Actions + Primary CTA */}
+        {/* Right Controls */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <a
             href={REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={showStars ? `Open Source on GitHub (${stars} stars)` : 'Open Source Repository on GitHub'}
-            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[12.5px] font-medium text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] border border-transparent hover:border-[#101211]/[0.08] dark:hover:border-white/[0.10] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
+            className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-[12.5px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#E9EDE8]/70 dark:hover:bg-white/[0.08] border border-transparent hover:border-[#101211]/[0.08] dark:hover:border-white/[0.10] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
           >
             <Github className="w-3.5 h-3.5" />
             <span>GitHub</span>
             {showStars && (
-              <span className="font-mono text-[11px] text-[#087F5B] dark:text-[#CFFF49]">
+              <span className="font-mono text-[11px] text-[#087F5B] dark:text-[#CDFF45]">
                 {stars}
               </span>
             )}
@@ -109,7 +158,7 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
 
           <Link
             href="/login"
-            className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-full text-[13px] font-medium text-[#555E58] dark:text-[#9AA69E] hover:text-[#101211] dark:hover:text-[#F3F5F1] hover:bg-[#F2F3F0] dark:hover:bg-white/[0.08] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
+            className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-full text-[13px] font-medium text-[#606961] dark:text-[#A4AEA9] hover:text-[#101211] dark:hover:text-[#F4F6F2] hover:bg-[#E9EDE8]/70 dark:hover:bg-white/[0.08] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
           >
             Sign in
           </Link>
@@ -127,14 +176,14 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
             onClick={() => setMobileOpen((o) => !o)}
             aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileOpen}
-            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)] text-[var(--vg-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]"
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)] text-[var(--vg-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
           >
             {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -192,4 +241,3 @@ export function PillNavbar({ stars, hasLocalApk = false }: PillNavbarProps) {
     </header>
   )
 }
-

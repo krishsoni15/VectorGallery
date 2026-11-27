@@ -5,61 +5,62 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
 
 :root {
-  /* App & Workspace Tokens (Liquid Carbon Default) */
-  --vm-bg: #090B0A;
-  --vm-surface-input: #171B19;
-  --vm-surface: #131715;
-  --vm-surface-2: #202522;
+  /* App & Workspace Tokens (Obsidian Volt Default) */
+  --vm-bg: #090B0D;
+  --vm-surface-input: #14181B;
+  --vm-surface: #111416;
+  --vm-surface-2: #191D20;
   --vm-border: rgba(255, 255, 255, 0.10);
   --vm-border-light: rgba(255, 255, 255, 0.18);
-  --vm-text: #F3F5F1;
-  --vm-text-muted: #9AA69E;
-  --vm-text-dim: #7B867F;
+  --vm-text: #F4F6F2;
+  --vm-text-muted: #A4AEA9;
+  --vm-text-dim: #7C8782;
   --vm-accent: #087F5B;
-  --vm-accent-light: #39D9A0;
-  --vm-accent-glow: rgba(57, 217, 160, 0.16);
+  --vm-accent-light: #46D6A4;
+  --vm-accent-glow: rgba(70, 214, 164, 0.16);
   --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Mono', 'Fira Code', monospace;
 
-  /* Project Living Matter Tokens (Liquid Silver Light Fallback) */
-  --vg-bg: #F2F3F0;
+  /* Project Liquid Intelligence Tokens (Liquid Titanium Light Fallback) */
+  --vg-bg: #F4F5F2;
   --vg-surface: #FFFFFF;
-  --vg-surface-2: #E7E9E5;
-  --vg-surface-soft: #E7E9E5;
-  --vg-silver: #D1D5D2;
-  --vg-titanium: #A8B3B2;
-  --vg-stone: #E7E9E5;
-  --vg-sage: #D1D5D2;
+  --vg-surface-2: #E9EDE8;
+  --vg-surface-soft: #E9EDE8;
+  --vg-silver: #E3E8EA;
+  --vg-titanium: #BCC5C8;
+  --vg-chrome: #E3E8EA;
+  --vg-stone: #E9EDE8;
+  --vg-sage: #E9EDE8;
   --vg-mint: #C4EDE1;
-  --vg-teal: #39D9A0;
-  --vg-lime: #D4FF54;
-  --vg-lime-hover: #C8F73E;
+  --vg-teal: #46D6A4;
+  --vg-lime: #CDFF45;
+  --vg-lime-hover: #C2F736;
   --vg-lime-ink: #101211;
   --vg-brand: #087F5B;
   --vg-brand-interactive: #087F5B;
   --vg-brand-hover: #066649;
-  --vg-accent-light: #D4FF54;
+  --vg-accent-light: #CDFF45;
   --vg-forest: #092219;
   --vg-ink: #101211;
-  --vg-ink-2: #555E58;
-  --vg-ink-muted: #626B64;
-  --vg-ink-3: #626B64;
-  --vg-border: #DDE2DC;
-  --vg-border-strong: #C7CEC6;
-  --vg-shadow-card: 0 22px 52px -24px rgba(16, 18, 17, 0.12), 0 2px 10px -2px rgba(16, 18, 17, 0.04);
-  --vg-shadow-hero: 0 40px 96px -28px rgba(16, 18, 17, 0.16), 0 10px 28px -12px rgba(8, 127, 91, 0.08);
+  --vg-ink-2: #606961;
+  --vg-ink-muted: #606961;
+  --vg-ink-3: #606961;
+  --vg-border: #DBE0DA;
+  --vg-border-strong: #C3CAC4;
+  --vg-shadow-card: 0 22px 52px -24px rgba(16, 18, 17, 0.10), 0 2px 10px -2px rgba(16, 18, 17, 0.04);
+  --vg-shadow-hero: 0 40px 96px -28px rgba(16, 18, 17, 0.14), 0 10px 28px -12px rgba(8, 127, 91, 0.08);
 }
 
-/* ─── Light Mode Liquid Silver Tokens ─── */
+/* ─── Light Mode Liquid Titanium Tokens ─── */
 html.light {
-  --vm-bg: #F2F3F0;
+  --vm-bg: #F4F5F2;
   --vm-surface-input: #FFFFFF;
   --vm-surface: #FFFFFF;
-  --vm-surface-2: #E7E9E5;
-  --vm-border: #DDE2DC;
-  --vm-border-light: #C7CEC6;
+  --vm-surface-2: #E9EDE8;
+  --vm-border: #DBE0DA;
+  --vm-border-light: #C3CAC4;
   --vm-text: #101211;
-  --vm-text-muted: #555E58;
-  --vm-text-dim: #626B64;
+  --vm-text-muted: #606961;
+  --vm-text-dim: #606961;
   --vm-accent: #087F5B;
   --vm-accent-light: #10A375;
   --vm-accent-glow: rgba(8, 127, 91, 0.14);
@@ -78,27 +79,29 @@ html.dark {
   margin: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 84px;
-  transition: background-color 0.28s ease, color 0.28s ease;
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 84px;
+    transition: background-color 0.28s ease, color 0.28s ease;
+  }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: clip;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: var(--vm-bg);
-  color: var(--vm-text);
-  font-size: 15.5px;
-}
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: clip;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--vm-bg);
+    color: var(--vm-text);
+    font-size: 15.5px;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* Override Chrome yellow/slate autofill wash so inputs match Liquid Silver & Carbon surfaces */
@@ -128,64 +131,66 @@ html.dark select:-webkit-autofill {
    Acid-Lime Sculpture Reflection (#D4FF54 / #CFFF49) + Emerald AA (#087F5B / #39D9A0)
    ═══════════════════════════════════════════════════════════ */
 .vg-shell {
-  --vg-bg: #F2F3F0;
+  --vg-bg: #F4F5F2;
   --vg-surface: #FFFFFF;
-  --vg-surface-2: #E7E9E5;
-  --vg-surface-soft: #E7E9E5;
-  --vg-silver: #D1D5D2;
-  --vg-titanium: #A8B3B2;
-  --vg-stone: #E7E9E5;
-  --vg-sage: #D1D5D2;
+  --vg-surface-2: #E9EDE8;
+  --vg-surface-soft: #E9EDE8;
+  --vg-silver: #E3E8EA;
+  --vg-titanium: #BCC5C8;
+  --vg-chrome: #E3E8EA;
+  --vg-stone: #E9EDE8;
+  --vg-sage: #E9EDE8;
   --vg-mint: #C4EDE1;
-  --vg-teal: #39D9A0;
-  --vg-lime: #D4FF54;
-  --vg-lime-hover: #C8F73E;
+  --vg-teal: #46D6A4;
+  --vg-lime: #CDFF45;
+  --vg-lime-hover: #C2F736;
   --vg-lime-ink: #101211;
   --vg-brand: #087F5B;
   --vg-brand-interactive: #087F5B;
   --vg-brand-hover: #066649;
-  --vg-accent-light: #D4FF54;
+  --vg-accent-light: #CDFF45;
   --vg-forest: #092219;
   --vg-ink: #101211;
-  --vg-ink-2: #555E58;
-  --vg-ink-muted: #626B64;
-  --vg-ink-3: #626B64;
-  --vg-border: #DDE2DC;
-  --vg-border-strong: #C7CEC6;
-  --vg-shadow-card: 0 22px 52px -24px rgba(16, 18, 17, 0.12), 0 2px 10px -2px rgba(16, 18, 17, 0.04);
-  --vg-shadow-hero: 0 40px 96px -28px rgba(16, 18, 17, 0.16), 0 10px 28px -12px rgba(8, 127, 91, 0.08);
+  --vg-ink-2: #606961;
+  --vg-ink-muted: #606961;
+  --vg-ink-3: #606961;
+  --vg-border: #DBE0DA;
+  --vg-border-strong: #C3CAC4;
+  --vg-shadow-card: 0 22px 52px -24px rgba(16, 18, 17, 0.10), 0 2px 10px -2px rgba(16, 18, 17, 0.04);
+  --vg-shadow-hero: 0 40px 96px -28px rgba(16, 18, 17, 0.14), 0 10px 28px -12px rgba(8, 127, 91, 0.08);
   background-color: var(--vg-bg);
   color: var(--vg-ink);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 html.dark .vg-shell {
-  --vg-bg: #090B0A;
-  --vg-surface: #131715;
-  --vg-surface-2: #202522;
-  --vg-surface-soft: #202522;
-  --vg-silver: #303633;
-  --vg-titanium: #B9C5C5;
-  --vg-stone: #202522;
-  --vg-sage: #202522;
+  --vg-bg: #090B0D;
+  --vg-surface: #111416;
+  --vg-surface-2: #191D20;
+  --vg-surface-soft: #191D20;
+  --vg-silver: #272D30;
+  --vg-titanium: #B8C5CC;
+  --vg-chrome: #B8C5CC;
+  --vg-stone: #191D20;
+  --vg-sage: #191D20;
   --vg-mint: #C4EDE1;
-  --vg-teal: #39D9A0;
-  --vg-lime: #CFFF49;
-  --vg-lime-hover: #DCFF73;
-  --vg-lime-ink: #090B0A;
-  --vg-brand: #39D9A0;
-  --vg-brand-interactive: #39D9A0;
-  --vg-brand-hover: #5BE3B2;
-  --vg-accent-light: #CFFF49;
+  --vg-teal: #46D6A4;
+  --vg-lime: #CDFF45;
+  --vg-lime-hover: #D8FF69;
+  --vg-lime-ink: #090B0D;
+  --vg-brand: #46D6A4;
+  --vg-brand-interactive: #46D6A4;
+  --vg-brand-hover: #63E0B4;
+  --vg-accent-light: #CDFF45;
   --vg-forest: #071711;
-  --vg-ink: #F3F5F1;
-  --vg-ink-2: #9AA69E;
-  --vg-ink-muted: #828E86;
-  --vg-ink-3: #828E86;
+  --vg-ink: #F4F6F2;
+  --vg-ink-2: #A4AEA9;
+  --vg-ink-muted: #7C8782;
+  --vg-ink-3: #7C8782;
   --vg-border: rgba(255, 255, 255, 0.10);
   --vg-border-strong: rgba(255, 255, 255, 0.18);
   --vg-shadow-card: 0 28px 64px -22px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --vg-shadow-hero: 0 46px 104px -26px rgba(0, 0, 0, 0.90), 0 0 76px -30px rgba(207, 255, 73, 0.12);
+  --vg-shadow-hero: 0 46px 104px -26px rgba(0, 0, 0, 0.90), 0 0 76px -30px rgba(70, 214, 164, 0.12);
 }
 
 /* Acid-lime CTA ink guard (high contrast across light & dark) */

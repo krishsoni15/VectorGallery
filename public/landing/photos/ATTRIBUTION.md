@@ -1,23 +1,27 @@
-# VectorGallery Landing Assets & Photography Attribution (Project Aura)
+# VectorGallery Landing Assets & Manifest (Project Liquid Intelligence)
 
-All landing visual assets for Project Aura are cohesive, bespoke studio renders and curated editorial photographs created specifically for VectorGallery's Neutral-First design system (`#FAFAF7` alabaster light / `#0B0D0C` obsidian dark).
+All photography, documents, artwork, and UI assets in `public/landing/` are original generated imagery or user-provided brand media bundled locally under `public/landing/` — zero hotlinks, zero stock watermarks, and zero private user data.
 
-## Bespoke Signature Renders (`public/brand/`)
+## Core Signature Brand Media (`public/landing/artwork/`)
+- `memory-sphere-hero.webp` — User-provided transparent studio liquid-silver & acid-lime glass Memory Sphere loop (derived from `Generated Video November 27, 2026 - 2_43PM.mp4`).
+- `memory-sphere-video-poster.webp` — High-resolution alpha studio poster fallback rendered for `prefers-reduced-motion` and SSR paint.
 
-- `memory-fold-light.webp` — Studio sculptural render of frosted glass, warm ceramic, and satin emerald acrylic folded into a clean `V` on matte warm alabaster (Hero Light Mode).
-- `memory-fold-dark.webp` — Studio sculptural render of frosted glass, charcoal ceramic, and luminous emerald acrylic casting gentle refractions on deep obsidian (Hero Dark Mode & Social Preview).
-
-## Bespoke Editorial Photography (`public/landing/photos/`)
-
-10 warm, human-centered photographs spanning daily rituals, handwritten notes, sunlit spaces, family tables, and quiet coastal travel:
-
-- `aura-journal-desk.webp` — Open linen-bound journal dated October 14 with handwritten notes, botanical and coffee cup sketches, brass fountain pen, and stoneware mug. *(Hero Search Slice, Chapter 02 Document Search)*
-- `aura-train-journey.webp` — Traveler's hand resting on a leather notebook beside a vintage rail ticket on a coastal train window overlooking sea and hills. *(Chapter 02 Memory Search)*
-- `aura-family-morning.webp` — Hands selecting green pears from a speckled ceramic bowl on a sunlit kitchen table beside sage leaves and a ceramic mug. *(Chapter 02 Memory Search, Chapter 04 Mobile Gallery)*
-- `aura-study-table.webp` — Sunlit wooden study desk beside a garden window with a brass lamp, stacked books, laptop, and handwritten sticky notes. *(Chapter 02 Document Search)*
-- `aura-heirloom-object.webp` — Vintage silver rangefinder camera beside black-and-white coastal and botanical contact sheets with a brass loupe on linen. *(Chapter 02 Ask AI)*
-- `aura-sunlit-interior.webp` — Warm limestone living room bathed in afternoon sunlight with framed art prints and ceramic vessels. *(Chapter 03 Library, Login Backdrop)*
-- `aura-evening-gathering.webp` — Candlelit outdoor courtyard dinner table beneath olive branches with friends sharing food and conversation. *(Chapter 03 Library)*
-- `aura-personal-travel.webp` — Traveler carrying a film camera along a sunlit stone harbor promenade lined with coastal boats. *(Chapter 03 Library, Chapter 04 Mobile Backup & Desktop Sync, Install Preview)*
-- `aura-coastal-path.webp` — Quiet sandy footpath winding through coastal sea grass overlooking chalk cliffs and pale sea water. *(Chapter 03 Library, Chapter 04 Mobile Gallery)*
-- `aura-botanical-light.webp` — Eucalyptus and sage stems in an earthen ceramic vase beside a sunlit wooden window casting soft leaf shadows. *(Chapter 05 Privacy Sanctuary, Signup Backdrop)*
+## Coherent Digital Life Dataset (`public/landing/photos/`)
+17 cohesive sample artifacts covering daily photographs, travel captures, celebrations, handwritten journals, official forms, receipts, and technical work:
+- `aura-celebration-toast.webp` — Golden-hour outdoor terrace toast over pistachio celebration cake and candles.
+- `aura-evening-gathering.webp` — Candlelit outdoor olive-tree September dinner table with friends.
+- `aura-personal-travel.webp` — Traveler with analog film camera walking beside moored coastal harbor boats.
+- `aura-train-journey.webp` — Hand resting beside coastal rail pass and leather travel journal by train window.
+- `aura-coastal-path.webp` — Sandy coastal footpath overlooking chalk cliffs and sunlit water.
+- `aura-ticket-coastal.webp` — Fictional `COASTAL LINE` rail boarding pass (`Seat 14A · 08:40 · Marseille St Charles -> Nice Ville`).
+- `aura-receipt-studio.webp` — Fictional `Studio Equip Co.` itemized receipt (`#10482`, Acoustic Headphones `$89.00`, Total `$153.36`).
+- `aura-university-letter.webp` — Fictional `Northridge University` Autumn Project Registration confirmation letter.
+- `aura-deadline-notes.webp` — Handwritten grid notebook page listing `Project Deadline Notes` (`Oct 18`, `Oct 21`, `Oct 25`).
+- `aura-journal-desk.webp` — Linen-bound journal dated October 14 with ink coffee cup sketch and fountain pen.
+- `aura-arch-notes.webp` — Dot-grid notebook spread detailing architectural gallery spatial flow.
+- `aura-tech-screenshot.webp` — Clean TypeScript & Sync Worker verification terminal screen capture on brushed aluminum.
+- `aura-family-morning.webp` — Morning sunlight kitchen table with hands reaching into bowl of green pears.
+- `aura-study-table.webp` — Sunlit timber study desk with lamp, stacked books, laptop, and sticky notes.
+- `aura-heirloom-object.webp` — Vintage silver rangefinder camera beside black-and-white film contact sheets.
+- `aura-sunlit-interior.webp` — Warm sunlit architectural room with framed botanical prints.
+- `aura-botanical-light.webp` — Eucalyptus and sage stems in stoneware beside sunlit timber window.

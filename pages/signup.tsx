@@ -198,7 +198,7 @@ export default function SignUpPage() {
                 Create your vault
               </h1>
               <p className="text-[14.5px] text-[var(--vg-ink-2)]">
-                Start keeping photos, documents, and mobile backups together in seconds.
+                Keep photos, scanned documents, and mobile backups connected in one private space.
               </p>
             </div>
 

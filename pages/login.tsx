@@ -104,10 +104,10 @@ export default function LoginPage() {
       <div className="vg-shell min-h-screen grid lg:grid-cols-12 bg-[var(--vg-bg)] text-[var(--vg-ink)] selection:bg-[#087F5B]/20 dark:selection:bg-[#CFFF49]/25">
         <AuthShowcasePanel
           badgeText="Personal Cloud"
-          headline="Your personal library, searchable in seconds."
+          headline="Your personal library, intelligently connected."
           description="Return to your photos, OCR-indexed receipts, handwritten notes, and automatic Android camera roll backups."
-          footerLeft="Encrypted workspace · Zero lock-in"
-          footerRight="Local or cloud storage"
+          footerLeft="Private local or cloud workspace"
+          footerRight="Zero lock-in"
         />
 
         {/* Right Form Canvas */}

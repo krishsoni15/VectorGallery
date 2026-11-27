@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { VG_AURA_SHADER_SPEC } from '@/components/landing/design-system'
+import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
+import { useVisibility } from '@/components/landing/motion/useVisibility'
 import { cn } from '@/lib/utils'
 
 interface LivingAuraCanvasProps {
@@ -7,6 +9,7 @@ interface LivingAuraCanvasProps {
   speed?: number
   className?: string
   intensity?: number
+  pointerReactive?: boolean
 }
 
 const VERTEX_SHADER = `
@@ -18,15 +21,22 @@ void main() {
 }
 `
 
+/**
+ * Custom Liquid Intelligence GLSL Studio Shader:
+ * Combines domain-warped porcelain/titanium silk waves, anisotropic cool metallic reflection bands,
+ * pointer-coupled softbox falloff, iridescent specular edge interference, and zero muddy olive cast.
+ */
 const FRAGMENT_SHADER = `
 precision highp float;
 
 uniform float uTime;
 uniform vec2 uResolution;
+uniform vec2 uPointer;
 uniform vec3 uBaseColor;
 uniform vec3 uMidColor;
-uniform vec3 uRibbonColor;
-uniform vec3 uCausticColor;
+uniform vec3 uHighlightColor;
+uniform vec3 uJadeColor;
+uniform vec3 uLimeColor;
 uniform float uIntensity;
 uniform float uIsDark;
 
@@ -49,11 +59,11 @@ float noise(vec2 p) {
 
 float fbm(vec2 p) {
   float v = 0.0;
-  float a = 0.52;
+  float a = 0.5;
   mat2 rot = mat2(0.84, 0.54, -0.54, 0.84);
   for (int i = 0; i < 4; i++) {
     v += a * noise(p);
-    p = rot * p * 1.92;
+    p = rot * p * 1.94;
     a *= 0.48;
   }
   return v;
@@ -63,32 +73,41 @@ void main() {
   vec2 uv = gl_FragCoord.xy / max(uResolution, vec2(1.0));
   float aspect = uResolution.x / max(uResolution.y, 1.0);
   vec2 p = vec2((uv.x - 0.5) * aspect, uv.y - 0.5);
+  vec2 ptr = vec2((uPointer.x - 0.5) * aspect, uPointer.y - 0.5);
 
-  float t = uTime * 0.085;
-  vec2 q = vec2(fbm(p * 1.15 + vec2(0.0, t * 0.7)), fbm(p * 1.2 + vec2(3.1, -t * 0.55)));
-  vec2 r = vec2(fbm(p * 1.45 + q * 1.55 + vec2(t * 0.4, 2.3)), fbm(p * 1.5 - q * 1.35));
-  float silk = fbm(p * 1.3 + r * 1.4);
+  float t = uTime * 0.075;
+  vec2 q = vec2(fbm(p * 1.1 + vec2(0.0, t * 0.6)), fbm(p * 1.15 + vec2(2.7, -t * 0.45)));
+  vec2 r = vec2(fbm(p * 1.35 + q * 1.45 + vec2(t * 0.35, 1.9)), fbm(p * 1.4 - q * 1.25));
+  float silk = fbm(p * 1.15 + r * 1.25);
 
-  // Diagonal architectural ribbon flowing across lower half
-  float ribbonWave = sin((uv.x * 2.2 + uv.y * 1.1) + silk * 3.1 - t * 0.8) * 0.5 + 0.5;
-  float causticWave = pow(smoothstep(0.42, 0.96, sin((uv.x * 1.7 - uv.y * 1.3) + r.x * 2.6) * 0.5 + 0.5), 1.8);
+  // Anisotropic brushed titanium light band sweeping gently beneath horizon
+  float anisoBand = smoothstep(-0.42, 0.48, (p.x * 0.65 - p.y * 0.85) + silk * 0.65);
+  float specularFold = pow(smoothstep(0.35, 0.96, sin((p.x * 2.1 - p.y * 1.6) + r.x * 2.4 - t * 0.65) * 0.5 + 0.5), 2.2);
 
-  // Clean upper stage ground (top ~36%) transitioning into rich liquid silver / carbon waves below
-  float lowerAtmosphereMask = smoothstep(0.68, 0.25, uv.y);
+  // Subtle top studio air transitioning smoothly into sculpted lower atmosphere
+  float stageMask = smoothstep(0.92, 0.14, uv.y);
 
-  vec3 col = mix(uBaseColor, uMidColor, smoothstep(0.15, 0.85, silk) * lowerAtmosphereMask);
-  col = mix(col, uRibbonColor, pow(ribbonWave, 1.6) * (uIsDark > 0.5 ? 0.55 : 0.42) * lowerAtmosphereMask * uIntensity);
+  vec3 col = mix(uBaseColor, uMidColor, smoothstep(0.18, 0.82, silk) * stageMask);
+  col = mix(col, uHighlightColor, specularFold * (uIsDark > 0.5 ? 0.34 : 0.46) * anisoBand * uIntensity);
 
-  // Subtle acid-lime specular bounce flanking the central sculpture
-  float limeMask = smoothstep(0.82, 0.08, length(uv - vec2(0.24, 0.28))) * causticWave * lowerAtmosphereMask;
-  float rightGlow = smoothstep(0.84, 0.12, length(uv - vec2(0.76, 0.30))) * ribbonWave * lowerAtmosphereMask;
-  col += uCausticColor * (limeMask * (uIsDark > 0.5 ? 0.11 : 0.16) + rightGlow * (uIsDark > 0.5 ? 0.06 : 0.09)) * uIntensity;
+  // Cool emerald/jade metallic depth sheen around central sculpture core
+  float distCenter = length(vec2((uv.x - 0.5) * aspect, (uv.y - 0.48) * 1.05));
+  float coreField = smoothstep(0.88, 0.06, distCenter);
+  float ptrDist = length(p - ptr * 0.35);
+  float ptrAura = smoothstep(0.82, 0.08, ptrDist);
 
-  // Fine tactile grain prevents banding on displays
-  float grain = (hash(uv * uResolution + fract(uTime)) - 0.5) * (uIsDark > 0.5 ? 0.015 : 0.011);
+  // Clean blue-silver & jade refraction rather than muddy yellow-olive overlay
+  col += uJadeColor * (coreField * (uIsDark > 0.5 ? 0.075 : 0.045) + ptrAura * (uIsDark > 0.5 ? 0.03 : 0.02)) * uIntensity;
+
+  // Tightly surgical volt-lime edge caustic near sculpture tangent
+  float rimArc = smoothstep(0.55, 0.22, abs(distCenter - 0.24)) * specularFold * ptrAura;
+  col += uLimeColor * (rimArc * (uIsDark > 0.5 ? 0.065 : 0.085)) * uIntensity;
+
+  // Micro film grain preventing gradient banding on wide displays
+  float grain = (hash(uv * uResolution + fract(uTime)) - 0.5) * (uIsDark > 0.5 ? 0.012 : 0.008);
   col += grain;
 
-  float alpha = (0.30 + 0.64 * lowerAtmosphereMask) * clamp(uIntensity, 0.35, 1.0);
+  float alpha = (0.36 + 0.64 * stageMask) * clamp(uIntensity, 0.35, 1.0);
   gl_FragColor = vec4(col, alpha);
 }
 `
@@ -99,26 +118,26 @@ function hexToRgbVec(hex: string): [number, number, number] {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]
 }
 
-/**
- * LivingAuraCanvas — OGL fluid shader rendering liquid-silver / liquid-carbon silky light waves.
- * Updates theme uniforms live without tearing down the WebGL context on light/dark toggles.
- */
 export function LivingAuraCanvas({
   variant = 'auto',
   speed = 0.72,
   className,
-  intensity = 0.94,
+  intensity = 0.95,
+  pointerReactive = true,
 }: LivingAuraCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const themeRef = useRef<'light' | 'dark'>(variant === 'dark' ? 'dark' : 'light')
+  const pointerTargetRef = useRef<[number, number]>([0.55, 0.52])
+  const pointerSmoothRef = useRef<[number, number]>([0.55, 0.52])
+
   const programRef = useRef<{
     uniforms: {
       uBaseColor: { value: [number, number, number] }
       uMidColor: { value: [number, number, number] }
-      uRibbonColor: { value: [number, number, number] }
-      uCausticColor: { value: [number, number, number] }
-      uIntensity: { value: number }
+      uHighlightColor: { value: [number, number, number] }
+      uJadeColor: { value: [number, number, number] }
+      uLimeColor: { value: [number, number, number] }
       uIsDark: { value: number }
     }
   } | null>(null)
@@ -127,15 +146,13 @@ export function LivingAuraCanvas({
     variant === 'dark' ? 'dark' : 'light'
   )
   const [webglReady, setWebglReady] = useState(true)
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const reducedMotion = useReducedMotion()
+  const isVisible = useVisibility(hostRef)
+  const isVisibleRef = useRef(isVisible)
+  isVisibleRef.current = isVisible
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const syncRm = () => setReducedMotion(mq.matches)
-    syncRm()
-    mq.addEventListener?.('change', syncRm)
-
     const syncTheme = () => {
       const next =
         variant !== 'auto'
@@ -148,24 +165,42 @@ export function LivingAuraCanvas({
 
       const prog = programRef.current
       if (prog) {
-        const stops = next === 'dark' ? VG_AURA_SHADER_SPEC.darkStops : VG_AURA_SHADER_SPEC.lightStops
-        prog.uniforms.uBaseColor.value = hexToRgbVec(stops.base)
-        prog.uniforms.uMidColor.value = hexToRgbVec(stops.mid)
-        prog.uniforms.uRibbonColor.value = hexToRgbVec(stops.highlight)
-        prog.uniforms.uCausticColor.value = hexToRgbVec(stops.limeCaustic)
-        prog.uniforms.uIsDark.value = next === 'dark' ? 1.0 : 0.0
+        const isDark = next === 'dark'
+        prog.uniforms.uBaseColor.value = hexToRgbVec(
+          isDark ? VG_AURA_SHADER_SPEC.darkStops.base : VG_AURA_SHADER_SPEC.lightStops.base
+        )
+        prog.uniforms.uMidColor.value = hexToRgbVec(
+          isDark ? VG_AURA_SHADER_SPEC.darkStops.mid : VG_AURA_SHADER_SPEC.lightStops.mid
+        )
+        prog.uniforms.uHighlightColor.value = hexToRgbVec(
+          isDark ? VG_AURA_SHADER_SPEC.darkStops.chrome : VG_AURA_SHADER_SPEC.lightStops.highlight
+        )
+        prog.uniforms.uJadeColor.value = hexToRgbVec(
+          isDark ? VG_AURA_SHADER_SPEC.darkStops.jadeCaustic : VG_AURA_SHADER_SPEC.lightStops.emeraldCaustic
+        )
+        prog.uniforms.uLimeColor.value = hexToRgbVec(VG_AURA_SHADER_SPEC.lightStops.limeCaustic)
+        prog.uniforms.uIsDark.value = isDark ? 1.0 : 0.0
       }
     }
     syncTheme()
 
     const observer = new MutationObserver(syncTheme)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-
-    return () => {
-      mq.removeEventListener?.('change', syncRm)
-      observer.disconnect()
-    }
+    return () => observer.disconnect()
   }, [variant])
+
+  useEffect(() => {
+    if (!pointerReactive || reducedMotion || typeof window === 'undefined') return
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
+      pointerTargetRef.current = [
+        e.clientX / Math.max(1, window.innerWidth),
+        1 - e.clientY / Math.max(1, window.innerHeight),
+      ]
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [pointerReactive, reducedMotion])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -174,7 +209,6 @@ export function LivingAuraCanvas({
 
     let destroyed = false
     let rafId = 0
-    let isVisible = true
     const cleanupFns: Array<() => void> = []
 
     const init = async () => {
@@ -193,8 +227,7 @@ export function LivingAuraCanvas({
         const gl = renderer.gl
         gl.clearColor(0, 0, 0, 0)
 
-        const initTheme = themeRef.current
-        const stops = initTheme === 'dark' ? VG_AURA_SHADER_SPEC.darkStops : VG_AURA_SHADER_SPEC.lightStops
+        const isDark = themeRef.current === 'dark'
         const geometry = new Triangle(gl)
         const program = new Program(gl, {
           vertex: VERTEX_SHADER,
@@ -203,12 +236,30 @@ export function LivingAuraCanvas({
           uniforms: {
             uTime: { value: 0 },
             uResolution: { value: new Vec2(host.clientWidth || 1280, host.clientHeight || 720) },
-            uBaseColor: { value: hexToRgbVec(stops.base) },
-            uMidColor: { value: hexToRgbVec(stops.mid) },
-            uRibbonColor: { value: hexToRgbVec(stops.highlight) },
-            uCausticColor: { value: hexToRgbVec(stops.limeCaustic) },
+            uPointer: { value: new Vec2(0.55, 0.52) },
+            uBaseColor: {
+              value: hexToRgbVec(
+                isDark ? VG_AURA_SHADER_SPEC.darkStops.base : VG_AURA_SHADER_SPEC.lightStops.base
+              ),
+            },
+            uMidColor: {
+              value: hexToRgbVec(
+                isDark ? VG_AURA_SHADER_SPEC.darkStops.mid : VG_AURA_SHADER_SPEC.lightStops.mid
+              ),
+            },
+            uHighlightColor: {
+              value: hexToRgbVec(
+                isDark ? VG_AURA_SHADER_SPEC.darkStops.chrome : VG_AURA_SHADER_SPEC.lightStops.highlight
+              ),
+            },
+            uJadeColor: {
+              value: hexToRgbVec(
+                isDark ? VG_AURA_SHADER_SPEC.darkStops.jadeCaustic : VG_AURA_SHADER_SPEC.lightStops.emeraldCaustic
+              ),
+            },
+            uLimeColor: { value: hexToRgbVec(VG_AURA_SHADER_SPEC.lightStops.limeCaustic) },
             uIntensity: { value: intensity },
-            uIsDark: { value: initTheme === 'dark' ? 1.0 : 0.0 },
+            uIsDark: { value: isDark ? 1.0 : 0.0 },
           },
         })
         programRef.current = program as unknown as typeof programRef.current
@@ -227,34 +278,29 @@ export function LivingAuraCanvas({
         const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handleResize) : null
         ro?.observe(host)
 
-        const io =
-          typeof IntersectionObserver !== 'undefined'
-            ? new IntersectionObserver(
-                (entries) => {
-                  isVisible = Boolean(entries[0]?.isIntersecting)
-                },
-                { threshold: 0.02 }
-              )
-            : null
-        io?.observe(host)
-
-        const onVis = () => {
-          isVisible = !document.hidden
+        const onLost = (e: Event) => {
+          e.preventDefault()
+          if (!destroyed) setWebglReady(false)
         }
-        document.addEventListener('visibilitychange', onVis)
+        canvas.addEventListener('webglcontextlost', onLost)
 
         cleanupFns.push(() => {
           programRef.current = null
           ro?.disconnect()
-          io?.disconnect()
-          document.removeEventListener('visibilitychange', onVis)
+          canvas.removeEventListener('webglcontextlost', onLost)
           gl.getExtension('WEBGL_lose_context')?.loseContext()
         })
 
         const start = performance.now()
         const render = (now: number) => {
           if (destroyed) return
-          if (isVisible && !document.hidden) {
+          if (isVisibleRef.current) {
+            const [tx, ty] = pointerTargetRef.current
+            const [sx, sy] = pointerSmoothRef.current
+            const nx = sx + (tx - sx) * 0.06
+            const ny = sy + (ty - sy) * 0.06
+            pointerSmoothRef.current = [nx, ny]
+            program.uniforms.uPointer.value.set(nx, ny)
             program.uniforms.uTime.value = ((now - start) / 1000) * speed
             renderer.render({ scene: mesh })
           }

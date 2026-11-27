@@ -1,20 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { VG_COMPONENTS, VG_MOTION } from '@/components/landing/design-system'
+import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
 import { cn } from '@/lib/utils'
 
 /**
- * SSR-safe reduced motion hook that prevents React #418/#425 hydration mismatches
- * when Chromium or OS has prefers-reduced-motion: reduce enabled on first load.
+ * SSR-safe reduced motion helper matching centralized MotionProvider policy.
  */
 export function useClientReducedMotion(): boolean {
-  const prefers = useReducedMotion()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  return mounted && Boolean(prefers)
+  return useReducedMotion()
+}
+
+function isFinePointer(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false
+  return window.matchMedia('(pointer: fine)').matches
 }
 
 interface MagneticCircleButtonProps {
@@ -27,8 +27,8 @@ interface MagneticCircleButtonProps {
 }
 
 /**
- * Tactile Magnetic Circular Acid-Lime CTA matching the benchmark hero sculptural anchor.
- * Gently attracts toward pointer hover inside a subtle spring envelope, and remains rock-solid under reduced-motion.
+ * Tactile Magnetic Circular Volt-Lime CTA (custom-tuned React Bits Magnet interaction).
+ * Automatically disables magnetic offset on touch / coarse pointers and prefers-reduced-motion.
  */
 export function MagneticCircleButton({
   label,
@@ -39,14 +39,14 @@ export function MagneticCircleButton({
   size = 'lg',
 }: MagneticCircleButtonProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const reduced = useClientReducedMotion()
+  const reduced = useReducedMotion()
   const rawX = useMotionValue(0)
   const rawY = useMotionValue(0)
   const x = useSpring(rawX, VG_MOTION.springMagnetic)
   const y = useSpring(rawY, VG_MOTION.springMagnetic)
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (reduced || !ref.current) return
+    if (reduced || !ref.current || !isFinePointer()) return
     const rect = ref.current.getBoundingClientRect()
     const dx = (e.clientX - (rect.left + rect.width / 2)) * 0.16
     const dy = (e.clientY - (rect.top + rect.height / 2)) * 0.16
@@ -61,8 +61,8 @@ export function MagneticCircleButton({
 
   const sizeClass =
     size === 'lg'
-      ? 'w-[126px] h-[126px] sm:w-[144px] sm:h-[144px] xl:w-[164px] xl:h-[164px] 2xl:w-[184px] 2xl:h-[184px]'
-      : 'w-[112px] h-[112px] sm:w-[128px] sm:h-[128px]'
+      ? 'w-[122px] h-[122px] sm:w-[138px] sm:h-[138px] xl:w-[156px] xl:h-[156px] 2xl:w-[174px] 2xl:h-[174px]'
+      : 'w-[108px] h-[108px] sm:w-[124px] sm:h-[124px]'
 
   const innerContent = (
     <span className="flex flex-col items-center justify-center gap-1 px-4 leading-tight">
@@ -71,7 +71,7 @@ export function MagneticCircleButton({
         <span>{label}</span>
       </span>
       {sublabel && (
-        <span className="text-[11px] xl:text-[12px] font-medium text-[#101211]/75 tracking-[-0.01em]">
+        <span className="text-[11px] xl:text-[11.5px] font-medium text-[#101211]/75 tracking-[-0.01em]">
           {sublabel}
         </span>
       )}
@@ -120,32 +120,104 @@ export function MagneticCircleButton({
 interface SplitTextRevealProps {
   text: string
   className?: string
+  style?: React.CSSProperties
   delay?: number
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span'
 }
 
+/**
+ * Editorial SplitText Reveal (custom-tuned React Bits SplitText typography rhythm).
+ * Animates words cleanly upward out of a mask without hiding SSR text before hydration.
+ */
 export function SplitTextReveal({
   text,
   className,
+  style,
   delay = 0,
-  as = 'p',
+  as = 'h2',
 }: SplitTextRevealProps) {
-  const reduced = useClientReducedMotion()
+  const reduced = useReducedMotion()
+  const [mounted, setMounted] = useState(false)
   const Component = as
+  const words = text.split(' ')
 
-  if (reduced) {
-    return <Component className={className}>{text}</Component>
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (reduced || !mounted) {
+    return (
+      <Component className={className} style={style}>
+        {text}
+      </Component>
+    )
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0.9, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={VG_MOTION.viewport}
-      transition={{ duration: 0.55, delay, ease: VG_MOTION.ease }}
+    <Component className={className} style={style}>
+      {words.map((word, idx) => (
+        <span key={`${word}-${idx}`} className="inline-block overflow-hidden align-top mr-[0.26em] last:mr-0">
+          <motion.span
+            className="inline-block"
+            initial={{ y: '22%', opacity: 0.92 }}
+            whileInView={{ y: '0%', opacity: 1 }}
+            viewport={VG_MOTION.viewport}
+            transition={{
+              duration: 0.52,
+              delay: delay + idx * 0.035,
+              ease: VG_MOTION.ease,
+            }}
+          >
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </Component>
+  )
+}
+
+/**
+ * Refined Metallic Glare Frame (custom-tuned React Bits GlareHover effect).
+ * Adds a delicate soft specular sheen tracing mouse coordinates across hardware/software stages.
+ */
+export function StudioGlareFrame({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  const hostRef = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
+  const [glare, setGlare] = useState({ x: 50, y: 20, active: false })
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (reduced || !hostRef.current || !isFinePointer()) return
+    const rect = hostRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / Math.max(1, rect.width)) * 100
+    const y = ((e.clientY - rect.top) / Math.max(1, rect.height)) * 100
+    setGlare({ x, y, active: true })
+  }
+
+  return (
+    <div
+      ref={hostRef}
+      onPointerMove={onPointerMove}
+      onPointerLeave={() => setGlare((g) => ({ ...g, active: false }))}
+      className={cn('relative overflow-hidden', className)}
     >
-      <Component className={className}>{text}</Component>
-    </motion.div>
+      {children}
+      {!reduced && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 transition-opacity duration-300 z-20"
+          style={{
+            opacity: glare.active ? 0.55 : 0,
+            background: `radial-gradient(520px circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.09), rgba(205,255,69,0.04) 34%, transparent 70%)`,
+          }}
+        />
+      )}
+    </div>
   )
 }
 
@@ -156,10 +228,6 @@ export interface TriadItem {
   hint: string
 }
 
-/**
- * Interactive right-aligned triad index matching the benchmark layout:
- * Capture /01 · Connect /02 · Remember /03
- */
 export function InteractiveTriadIndex({
   items,
   activeIndex = 0,
@@ -180,21 +248,21 @@ export function InteractiveTriadIndex({
             onClick={() => onSelect?.(idx)}
             onMouseEnter={() => onSelect?.(idx)}
             className={cn(
-              'group inline-flex items-baseline justify-between lg:justify-end gap-4 sm:gap-5 py-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49] rounded-md px-1',
+              'group inline-flex items-baseline justify-between lg:justify-end gap-4 sm:gap-5 py-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45] rounded-md px-1',
               isActive
-                ? 'text-[#101211] dark:text-[#F3F5F1]'
-                : 'text-[#626B64] hover:text-[#101211] dark:text-[#9AA69E] dark:hover:text-[#F3F5F1]'
+                ? 'text-[#101211] dark:text-[#F4F6F2]'
+                : 'text-[#606961] hover:text-[#101211] dark:text-[#A4AEA9] dark:hover:text-[#F4F6F2]'
             )}
           >
-            <span className="text-[14px] sm:text-[15px] xl:text-[17px] font-medium tracking-[-0.015em] group-hover:translate-x-0.5 lg:group-hover:-translate-x-0.5 transition-transform">
+            <span className="text-[14px] sm:text-[15px] xl:text-[16.5px] font-medium tracking-[-0.015em] group-hover:translate-x-0.5 lg:group-hover:-translate-x-0.5 transition-transform">
               {item.label}
             </span>
             <span
               className={cn(
                 'font-mono text-[12px] xl:text-[13px] tracking-[0.04em] transition-colors',
                 isActive
-                  ? 'text-[#087F5B] dark:text-[#CFFF49] font-semibold'
-                  : 'text-[#626B64]/80 dark:text-[#828E86]'
+                  ? 'text-[#087F5B] dark:text-[#CDFF45] font-semibold'
+                  : 'text-[#606961]/80 dark:text-[#7C8782]'
               )}
             >
               /{item.numeral}
@@ -205,4 +273,3 @@ export function InteractiveTriadIndex({
     </nav>
   )
 }
-

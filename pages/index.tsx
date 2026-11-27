@@ -12,7 +12,7 @@ import {
   type GitHubRepoStats,
 } from '@/components/landing/PrivacySection'
 import { ProductShowcaseSection } from '@/components/landing/ProductShowcaseSection'
-import { SanctuaryMotionConfig } from '@/components/landing/motion'
+import { MotionProvider } from '@/components/landing/motion/MotionProvider'
 import { REPO_URL } from '@/components/landing/tokens'
 
 const STRUCTURED_DATA = {
@@ -82,8 +82,8 @@ export default function HomePage() {
   }, [])
 
   return (
-    <SanctuaryMotionConfig>
-      <div className="vg-shell min-h-screen flex flex-col selection:bg-[#087F5B]/20 dark:selection:bg-[#58D6A8]/25 selection:text-[#181C19] dark:selection:text-[#F2F3EF]">
+    <MotionProvider>
+      <div className="vg-shell min-h-screen flex flex-col selection:bg-[#087F5B]/20 dark:selection:bg-[#46D6A4]/25 selection:text-[#101211] dark:selection:text-[#F4F6F2]">
         <Head>
           <title>VectorGallery — Everything you keep. Right where you need it.</title>
           <meta
@@ -127,6 +127,6 @@ export default function HomePage() {
 
         <FaqAndFooterSection />
       </div>
-    </SanctuaryMotionConfig>
+    </MotionProvider>
   )
 }

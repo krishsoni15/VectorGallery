@@ -7,48 +7,50 @@
 
 export const VG_PALETTE = {
   light: {
-    bg: '#F2F3F0',
+    bg: '#F4F5F2',
     surface: '#FFFFFF',
-    secondary: '#E7E9E5',
-    stone: '#E7E9E5',
-    silver: '#D1D5D2',
-    titanium: '#A8B3B2',
-    sage: '#D1D5D2',
-    lime: '#D4FF54',
-    limeHover: '#C8F73E',
+    secondary: '#E9EDE8',
+    stone: '#E9EDE8',
+    silver: '#E3E8EA',
+    titanium: '#BCC5C8',
+    chrome: '#E3E8EA',
+    sage: '#E9EDE8',
+    lime: '#CDFF45',
+    limeHover: '#C2F736',
     limeInk: '#101211',
     primary: '#087F5B',
     primaryHover: '#066649',
     primaryDeep: '#05543C',
     mint: '#C4EDE1',
-    teal: '#39D9A0',
+    teal: '#46D6A4',
     ink: '#101211',
-    inkSecondary: '#555E58',
-    inkMuted: '#626B64',
+    inkSecondary: '#606961',
+    inkMuted: '#606961',
     badgeInkOnSage: '#066649',
-    border: '#DDE2DC',
-    borderStrong: '#C7CEC6',
+    border: '#DBE0DA',
+    borderStrong: '#C3CAC4',
     forest: '#092219',
     forestSurface: '#0E2E22',
   },
   dark: {
-    bg: '#090B0A',
-    surface: '#131715',
-    secondary: '#202522',
-    elevated: '#202522',
-    graphite: '#303633',
-    titanium: '#B9C5C5',
-    lime: '#CFFF49',
-    limeHover: '#DCFF73',
-    limeInk: '#090B0A',
-    primary: '#39D9A0',
-    primaryInteractive: '#39D9A0',
-    primaryHover: '#5BE3B2',
+    bg: '#090B0D',
+    surface: '#111416',
+    secondary: '#191D20',
+    elevated: '#191D20',
+    graphite: '#272D30',
+    chrome: '#B8C5CC',
+    titanium: '#B8C5CC',
+    lime: '#CDFF45',
+    limeHover: '#D8FF69',
+    limeInk: '#090B0D',
+    primary: '#46D6A4',
+    primaryInteractive: '#46D6A4',
+    primaryHover: '#63E0B4',
     mint: '#C4EDE1',
-    teal: '#39D9A0',
-    ink: '#F3F5F1',
-    inkSecondary: '#9AA69E',
-    inkMuted: '#828E86',
+    teal: '#46D6A4',
+    ink: '#F4F6F2',
+    inkSecondary: '#A4AEA9',
+    inkMuted: '#7C8782',
     ctaInkOnJade: '#071912',
     border: 'rgba(255, 255, 255, 0.10)',
     borderStrong: 'rgba(255, 255, 255, 0.18)',
@@ -56,13 +58,13 @@ export const VG_PALETTE = {
     forestSurface: '#0D261D',
   },
   app: {
-    darkBg: '#090B0A',
-    darkSurface: '#131715',
-    darkSurface2: '#202522',
-    darkInput: '#171B19',
+    darkBg: '#090B0D',
+    darkSurface: '#111416',
+    darkSurface2: '#191D20',
+    darkInput: '#14181B',
     accent: '#087F5B',
-    accentLight: '#39D9A0',
-    accentGlow: 'rgba(57, 217, 160, 0.16)',
+    accentLight: '#46D6A4',
+    accentGlow: 'rgba(70, 214, 164, 0.16)',
   },
 } as const
 
@@ -73,6 +75,7 @@ export const VG_CSS_VARS_LIGHT: Record<string, string> = {
   '--vg-surface-soft': VG_PALETTE.light.secondary,
   '--vg-silver': VG_PALETTE.light.silver,
   '--vg-titanium': VG_PALETTE.light.titanium,
+  '--vg-chrome': VG_PALETTE.light.chrome,
   '--vg-stone': VG_PALETTE.light.stone,
   '--vg-sage': VG_PALETTE.light.silver,
   '--vg-mint': VG_PALETTE.light.mint,
@@ -92,9 +95,9 @@ export const VG_CSS_VARS_LIGHT: Record<string, string> = {
   '--vg-border': VG_PALETTE.light.border,
   '--vg-border-strong': VG_PALETTE.light.borderStrong,
   '--vg-shadow-card':
-    '0 22px 52px -24px rgba(16, 18, 17, 0.12), 0 2px 10px -2px rgba(16, 18, 17, 0.04)',
+    '0 22px 52px -24px rgba(16, 18, 17, 0.10), 0 2px 10px -2px rgba(16, 18, 17, 0.04)',
   '--vg-shadow-hero':
-    '0 40px 96px -28px rgba(16, 18, 17, 0.16), 0 10px 28px -12px rgba(8, 127, 91, 0.08)',
+    '0 40px 96px -28px rgba(16, 18, 17, 0.14), 0 10px 28px -12px rgba(8, 127, 91, 0.08)',
 }
 
 export const VG_CSS_VARS_DARK: Record<string, string> = {
@@ -104,6 +107,7 @@ export const VG_CSS_VARS_DARK: Record<string, string> = {
   '--vg-surface-soft': VG_PALETTE.dark.elevated,
   '--vg-silver': VG_PALETTE.dark.graphite,
   '--vg-titanium': VG_PALETTE.dark.titanium,
+  '--vg-chrome': VG_PALETTE.dark.chrome,
   '--vg-stone': VG_PALETTE.dark.elevated,
   '--vg-sage': VG_PALETTE.dark.elevated,
   '--vg-mint': VG_PALETTE.dark.mint,
@@ -125,7 +129,7 @@ export const VG_CSS_VARS_DARK: Record<string, string> = {
   '--vg-shadow-card':
     '0 28px 64px -22px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(255, 255, 255, 0.06)',
   '--vg-shadow-hero':
-    '0 46px 104px -26px rgba(0, 0, 0, 0.90), 0 0 76px -30px rgba(207, 255, 73, 0.12)',
+    '0 46px 104px -26px rgba(0, 0, 0, 0.90), 0 0 76px -30px rgba(70, 214, 164, 0.12)',
 }
 
 export const VG_TAILWIND_COLORS = {
@@ -288,27 +292,27 @@ export const VG_MOTION = {
 export const VG_COMPONENTS = {
   buttons: {
     limeCircle:
-      'vg-cta-lime inline-flex flex-col items-center justify-center text-center rounded-full bg-[#D4FF54] hover:bg-[#C8F73E] dark:bg-[#CFFF49] dark:hover:bg-[#DCFF73] text-[#101211] font-semibold tracking-[-0.015em] shadow-[0_20px_50px_-14px_rgba(212,255,84,0.65),0_6px_18px_-6px_rgba(16,18,17,0.14)] dark:shadow-[0_20px_54px_-12px_rgba(207,255,73,0.34),0_6px_22px_-6px_rgba(0,0,0,0.6)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101211] dark:focus-visible:ring-[#F3F5F1] focus-visible:ring-offset-4',
+      'vg-cta-lime inline-flex flex-col items-center justify-center text-center rounded-full bg-[#CDFF45] hover:bg-[#D8FF69] text-[#101211] font-semibold tracking-[-0.015em] shadow-[0_22px_54px_-14px_rgba(205,255,69,0.52),0_6px_18px_-6px_rgba(16,18,17,0.16)] dark:shadow-[0_22px_58px_-12px_rgba(205,255,69,0.28),0_6px_22px_-6px_rgba(0,0,0,0.65)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101211] dark:focus-visible:ring-[#F4F6F2] focus-visible:ring-offset-4',
     limePill:
-      'vg-cta-lime inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#D4FF54] hover:bg-[#C8F73E] dark:bg-[#CFFF49] dark:hover:bg-[#DCFF73] text-[#101211] shadow-[0_14px_34px_-12px_rgba(212,255,84,0.55)] dark:shadow-[0_14px_34px_-12px_rgba(207,255,73,0.28)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101211] dark:focus-visible:ring-[#F3F5F1] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
+      'vg-cta-lime inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#CDFF45] hover:bg-[#D8FF69] text-[#101211] shadow-[0_14px_34px_-12px_rgba(205,255,69,0.45)] dark:shadow-[0_14px_34px_-12px_rgba(205,255,69,0.24)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101211] dark:focus-visible:ring-[#F4F6F2] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
     primary:
-      'vg-cta inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F3F5F1] dark:bg-[#F3F5F1] dark:hover:bg-[#FFFFFF] dark:text-[#090B0A] shadow-[0_16px_36px_-14px_rgba(16,18,17,0.35)] dark:shadow-[0_16px_36px_-14px_rgba(255,255,255,0.18)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
+      'vg-cta inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F4F6F2] dark:bg-[#F4F6F2] dark:hover:bg-[#FFFFFF] dark:text-[#090B0D] shadow-[0_16px_36px_-14px_rgba(16,18,17,0.32)] dark:shadow-[0_16px_36px_-14px_rgba(255,255,255,0.16)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--vg-bg)]',
     primarySm:
-      'inline-flex items-center justify-center gap-1.5 h-9 lg:h-10 px-4 lg:px-5 rounded-full text-[13px] lg:text-[13.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F3F5F1] dark:bg-[#CFFF49] dark:hover:bg-[#DCFF73] dark:text-[#090B0A] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
+      'inline-flex items-center justify-center gap-1.5 h-9 lg:h-10 px-4 lg:px-5 rounded-full text-[13px] lg:text-[13.5px] font-semibold bg-[#101211] hover:bg-[#242826] text-[#F4F6F2] dark:bg-[#CDFF45] dark:hover:bg-[#D8FF69] dark:text-[#090B0D] shadow-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]',
     secondary:
-      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
+      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] hover:border-[var(--vg-border-strong)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]',
     secondarySm:
-      'inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
+      'inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full text-[13px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]',
     ghost:
-      'inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#FFFFFF]/80 dark:hover:bg-[#202522] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
+      'inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13.5px] font-medium text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] hover:bg-[#FFFFFF]/85 dark:hover:bg-[#191D20] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]',
     forestPrimary:
-      'vg-cta-lime inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full text-[14.5px] font-semibold bg-[#CFFF49] hover:bg-[#DCFF73] text-[#090B0A] shadow-[0_14px_34px_-10px_rgba(207,255,73,0.34)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CFFF49]',
+      'vg-cta-lime inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full text-[14.5px] font-semibold bg-[#CDFF45] hover:bg-[#D8FF69] text-[#090B0D] shadow-[0_14px_34px_-10px_rgba(205,255,69,0.30)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CDFF45]',
     forestSecondary:
-      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-white/[0.08] hover:bg-white/[0.14] text-[#F3F5F1] border border-white/[0.18] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39D9A0]',
+      'inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-[14.5px] font-medium bg-white/[0.08] hover:bg-white/[0.14] text-[#F4F6F2] border border-white/[0.18] transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#46D6A4]',
     tabActive:
-      'bg-[#101211] text-[#F3F5F1] border-[#101211] dark:bg-[#CFFF49] dark:text-[#090B0A] dark:border-[#CFFF49] shadow-sm',
+      'bg-[#101211] text-[#F4F6F2] border-[#101211] dark:bg-[#CDFF45] dark:text-[#090B0D] dark:border-[#CDFF45] shadow-sm',
     tabIdle:
-      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[#101211]/25 dark:hover:border-[#CFFF49]/35',
+      'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[#101211]/25 dark:hover:border-[#CDFF45]/35',
   },
   cards: {
     surface:
@@ -356,46 +360,52 @@ export const VG_COMPONENTS = {
  */
 export const VG_AURA_SHADER_SPEC = {
   lightStops: {
-    base: '#ECEDEA',
-    mid: '#D9DDD8',
-    highlight: '#C8CEC9',
-    limeCaustic: '#D4FF54',
-    opacityRange: [0.38, 0.62] as const,
+    base: '#F4F5F2',
+    mid: '#E3E8EA',
+    highlight: '#BCC5C8',
+    limeCaustic: '#CDFF45',
+    emeraldCaustic: '#087F5B',
+    opacityRange: [0.42, 0.68] as const,
   },
   darkStops: {
-    base: '#090B0A',
-    mid: '#121614',
-    highlight: '#1E2421',
-    limeCaustic: '#CFFF49',
-    jadeCaustic: '#39D9A0',
-    opacityRange: [0.40, 0.64] as const,
+    base: '#090B0D',
+    mid: '#111416',
+    highlight: '#272D30',
+    chrome: '#B8C5CC',
+    limeCaustic: '#CDFF45',
+    jadeCaustic: '#46D6A4',
+    opacityRange: [0.45, 0.72] as const,
   },
   cssFallbackLight:
-    'radial-gradient(ellipse 56% 52% at 22% 76%, rgba(212, 255, 84, 0.18), transparent 60%), linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 36%, #EFF1ED 62%, #E5E8E3 100%)',
+    'radial-gradient(ellipse 46% 42% at 50% 56%, rgba(188, 197, 200, 0.34), transparent 64%), radial-gradient(ellipse 34% 28% at 62% 48%, rgba(205, 255, 69, 0.12), transparent 62%), linear-gradient(180deg, #F4F5F2 0%, #FFFFFF 38%, #E9EDE8 78%, #E3E8EA 100%)',
   cssFallbackDark:
-    'radial-gradient(ellipse 54% 50% at 24% 76%, rgba(207, 255, 73, 0.10), transparent 60%), linear-gradient(180deg, #090B0A 0%, #090B0A 36%, #111513 66%, #181D1A 100%)',
+    'radial-gradient(ellipse 52% 44% at 50% 54%, rgba(70, 214, 164, 0.11), transparent 62%), radial-gradient(ellipse 32% 28% at 64% 48%, rgba(205, 255, 69, 0.07), transparent 62%), linear-gradient(180deg, #090B0D 0%, #0D1013 44%, #111416 78%, #090B0D 100%)',
 } as const
 
 export const VG_SPHERE_THEME_SPEC = {
+  heroPosterLight: '/landing/artwork/memory-sphere-video-poster.webp',
+  heroPosterDark: '/landing/artwork/memory-sphere-video-poster.webp',
   heroAnimWebp: '/landing/artwork/memory-sphere-hero.webp',
   heroVideoPoster: '/landing/artwork/memory-sphere-video-poster.webp',
-  heroSourceMp4: '/original-95b39c963d2d05ef93d4459cf213c8cb.mp4',
+  heroSourceMp4: '/Generated Video November 27, 2026 - 2_43PM.mp4',
   light: {
     cutoutSrc: '/landing/artwork/memory-sphere-light-cutout.webp',
     studioSrc: '/landing/artwork/memory-sphere-light.webp',
-    coreColor: '#D4FF54',
-    coreAttenuation: '#A5E816',
-    chromeColor: '#EBEEF0',
-    ringColor: '#C5CCC9',
-    ambientIntensity: 0.9,
+    coreColor: '#CDFF45',
+    coreAttenuation: '#087F5B',
+    chromeColor: '#E3E8EA',
+    titaniumColor: '#BCC5C8',
+    ringColor: '#AEB9BD',
+    ambientIntensity: 0.95,
   },
   dark: {
     cutoutSrc: '/landing/artwork/memory-sphere-dark-cutout.webp',
     studioSrc: '/landing/artwork/memory-sphere-dark.webp',
-    coreColor: '#CFFF49',
-    coreAttenuation: '#39D9A0',
-    chromeColor: '#BAC3C1',
-    ringColor: '#98A4A0',
-    ambientIntensity: 0.72,
+    coreColor: '#CDFF45',
+    coreAttenuation: '#46D6A4',
+    chromeColor: '#B8C5CC',
+    titaniumColor: '#7B8B94',
+    ringColor: '#98A8B0',
+    ambientIntensity: 0.85,
   },
 } as const

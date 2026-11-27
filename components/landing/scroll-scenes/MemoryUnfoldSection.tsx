@@ -1,204 +1,120 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Check, CheckCircle2, Search } from 'lucide-react'
+import { ArrowDown, ArrowRight, Check, CheckCircle2, FileText, Search } from 'lucide-react'
 import { VG_COMPONENTS, VG_LAYOUT, VG_SPHERE_THEME_SPEC } from '@/components/landing/design-system'
-import { useClientReducedMotion } from '@/components/landing/motion/LivingMotionPrimitives'
+import { useReducedMotion } from '@/components/landing/motion/useReducedMotion'
+import {
+  computeStageKinematics,
+  lerp,
+  UNFOLD_SCENES,
+} from '@/components/landing/scroll-scenes/SphereUnfoldTimeline'
 import { cn } from '@/lib/utils'
 
-interface SceneMeta {
-  id: string
-  numeral: string
-  label: string
-  range: [number, number]
-  targetProgress: number
-  title: string
-  caption: string
-}
-
-const SCENES: SceneMeta[] = [
-  {
-    id: 'scene-sphere',
-    numeral: '01',
-    label: 'Sphere',
-    range: [0, 0.15],
-    targetProgress: 0.04,
-    title: 'One calm core for everything you keep.',
-    caption:
-      'Photos, scanned receipts, handwritten journals, and mobile backups begin unified in one sovereign center.',
-  },
-  {
-    id: 'scene-unfold',
-    numeral: '02',
-    label: 'Unfold',
-    range: [0.15, 0.35],
-    targetProgress: 0.25,
-    title: 'Orbital bounds widen as the archive opens.',
-    caption:
-      'As you look closer, sealed storage unlocks without nested folder trees—opening every surface clearly.',
-  },
-  {
-    id: 'scene-capture',
-    numeral: '03',
-    label: 'Capture',
-    range: [0.35, 0.50],
-    targetProgress: 0.43,
-    title: 'Original photos and readable artifacts side by side.',
-    caption:
-      'Camera rolls, coastal rail tickets, expense receipts, and notebook diagrams preserve exact fidelity without format lock-in.',
-  },
-  {
-    id: 'scene-connect',
-    numeral: '04',
-    label: 'Connect',
-    range: [0.50, 0.65],
-    targetProgress: 0.57,
-    title: 'Moments align around visual context and OCR.',
-    caption:
-      'Text extracted from receipts and passes links quietly with shooting dates and scene context across your library.',
-  },
-  {
-    id: 'scene-remember',
-    numeral: '05',
-    label: 'Remember',
-    range: [0.65, 0.82],
-    targetProgress: 0.74,
-    title: 'Type what you recall. Watch clutter step back.',
-    caption:
-      'Ask for "photos from our summer trip"—matched harbors and coastal rail passages illuminate while distraction fades.',
-  },
-  {
-    id: 'scene-reveal',
-    numeral: '06',
-    label: 'Vault',
-    range: [0.82, 1.01],
-    targetProgress: 0.94,
-    title: 'Organized straight inside one quiet workspace.',
-    caption:
-      'Review matched items, grounded file citations, and full-size previews ready for instant lookup anytime.',
-  },
-]
-
-interface StoryFragment {
+interface StoryArtifact {
   id: string
   src: string
   alt: string
   filename: string
-  clusterLabel: string
-  isSummerMatch: boolean
-  // Normalized stage coordinates [-1..+1] from center of choreographed stage
-  capturePos: [number, number, number] // nx, ny, rotate deg
+  category: string
+  isCoastalMatch: boolean
+  /** Normalized coordinates [-1..+1] across Discover, Connect, and Workspace Left Library */
+  discoverPos: [number, number, number] // nx, ny, rotateDeg
   connectPos: [number, number, number]
-  revealPos: [number, number]
+  workspacePos: [number, number]
 }
 
-const FRAGMENTS: StoryFragment[] = [
+const STORY_ARTIFACTS: StoryArtifact[] = [
   {
-    id: 'frag-harbor',
+    id: 'art-harbor',
     src: '/landing/photos/aura-personal-travel.webp',
-    alt: 'Summer harbor promenade beside moored fishing boats',
+    alt: 'Summer harbor walk beside moored coastal boats',
     filename: 'harbor_promenade_august.webp',
-    clusterLabel: 'Summer · Photos',
-    isSummerMatch: true,
-    capturePos: [-0.88, -0.58, -7],
-    connectPos: [-0.82, -0.58, -2],
-    revealPos: [-0.68, -0.46],
+    category: 'Photos',
+    isCoastalMatch: true,
+    discoverPos: [-0.82, -0.58, -6],
+    connectPos: [-0.74, -0.52, 0],
+    workspacePos: [-0.66, -0.46],
   },
   {
-    id: 'frag-train',
-    src: '/landing/photos/aura-train-journey.webp',
-    alt: 'Travel journal and paper ticket by coastal train window',
-    filename: 'coastal_rail_ticket_aug19.webp',
-    clusterLabel: 'Summer · Rail',
-    isSummerMatch: true,
-    capturePos: [0.86, -0.56, 6],
-    connectPos: [0.0, -0.66, 1],
-    revealPos: [0.0, -0.46],
-  },
-  {
-    id: 'frag-coast',
-    src: '/landing/photos/aura-coastal-path.webp',
-    alt: 'Sandy coastal path above chalk cliffs and sea',
-    filename: 'chalk_cliff_footpath.webp',
-    clusterLabel: 'Summer · Coast',
-    isSummerMatch: true,
-    capturePos: [-0.94, 0.36, 5],
-    connectPos: [0.82, -0.58, 2],
-    revealPos: [0.68, -0.46],
-  },
-  {
-    id: 'frag-ticket',
+    id: 'art-pass',
     src: '/landing/photos/aura-ticket-coastal.webp',
-    alt: 'Coastal Line Seat 14A boarding pass OCR scan',
+    alt: 'Coastal Line Seat 14A boarding pass to Nice Ville',
     filename: 'coastal_line_seat_14a.jpg',
-    clusterLabel: 'OCR · Pass',
-    isSummerMatch: false,
-    capturePos: [0.94, 0.34, -5],
-    connectPos: [-0.82, 0.62, -2],
-    revealPos: [-0.68, 0.62],
+    category: 'OCR Pass',
+    isCoastalMatch: true,
+    discoverPos: [-0.26, -0.68, 3],
+    connectPos: [-0.25, -0.52, 0],
+    workspacePos: [-0.24, -0.46],
   },
   {
-    id: 'frag-receipt',
+    id: 'art-rail',
+    src: '/landing/photos/aura-train-journey.webp',
+    alt: 'Coastal train window view with rail ticket and journal',
+    filename: 'coastal_rail_aug19.webp',
+    category: 'Travel',
+    isCoastalMatch: true,
+    discoverPos: [0.30, -0.66, -4],
+    connectPos: [0.25, -0.52, 0],
+    workspacePos: [-0.66, 0.46],
+  },
+  {
+    id: 'art-cliff',
+    src: '/landing/photos/aura-coastal-path.webp',
+    alt: 'Coastal footpath along sunlit white cliffs',
+    filename: 'chalk_cliff_walk.webp',
+    category: 'Photos',
+    isCoastalMatch: true,
+    discoverPos: [0.84, -0.52, 7],
+    connectPos: [0.74, -0.52, 0],
+    workspacePos: [-0.24, 0.46],
+  },
+  {
+    id: 'art-celebration',
+    src: '/landing/photos/aura-celebration-toast.webp',
+    alt: 'Friends raising glasses in golden-hour terrace celebration',
+    filename: 'terrace_toast_sep19.webp',
+    category: 'Celebration',
+    isCoastalMatch: false,
+    discoverPos: [-0.84, 0.44, 5],
+    connectPos: [-0.74, 0.54, 0],
+    workspacePos: [-0.66, 0.88],
+  },
+  {
+    id: 'art-receipt',
     src: '/landing/photos/aura-receipt-studio.webp',
-    alt: 'Studio Equip Co receipt #10482 for headphones and desk lamp',
-    filename: 'studio_equip_receipt_10482.png',
-    clusterLabel: 'OCR · Receipt',
-    isSummerMatch: false,
-    capturePos: [-0.44, 0.72, -3],
-    connectPos: [0.0, 0.68, 0],
-    revealPos: [0.0, 0.62],
+    alt: 'Studio Equip Co headphones receipt totaling $153.36',
+    filename: 'studio_receipt_10482.png',
+    category: 'Receipt',
+    isCoastalMatch: false,
+    discoverPos: [-0.28, 0.64, -3],
+    connectPos: [-0.25, 0.54, 0],
+    workspacePos: [-0.24, 0.88],
   },
   {
-    id: 'frag-arch',
-    src: '/landing/photos/aura-arch-notes.webp',
-    alt: 'Handwritten architectural spatial flow notebook spread',
-    filename: 'architectural_spatial_flow.pdf',
-    clusterLabel: 'Notes · Sketch',
-    isSummerMatch: false,
-    capturePos: [0.46, 0.70, 6],
-    connectPos: [0.82, 0.62, 2],
-    revealPos: [0.68, 0.62],
+    id: 'art-deadlines',
+    src: '/landing/photos/aura-deadline-notes.webp',
+    alt: 'Handwritten project deadline notes in grid notebook',
+    filename: 'project_deadlines_oct.webp',
+    category: 'Notes',
+    isCoastalMatch: false,
+    discoverPos: [0.28, 0.62, 4],
+    connectPos: [0.25, 0.54, 0],
+    workspacePos: [-0.66, 0.94],
+  },
+  {
+    id: 'art-university',
+    src: '/landing/photos/aura-university-letter.webp',
+    alt: 'Northridge University Autumn project registration letter',
+    filename: 'northridge_registration.pdf',
+    category: 'Document',
+    isCoastalMatch: false,
+    discoverPos: [0.82, 0.46, -6],
+    connectPos: [0.74, 0.54, 0],
+    workspacePos: [-0.24, 0.94],
   },
 ]
 
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * Math.max(0, Math.min(1, t))
-}
-
-function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v))
-}
-
-function computeStageState(p: number) {
-  const unfoldW = clamp01((p - 0.08) / 0.20)
-  const captureW = clamp01((p - 0.28) / 0.16)
-  const connectW = clamp01((p - 0.46) / 0.14)
-  const rememberW = clamp01((p - 0.62) / 0.14)
-  const revealW = clamp01((p - 0.79) / 0.16)
-
-  const sphereScale = 1 + unfoldW * 0.24 - captureW * 0.52 - revealW * 0.36
-  const sphereOpacity = 1 - clamp01((p - 0.48) / 0.24) * 0.90
-  const orbitExpand = 1 + unfoldW * 0.42 + connectW * 0.18
-  const orbitOpacity = 0.85 - revealW * 0.75
-
-  const connectLineProgress = clamp01((p - 0.46) / 0.14) * (1 - clamp01((p - 0.78) / 0.10))
-  const searchPillOpacity = clamp01((p - 0.61) / 0.07) * (1 - clamp01((p - 0.86) / 0.07))
-  const vaultFrameOpacity = clamp01((p - 0.79) / 0.12)
-
-  return {
-    unfoldW,
-    captureW,
-    connectW,
-    rememberW,
-    revealW,
-    sphereScale,
-    sphereOpacity,
-    orbitExpand,
-    orbitOpacity,
-    connectLineProgress,
-    searchPillOpacity,
-    vaultFrameOpacity,
-  }
-}
+const TYPED_QUERY_TEXT = 'Coastal train pass to Nice & summer harbor'
 
 export function MemoryUnfoldSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -206,11 +122,11 @@ export function MemoryUnfoldSection() {
   const stageRef = useRef<HTMLDivElement>(null)
   const stRef = useRef<{ start: number; end: number } | null>(null)
 
-  const reduced = useClientReducedMotion()
+  const reduced = useReducedMotion()
   const [isDark, setIsDark] = useState(false)
   const [progress, setProgress] = useState(0)
   const [manualSceneIdx, setManualSceneIdx] = useState<number | null>(null)
-  const [stageDims, setStageDims] = useState({ w: 1120, h: 450 })
+  const [stageDims, setStageDims] = useState({ w: 1200, h: 520 })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -226,7 +142,7 @@ export function MemoryUnfoldSection() {
     if (!el || typeof ResizeObserver === 'undefined') return
     const updateDims = () => {
       setStageDims({
-        w: Math.max(320, el.clientWidth),
+        w: Math.max(300, el.clientWidth),
         h: Math.max(320, el.clientHeight),
       })
     }
@@ -246,8 +162,10 @@ export function MemoryUnfoldSection() {
 
     const initGsap = async () => {
       try {
-        const gsapMod = await import('gsap')
-        const stMod = await import('gsap/ScrollTrigger')
+        const [gsapMod, stMod] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ])
         if (cancelled) return
 
         const gsap = gsapMod.gsap || gsapMod.default
@@ -259,9 +177,9 @@ export function MemoryUnfoldSection() {
           const st = ScrollTrigger.create({
             trigger: wrap,
             start: 'top 74px',
-            end: '+=2000',
+            end: '+=2400',
             pin: true,
-            scrub: 0.8,
+            scrub: 0.65,
             fastScrollEnd: true,
             invalidateOnRefresh: true,
             anticipatePin: 1,
@@ -280,7 +198,7 @@ export function MemoryUnfoldSection() {
 
         cleanupCtx = () => mm.revert()
       } catch {
-        // Clickable scene tabs still drive full state cleanly
+        // Clickable scene tabs remain responsive fallback
       }
     }
 
@@ -293,23 +211,23 @@ export function MemoryUnfoldSection() {
   }, [reduced])
 
   const effectiveProgress = useMemo(() => {
-    if (manualSceneIdx !== null) return SCENES[manualSceneIdx]?.targetProgress ?? progress
+    if (manualSceneIdx !== null) return UNFOLD_SCENES[manualSceneIdx]?.targetProgress ?? progress
     return progress
   }, [manualSceneIdx, progress])
 
   const activeSceneIdx = useMemo(() => {
     if (manualSceneIdx !== null) return manualSceneIdx
-    const idx = SCENES.findIndex(
+    const idx = UNFOLD_SCENES.findIndex(
       (s) => effectiveProgress >= s.range[0] && effectiveProgress < s.range[1]
     )
-    return idx === -1 ? SCENES.length - 1 : idx
+    return idx === -1 ? UNFOLD_SCENES.length - 1 : idx
   }, [effectiveProgress, manualSceneIdx])
 
-  const activeScene = SCENES[activeSceneIdx]
-  const stage = useMemo(() => computeStageState(effectiveProgress), [effectiveProgress])
+  const activeScene = UNFOLD_SCENES[activeSceneIdx]
+  const k = useMemo(() => computeStageKinematics(effectiveProgress), [effectiveProgress])
 
   const handleSelectScene = (idx: number) => {
-    const targetP = SCENES[idx]?.targetProgress ?? 0
+    const targetP = UNFOLD_SCENES[idx]?.targetProgress ?? 0
     if (!reduced && stRef.current && typeof window !== 'undefined' && window.innerWidth >= 768) {
       const { start, end } = stRef.current
       const destY = start + (end - start) * targetP
@@ -319,12 +237,13 @@ export function MemoryUnfoldSection() {
     }
   }
 
-  const cutoutSrc = VG_SPHERE_THEME_SPEC.heroVideoPoster
-
-  const maxSpreadX = Math.min(stageDims.w * 0.36, 560)
-  const isCompactHeight = stageDims.h < 405
-  const maxSpreadY = Math.min(stageDims.h * (isCompactHeight ? 0.34 : 0.35), 210)
+  const maxSpreadX = Math.min(stageDims.w * 0.42, 620)
+  const isCompactH = stageDims.h < 430
+  const maxSpreadY = Math.min(stageDims.h * (isCompactH ? 0.34 : 0.37), 225)
   const useCssGlide = manualSceneIdx !== null || stageDims.w < 768
+
+  const typedChars = Math.round(TYPED_QUERY_TEXT.length * k.typedQueryRatio)
+  const visibleQuery = TYPED_QUERY_TEXT.slice(0, typedChars)
 
   return (
     <section
@@ -333,35 +252,38 @@ export function MemoryUnfoldSection() {
       aria-labelledby="scroll-story-heading"
       data-story-progress={effectiveProgress.toFixed(3)}
       data-story-scene={activeScene.numeral}
-      className="relative bg-[#F2F3F0] dark:bg-[#090B0A] border-b border-[var(--vg-border)]"
+      className="relative bg-[#F4F5F2] dark:bg-[#090B0D] border-b border-[var(--vg-border)] scroll-mt-20"
     >
       <div
         ref={triggerWrapRef}
-        className="relative w-full min-h-[560px] md:min-h-0 md:h-[calc(100vh-74px)] md:max-h-[900px] flex flex-col justify-between py-3 sm:py-4 lg:py-5 overflow-hidden"
+        className="relative w-full min-h-[580px] md:min-h-0 md:h-[calc(100vh-74px)] md:max-h-[920px] flex flex-col justify-between py-3 sm:py-4 lg:py-5 overflow-hidden"
       >
+        {/* Studio Metallic Radial Field tracking expansion continuously */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-85"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: isDark
-              ? 'radial-gradient(ellipse 68% 60% at 50% 48%, rgba(207,255,73,0.06), rgba(19,23,21,0.9) 62%, #090B0A 100%)'
-              : 'radial-gradient(ellipse 68% 60% at 50% 48%, rgba(212,255,84,0.13), rgba(231,233,229,0.72) 60%, #F2F3F0 100%)',
+              ? `radial-gradient(ellipse ${Math.round(52 + k.apertureScale * 22)}% ${Math.round(48 + k.apertureScale * 18)}% at 50% 52%, rgba(70,214,164,${(0.06 + k.unfoldW * 0.06).toFixed(3)}), rgba(25,29,32,0.55) 55%, #090B0D 100%)`
+              : `radial-gradient(ellipse ${Math.round(52 + k.apertureScale * 22)}% ${Math.round(48 + k.apertureScale * 18)}% at 50% 52%, rgba(205,255,69,${(0.08 + k.unfoldW * 0.08).toFixed(3)}), rgba(227,232,234,0.65) 54%, #F4F5F2 100%)`,
           }}
         />
 
-        <div className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 min-h-0 flex flex-col justify-between gap-2.5 sm:gap-3`}>
-          {/* TOP NARRATIVE HEADER */}
+        <div
+          className={`${VG_LAYOUT.containers.heroStage} relative z-10 w-full flex-1 min-h-0 flex flex-col justify-between gap-2.5 sm:gap-3`}
+        >
+          {/* TOP NARRATIVE HEADER WITH ACCESSIBLE SKIP STORY CONTROL */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-2.5 border-b border-[var(--vg-border)] pb-2.5 sm:pb-3 shrink-0">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 mb-1">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#CFFF49]" />
-                <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--vg-ink-2)]">
-                  Scene {activeScene.numeral} / 06 · {activeScene.label}
+                <span className="inline-block w-2 h-2 rounded-full bg-[#087F5B] dark:bg-[#CDFF45]" />
+                <span className="text-[12px] font-medium text-[var(--vg-ink-2)]">
+                  Chapter {activeScene.numeral} of 06 — {activeScene.label}
                 </span>
               </div>
               <h2
                 id="scroll-story-heading"
-                className="font-display font-bold tracking-[-0.038em] leading-[1.05] text-[1.35rem] sm:text-[1.75rem] lg:text-[2.15rem] text-[#101211] dark:text-[#F3F5F1]"
+                className="font-display font-bold tracking-[-0.036em] leading-[1.06] text-[1.35rem] sm:text-[1.75rem] lg:text-[2.1rem] text-[#101211] dark:text-[#F4F6F2]"
               >
                 {activeScene.title}
               </h2>
@@ -370,223 +292,299 @@ export function MemoryUnfoldSection() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
-              <div className="hidden sm:flex items-center gap-2 font-mono text-[11.5px] text-[var(--vg-ink-2)] px-3 py-1 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)]">
-                <span>Scroll</span>
-                <span className="text-[#101211] dark:text-[#CFFF49] font-semibold">
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <div className="hidden sm:flex items-center gap-2 font-mono text-[11px] text-[var(--vg-ink-2)] px-3 py-1 rounded-full border border-[var(--vg-border)] bg-[var(--vg-surface)]">
+                <span>Story</span>
+                <span className="text-[#101211] dark:text-[#CDFF45] font-semibold">
                   {Math.round(effectiveProgress * 100)}%
                 </span>
               </div>
-              <Link
-                href="/app"
-                className={cn(VG_COMPONENTS.buttons.primarySm, 'whitespace-nowrap')}
+              <a
+                href="#search"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-[12.5px] font-medium bg-[var(--vg-surface)] hover:bg-[var(--vg-surface-2)] text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] border border-[var(--vg-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
               >
+                <span>Skip story</span>
+                <ArrowDown className="w-3.5 h-3.5" />
+              </a>
+              <Link href="/app" className={cn(VG_COMPONENTS.buttons.primarySm, 'whitespace-nowrap')}>
                 <span>Open Vault</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
 
-          {/* CHOREOGRAPHED CENTER TRANSFORM STAGE */}
+          {/* CHOREOGRAPHED CONTINUOUS VIEWPORT STAGE */}
           <div
             ref={stageRef}
-            className="relative flex-1 min-h-[260px] sm:min-h-[300px] flex items-center justify-center"
+            className="relative flex-1 min-h-[290px] sm:min-h-[340px] flex items-center justify-center"
           >
-            {/* Scene F Workspace Reveal Shell */}
+            {/* SCENE 06 EXPANDING WORKSPACE SHELL (Seamless continuity from aligned fragments!) */}
             <div
-              aria-hidden={stage.vaultFrameOpacity < 0.1}
+              aria-hidden={k.workspaceShellOpacity < 0.08}
               style={{
-                opacity: stage.vaultFrameOpacity,
-                transform: `scale(${lerp(0.95, 1, stage.vaultFrameOpacity)})`,
+                opacity: k.workspaceShellOpacity,
+                transform: `scale(${lerp(0.95, 1, k.workspaceShellOpacity)})`,
               }}
-              className="pointer-events-none absolute inset-x-2 sm:inset-x-8 lg:inset-x-20 top-1.5 bottom-1.5 rounded-3xl border border-[var(--vg-border-strong)] bg-[#FFFFFF]/90 dark:bg-[#131715]/90 backdrop-blur-xl shadow-[var(--vg-shadow-hero)] flex flex-col justify-between p-3 sm:p-4"
+              className="pointer-events-none absolute inset-x-1 sm:inset-x-4 lg:inset-x-12 top-1 bottom-1 rounded-3xl border border-[var(--vg-border-strong)] bg-[#FFFFFF]/92 dark:bg-[#111416]/94 backdrop-blur-2xl shadow-[var(--vg-shadow-hero)] grid grid-cols-1 lg:grid-cols-12 overflow-hidden z-10"
             >
-              <div className="flex items-center justify-between border-b border-[var(--vg-border)] pb-3">
-                <div className="flex items-center gap-2.5">
-                  <span className="inline-flex gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#DDE2DC] dark:bg-white/20" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#DDE2DC] dark:bg-white/20" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#DDE2DC] dark:bg-white/20" />
-                  </span>
-                  <span className="font-mono text-[11px] text-[var(--vg-ink-2)] ml-2">
-                    VectorGallery Vault · 6 captured artifacts · 3 matched Summer Trip
+              {/* Left Library Header */}
+              <div className="lg:col-span-7 border-b lg:border-b-0 lg:border-r border-[var(--vg-border)] p-4 sm:p-5 flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#DBE0DA] dark:bg-white/20" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#DBE0DA] dark:bg-white/20" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#DBE0DA] dark:bg-white/20" />
+                    </span>
+                    <span className="text-[12px] font-semibold text-[#101211] dark:text-[#F4F6F2] ml-2">
+                      VectorGallery Vault — Coastal Trip Results
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#CDFF45] text-[#101211]">
+                    <Check className="w-3 h-3" />
+                    <span>4 matched</span>
                   </span>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#D4FF54] text-[#101211]">
-                  <Check className="w-3 h-3" />
-                  <span>Indexed</span>
-                </span>
+
+                <div className="flex items-center justify-between text-[11px] text-[var(--vg-ink-2)] pt-2">
+                  <span>All 8 captures stored locally in original fidelity</span>
+                  <span>OCR &amp; visual context ready</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between pt-2 text-[11px] font-mono text-[var(--vg-ink-2)]">
-                <span>Local / Cloud Storage · Instant OCR + Visual Recall</span>
-                <span>Zero vendor lock-in</span>
+
+              {/* Right Active Document Inspector Preview */}
+              <div
+                style={{ opacity: k.inspectorOpacity }}
+                className="hidden lg:flex lg:col-span-5 flex-col justify-between p-5 bg-[#F4F5F2]/80 dark:bg-[#090B0D]/70"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#087F5B] dark:text-[#CDFF45]">
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Selected Memory Inspector</span>
+                  </span>
+                  <span className="font-mono text-[11px] text-[var(--vg-ink-2)]">OCR Match</span>
+                </div>
+
+                <div className="my-2 rounded-2xl overflow-hidden border border-[var(--vg-border)] aspect-[16/10] bg-[var(--vg-surface)]">
+                  <img
+                    src="/landing/photos/aura-ticket-coastal.webp"
+                    alt="Coastal Line Seat 14A boarding pass preview inside workspace"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="rounded-xl p-3 bg-[var(--vg-surface)] border border-[var(--vg-border)] space-y-1">
+                  <p className="font-mono text-[11.5px] font-semibold text-[#101211] dark:text-[#F4F6F2]">
+                    coastal_line_seat_14a.jpg
+                  </p>
+                  <p className="font-mono text-[11px] text-[var(--vg-ink-2)] leading-relaxed">
+                    SEAT 14A · 08:40 · MARSEILLE ST CHARLES -&gt; NICE VILLE
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Scene E Illuminated Search Pill */}
+            {/* SCENE 05 DYNAMIC TYPING NATURAL-LANGUAGE SEARCH COMMAND BAR */}
             <div
               style={{
-                opacity: stage.searchPillOpacity,
-                transform: `translate(-50%, ${lerp(-10, 0, stage.searchPillOpacity)}px)`,
+                opacity: k.searchBarOpacity,
+                transform: `translate(-50%, ${lerp(-14, 0, k.searchBarOpacity)}px)`,
               }}
-              className="pointer-events-none absolute top-3 sm:top-4 left-1/2 z-30 w-[92%] max-w-[520px]"
+              className="pointer-events-none absolute top-2 sm:top-3 left-1/2 z-30 w-[92%] max-w-[540px]"
             >
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#FFFFFF]/95 dark:bg-[#131715]/95 border border-[#087F5B]/45 dark:border-[#CFFF49]/55 shadow-[0_18px_40px_-14px_rgba(16,18,17,0.28)] backdrop-blur-xl">
-                <Search className="w-4 h-4 text-[#087F5B] dark:text-[#CFFF49] shrink-0" />
-                <span className="text-[13.5px] sm:text-[14.5px] font-medium text-[#101211] dark:text-[#F3F5F1] truncate">
-                  Find my photos from our summer trip
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#FFFFFF]/95 dark:bg-[#111416]/95 border border-[#087F5B]/45 dark:border-[#CDFF45]/55 shadow-[0_18px_40px_-14px_rgba(16,18,17,0.28)] backdrop-blur-xl">
+                <Search className="w-4 h-4 text-[#087F5B] dark:text-[#CDFF45] shrink-0" />
+                <span className="text-[13px] sm:text-[14px] font-medium text-[#101211] dark:text-[#F4F6F2] truncate">
+                  {visibleQuery || 'Searching archive...'}
+                  {k.typedQueryRatio > 0.02 && k.typedQueryRatio < 0.99 && (
+                    <span className="inline-block w-0.5 h-4 bg-[#087F5B] dark:bg-[#CDFF45] align-middle ml-0.5 animate-pulse" />
+                  )}
                 </span>
-                <span className="ml-auto font-mono text-[11px] px-2 py-0.5 rounded-full bg-[#D4FF54] text-[#101211] font-semibold shrink-0">
-                  3 hits
+                <span className="ml-auto font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-[#CDFF45] text-[#101211] font-semibold shrink-0">
+                  4 matched
                 </span>
               </div>
             </div>
 
-            {/* Expanding Concentric Orbital Hairlines & Cluster Vectors */}
+            {/* PARTING SCULPTURAL METALLIC CALIPER ARCS & CONNECTION FILAMENTS */}
             <svg
               aria-hidden="true"
-              viewBox="-480 -220 960 440"
+              viewBox="-560 -260 1120 520"
               className="pointer-events-none absolute inset-0 w-full h-full z-10"
             >
+              {/* Left Parting Titanium Caliper Wing */}
               <g
-                transform={`scale(${stage.orbitExpand.toFixed(3)})`}
-                style={{ opacity: stage.orbitOpacity }}
+                transform={`translate(${(-k.wingSplitPx * 130).toFixed(1)}, 0) scale(${k.apertureScale.toFixed(3)})`}
+                style={{ opacity: Math.max(0.12, 0.88 - k.productW * 0.78) }}
               >
-                <ellipse
-                  rx="210"
-                  ry="92"
-                  transform="rotate(-14)"
+                <path
+                  d="M -60 -150 C -210 -95, -210 95, -60 150"
                   fill="none"
-                  stroke={isDark ? '#CFFF49' : '#087F5B'}
-                  strokeOpacity="0.34"
-                  strokeWidth="1.2"
+                  stroke={isDark ? '#B8C5CC' : '#8D989C'}
+                  strokeWidth="2.4"
+                  strokeOpacity="0.65"
                 />
-                <ellipse
-                  rx="275"
-                  ry="118"
-                  transform="rotate(16)"
+                <path
+                  d="M -30 -180 C -250 -115, -250 115, -30 180"
                   fill="none"
-                  stroke={isDark ? '#B9C5C5' : '#A8B3B2'}
-                  strokeOpacity="0.48"
-                  strokeWidth="1"
-                  strokeDasharray="4 6"
+                  stroke={isDark ? '#46D6A4' : '#087F5B'}
+                  strokeWidth="1.25"
+                  strokeOpacity="0.42"
                 />
               </g>
 
-              {stage.connectLineProgress > 0.02 && (
+              {/* Right Parting Titanium Caliper Wing */}
+              <g
+                transform={`translate(${(k.wingSplitPx * 130).toFixed(1)}, 0) scale(${k.apertureScale.toFixed(3)})`}
+                style={{ opacity: Math.max(0.12, 0.88 - k.productW * 0.78) }}
+              >
+                <path
+                  d="M 60 -150 C 210 -95, 210 95, 60 150"
+                  fill="none"
+                  stroke={isDark ? '#B8C5CC' : '#8D989C'}
+                  strokeWidth="2.4"
+                  strokeOpacity="0.65"
+                />
+                <path
+                  d="M 30 -180 C 250 -115, 250 115, 30 180"
+                  fill="none"
+                  stroke={isDark ? '#CDFF45' : '#087F5B'}
+                  strokeWidth="1.25"
+                  strokeOpacity="0.48"
+                />
+              </g>
+
+              {/* Scene 04 Dynamic Memory Connection Filaments */}
+              {k.connectLineProgress > 0.02 && (
                 <g
-                  style={{ opacity: stage.connectLineProgress }}
-                  stroke={isDark ? '#CFFF49' : '#087F5B'}
-                  strokeWidth="1.35"
-                  strokeOpacity="0.5"
+                  style={{ opacity: k.connectLineProgress }}
+                  stroke={isDark ? '#CDFF45' : '#087F5B'}
+                  strokeWidth="1.4"
+                  strokeOpacity="0.52"
                   fill="none"
                 >
                   <path
-                    d="M -290 -96 Q 0 -132 290 -96"
-                    strokeDasharray="620"
-                    strokeDashoffset={(1 - stage.connectLineProgress) * 620}
+                    d="M -340 -95 Q 0 -145 340 -95"
+                    strokeDasharray="720"
+                    strokeDashoffset={(1 - k.connectLineProgress) * 720}
                   />
                   <path
-                    d="M -290 96 Q 0 132 290 96"
-                    strokeDasharray="620"
-                    strokeDashoffset={(1 - stage.connectLineProgress) * 620}
+                    d="M -340 100 Q 0 148 340 100"
+                    strokeDasharray="720"
+                    strokeDashoffset={(1 - k.connectLineProgress) * 720}
+                  />
+                  <path
+                    d="M -120 -95 L -120 100 M 120 -95 L 120 100"
+                    strokeDasharray="240"
+                    strokeDashoffset={(1 - k.connectLineProgress) * 240}
+                    strokeOpacity="0.28"
                   />
                 </g>
               )}
             </svg>
 
-            {/* Unfolding Central Memory Sphere */}
+            {/* CENTRAL DILATING GLASS PRISM GLOW BEHIND SPHERE OPENING */}
+            <div
+              aria-hidden="true"
+              style={{
+                opacity: k.unfoldW * (1 - k.productW) * 0.72,
+                transform: `scale(${lerp(0.65, 1.55, k.unfoldW)})`,
+              }}
+              className="pointer-events-none absolute w-[240px] h-[240px] sm:w-[320px] sm:h-[320px] rounded-full blur-3xl z-10 bg-[radial-gradient(circle,rgba(205,255,69,0.28)_0%,rgba(70,214,164,0.14)_48%,transparent_72%)]"
+            />
+
+            {/* CENTRAL SIGNATURE MEMORY SPHERE (Maintains dominant presence before parting) */}
             <div
               style={{
-                opacity: stage.sphereOpacity,
-                transform: `scale(${stage.sphereScale.toFixed(3)}) rotate(${(effectiveProgress * 22).toFixed(2)}deg)`,
+                opacity: k.sphereOpacity,
+                transform: `scale(${k.sphereScale.toFixed(3)}) rotate(${(effectiveProgress * 18).toFixed(2)}deg)`,
               }}
               className={cn(
-                'pointer-events-none relative z-20 w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] lg:w-[290px] lg:h-[290px] xl:w-[340px] xl:h-[340px] 2xl:w-[380px] 2xl:h-[380px] flex items-center justify-center will-change-[transform,opacity]',
+                'pointer-events-none relative z-20 w-[260px] h-[260px] sm:w-[330px] sm:h-[330px] lg:w-[390px] lg:h-[390px] xl:w-[440px] xl:h-[440px] 2xl:w-[480px] 2xl:h-[480px] flex items-center justify-center will-change-[transform,opacity]',
                 useCssGlide && 'transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
               )}
             >
               <img
-                src={cutoutSrc}
+                src={VG_SPHERE_THEME_SPEC.heroAnimWebp}
                 alt="Unfolding Memory Sphere core"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain scale-[1.08]"
               />
             </div>
 
-            {/* 6 Choreographed Photographic & Synthetic Document Fragments */}
+            {/* 8 CONTINUOUSLY CHOREOGRAPHED MEMORY & DOCUMENT ARTIFACTS */}
             <div className="pointer-events-none absolute inset-0 z-20">
-              {FRAGMENTS.map((frag) => {
-                const nxCap = lerp(0, frag.capturePos[0], stage.captureW)
-                const nyCap = lerp(0, frag.capturePos[1], stage.captureW)
-                const rCap = lerp(0, frag.capturePos[2], stage.captureW)
+              {STORY_ARTIFACTS.map((art) => {
+                // Smoothly blend Discover -> Connect -> Left Workspace Column without jumps
+                const nxCon = lerp(0, art.discoverPos[0], k.discoverW)
+                const nyCon = lerp(0, art.discoverPos[1], k.discoverW)
+                const rCon = lerp(0, art.discoverPos[2], k.discoverW)
 
-                const nxConn = lerp(nxCap, frag.connectPos[0], stage.connectW)
-                const nyConn = lerp(nyCap, frag.connectPos[1], stage.connectW)
-                const rConn = lerp(rCap, frag.connectPos[2], stage.connectW)
+                const nxGrid = lerp(nxCon, art.connectPos[0], k.connectW)
+                const nyGrid = lerp(nyCon, art.connectPos[1], k.connectW)
+                const rGrid = lerp(rCon, art.connectPos[2], k.connectW)
 
-                const nxFinal = lerp(nxConn, frag.revealPos[0], stage.revealW)
-                const nyFinal = lerp(nyConn, frag.revealPos[1], stage.revealW)
-                const rFinal = lerp(rConn, 0, stage.revealW)
+                const nxFinal = lerp(nxGrid, art.workspacePos[0], k.productW)
+                const nyFinal = lerp(nyGrid, art.workspacePos[1], k.productW)
+                const rFinal = lerp(rGrid, 0, k.productW)
 
                 const xPx = nxFinal * maxSpreadX
                 const yPx = nyFinal * maxSpreadY
 
-                const nonMatchDim =
-                  !frag.isSummerMatch && stage.rememberW > 0
-                    ? lerp(1, 0.24, stage.rememberW * (1 - stage.revealW * 0.72))
-                    : 1
+                // Hide non-matching cards smoothly once they settle beyond the Workspace top 4 results
+                const nonMatchRememberFade = !art.isCoastalMatch
+                  ? lerp(1, 0.24, k.rememberW) * (1 - k.productW)
+                  : 1
 
-                const fragOpacity = stage.captureW * nonMatchDim
-                const fragScale =
-                  lerp(0.28, 0.96, stage.captureW) *
-                  (frag.isSummerMatch && stage.rememberW > 0
-                    ? lerp(1, 1.07, stage.rememberW * (1 - stage.revealW))
-                    : 1)
+                // Gentle emergence straight out of the opening sphere starting at unfoldW > 0.35
+                const revealScale = lerp(0.18, 0.98, Math.max(k.unfoldW * 0.25, k.discoverW))
+                const matchBoost =
+                  art.isCoastalMatch && k.rememberW > 0
+                    ? lerp(1, 1.07, k.rememberW * (1 - k.productW * 0.85))
+                    : !art.isCoastalMatch && k.rememberW > 0
+                      ? lerp(1, 0.84, k.rememberW)
+                      : 1
 
-                const isHighlighted = frag.isSummerMatch && stage.rememberW > 0.2
+                const cardOpacity = Math.max(0, Math.min(1, k.discoverW * 1.15 * nonMatchRememberFade))
+                const isHighlighted = art.isCoastalMatch && k.rememberW > 0.22
 
                 return (
                   <div
-                    key={frag.id}
-                    data-fragment-id={frag.id}
+                    key={art.id}
+                    data-artifact-id={art.id}
                     style={{
                       left: '50%',
                       top: '50%',
-                      opacity: fragOpacity,
-                      transform: `translate3d(calc(-50% + ${xPx.toFixed(1)}px), calc(-50% + ${yPx.toFixed(1)}px), 0) rotate(${rFinal.toFixed(2)}deg) scale(${fragScale.toFixed(3)})`,
+                      opacity: cardOpacity,
+                      transform: `translate3d(calc(-50% + ${xPx.toFixed(1)}px), calc(-50% + ${yPx.toFixed(1)}px), 0) rotate(${rFinal.toFixed(2)}deg) scale(${(revealScale * matchBoost).toFixed(3)})`,
                     }}
                     className={cn(
                       'absolute rounded-2xl overflow-hidden bg-[var(--vg-surface)] border will-change-[transform,opacity]',
                       useCssGlide
                         ? 'transition-[transform,opacity,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
                         : 'transition-shadow duration-200',
-                      isCompactHeight
-                        ? 'w-[100px] sm:w-[110px] lg:w-[118px]'
-                        : 'w-[104px] sm:w-[146px] lg:w-[168px] 2xl:w-[196px]',
+                      isCompactH
+                        ? 'w-[96px] sm:w-[116px] lg:w-[130px]'
+                        : 'w-[104px] sm:w-[138px] lg:w-[164px] xl:w-[184px] 2xl:w-[204px]',
                       isHighlighted
-                        ? 'border-[#087F5B] dark:border-[#CFFF49] shadow-[0_24px_54px_-14px_rgba(212,255,84,0.45),0_12px_28px_-10px_rgba(16,18,17,0.24)] ring-2 ring-[#D4FF54]/75 dark:ring-[#CFFF49]/75 z-30'
+                        ? 'border-[#087F5B] dark:border-[#CDFF45] shadow-[0_24px_54px_-14px_rgba(205,255,69,0.42),0_12px_28px_-10px_rgba(16,18,17,0.22)] ring-2 ring-[#CDFF45]/75 z-30'
                         : 'border-[var(--vg-border-strong)] shadow-[var(--vg-shadow-card)] z-20'
                     )}
                   >
                     <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--vg-surface-2)]">
-                      <img
-                        src={frag.src}
-                        alt={frag.alt}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={art.src} alt={art.alt} className="w-full h-full object-cover" />
                       {isHighlighted && (
-                        <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-mono font-semibold bg-[#D4FF54] text-[#101211]">
+                        <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-[#CDFF45] text-[#101211]">
                           <CheckCircle2 className="w-2.5 h-2.5" />
                           <span>Match</span>
                         </span>
                       )}
                     </div>
                     <div className="px-2.5 py-1.5 bg-[var(--vg-surface)] flex items-center justify-between gap-1.5">
-                      <span className="font-mono text-[9.5px] sm:text-[10px] text-[#101211] dark:text-[#F3F5F1] truncate">
-                        {frag.filename}
+                      <span className="font-mono text-[9px] sm:text-[10px] text-[#101211] dark:text-[#F4F6F2] truncate">
+                        {art.filename}
                       </span>
                       <span className="hidden sm:inline text-[9px] text-[var(--vg-ink-2)] shrink-0">
-                        {frag.clusterLabel.split(' · ')[0]}
+                        {art.category}
                       </span>
                     </div>
                   </div>
@@ -597,9 +595,9 @@ export function MemoryUnfoldSection() {
 
           {/* BOTTOM INTERACTIVE SCENE SCRUBBER BAR */}
           <div className="relative z-30 flex flex-col gap-2 pt-1 shrink-0">
-            <div className="w-full h-1 rounded-full bg-[#DDE2DC] dark:bg-white/[0.10] overflow-hidden">
+            <div className="w-full h-1 rounded-full bg-[#DBE0DA] dark:bg-white/[0.10] overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#087F5B] dark:bg-[#CFFF49] transition-[width] duration-75"
+                className="h-full rounded-full bg-[#087F5B] dark:bg-[#CDFF45] transition-[width] duration-75"
                 style={{ width: `${Math.max(4, Math.round(effectiveProgress * 100))}%` }}
               />
             </div>
@@ -609,7 +607,7 @@ export function MemoryUnfoldSection() {
               aria-label="Memory transformation scenes"
               className="flex flex-wrap items-center justify-between gap-1.5"
             >
-              {SCENES.map((scene, idx) => {
+              {UNFOLD_SCENES.map((scene, idx) => {
                 const active = idx === activeSceneIdx
                 return (
                   <button
@@ -619,9 +617,9 @@ export function MemoryUnfoldSection() {
                     aria-selected={active}
                     onClick={() => handleSelectScene(idx)}
                     className={cn(
-                      'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11.5px] sm:text-[12px] font-medium border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CFFF49]',
+                      'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11.5px] sm:text-[12px] font-medium border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]',
                       active
-                        ? 'bg-[#101211] text-[#F3F5F1] border-[#101211] dark:bg-[#CFFF49] dark:text-[#090B0A] dark:border-[#CFFF49] shadow-sm'
+                        ? 'bg-[#101211] text-[#F4F6F2] border-[#101211] dark:bg-[#CDFF45] dark:text-[#090B0D] dark:border-[#CDFF45] shadow-sm'
                         : 'bg-[var(--vg-surface)] text-[var(--vg-ink-2)] border-[var(--vg-border)] hover:text-[var(--vg-ink)] hover:border-[var(--vg-border-strong)]'
                     )}
                   >

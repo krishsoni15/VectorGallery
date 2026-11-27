@@ -137,7 +137,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const userDisplayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Personal Vault'
 
   return (
-    <div className="vm-app-shell flex h-screen w-screen overflow-hidden bg-[#F2F3F0] dark:bg-[#090B0A] text-[#101211] dark:text-[#F3F5F1] font-sans antialiased">
+    <div className="vm-app-shell flex h-screen w-screen overflow-hidden bg-[#F4F5F2] dark:bg-[#090B0D] text-[#101211] dark:text-[#F4F6F2] font-sans antialiased">
       {/* ─── Mobile Slide-over Navigation Drawer ─── */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
@@ -146,7 +146,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             className="fixed inset-0 bg-[#101211]/45 dark:bg-black/75 backdrop-blur-sm transition-opacity"
           />
 
-          <div className="relative w-72 max-w-[85vw] bg-[#FFFFFF] dark:bg-[#131715] border-r border-[#DDE2DC] dark:border-white/[0.08] flex flex-col h-full z-10 shadow-2xl">
+          <div className="relative w-72 max-w-[85vw] bg-[#FFFFFF] dark:bg-[#111416] border-r border-[#DBE0DA] dark:border-white/[0.10] flex flex-col h-full z-10 shadow-2xl">
             <div className="flex items-center justify-between px-4 h-14 border-b border-[#DDE2DC] dark:border-white/[0.08]">
               <Link href="/" className="flex items-center gap-2.5">
                 <img
