@@ -559,7 +559,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             title: const Text('Host Server URL'),
                             content: TextField(
                               controller: urlController,
-                              decoration: const InputDecoration(labelText: 'Base URL', hintText: 'http://192.168.x.x:3000'),
+                              decoration: const InputDecoration(labelText: 'Base URL', hintText: 'https://vectorgallery.vercel.app'),
                               keyboardType: TextInputType.url,
                             ),
                             actions: [

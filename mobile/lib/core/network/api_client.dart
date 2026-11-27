@@ -7,7 +7,7 @@ class ApiClient {
 
   static const String defaultBaseUrl = String.fromEnvironment(
     'VECTORGALLERY_API_URL',
-    defaultValue: 'http://10.0.2.2:3000',
+    defaultValue: 'https://vectorgallery.vercel.app',
   );
   static const String _baseUrlStorageKey = 'vm_api_base_url';
 

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { isSupabaseConfigured, isServiceRoleConfigured } from '@/lib/supabase'
+import { getAdminSupabase, isSupabaseConfigured, isServiceRoleConfigured } from '@/lib/supabase'
 import { getStorageDriver } from '@/lib/storage'
 import { isProviderAvailable } from '@/lib/providers'
 import { getLocalKeys } from '@/lib/credentialResolver'
@@ -10,8 +10,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const storage = getStorageDriver()
+  getStorageDriver()
   const localKeys = getLocalKeys()
+  const dbConfigured = isServiceRoleConfigured()
+
+  // Lightweight 1-row Postgres heartbeat prevents Supabase Free Tier from auto-pausing on keepalive pings
+  let dbReachable = !dbConfigured
+  if (dbConfigured) {
+    try {
+      const supabase = getAdminSupabase()
+      const { error } = await supabase.from('user_profiles').select('id').limit(1)
+      dbReachable = !error
+    } catch {
+      dbReachable = false
+    }
+  }
 
   const health = {
     status: 'ok',
@@ -19,11 +32,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
     database: {
-      configured: isServiceRoleConfigured(),
+      configured: dbConfigured,
       clientConfigured: isSupabaseConfigured(),
+      reachable: dbReachable,
     },
     storage: {
-      driver: process.env.STORAGE_DRIVER || (isServiceRoleConfigured() ? 'supabase' : 'local'),
+      driver: process.env.STORAGE_DRIVER || (dbConfigured ? 'supabase' : 'local'),
       ready: true,
     },
     aiProviders: {
@@ -40,4 +54,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   return res.status(200).json(health)
 }
-

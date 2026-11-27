@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { signSupabaseFileUrls } from '@/lib/storage/supabaseStorage'
 import { getLocalFiles } from '@/lib/localMetadataStore'
 import { listLocalDevices } from '@/lib/localAppStore'
 import { GUEST_USER_ID } from '@/lib/localAuthStore'
@@ -106,7 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { data: files } = await supabase
       .from('files')
-      .select('id, original_name, category, size_bytes, created_at, mime_type, thumbnail_url, extracted_text, is_favorite, sha256_hash')
+      .select('id, original_name, category, size_bytes, created_at, mime_type, storage_key, thumbnail_url, extracted_text, is_favorite, sha256_hash')
       .eq('user_id', userId)
       .eq('is_trashed', false)
       .order('created_at', { ascending: false })
@@ -178,7 +179,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         last_sync_at: lastSyncAt,
         sync_status: devices && devices.length > 0 ? devices[0].sync_status : 'IDLE',
       },
-      recent_files: fileList.slice(0, 8),
+      recent_files: await signSupabaseFileUrls(supabase, fileList.slice(0, 8)),
     })
   } catch (err: any) {
     console.error('[Dashboard Stats API] Error:', err)

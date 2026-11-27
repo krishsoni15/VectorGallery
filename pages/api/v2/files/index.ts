@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { signSupabaseFileUrls } from '@/lib/storage/supabaseStorage'
 import { getLocalFiles } from '@/lib/localMetadataStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -105,8 +106,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const hasMore = (rows || []).length > pageSize
-    const files = hasMore ? rows.slice(0, pageSize) : (rows || [])
-    const nextCursor = hasMore && files.length > 0 ? files[files.length - 1].created_at : null
+    const rawFiles = hasMore ? rows.slice(0, pageSize) : (rows || [])
+    const nextCursor = hasMore && rawFiles.length > 0 ? rawFiles[rawFiles.length - 1].created_at : null
+    const files = await signSupabaseFileUrls(supabase, rawFiles)
 
     return res.status(200).json({
       files,

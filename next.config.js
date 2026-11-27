@@ -41,7 +41,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self' https://*.supabase.co; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; connect-src 'self' ws: wss: ws://localhost:* ws://127.0.0.1:* http://localhost:* https://*.supabase.co https://*.supabase.net https://generativelanguage.googleapis.com https://api.cohere.com https://api.openai.com https://api.groq.com https://*.upstash.io;",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; media-src 'self' blob: https://*.supabase.co; frame-src 'self' https://*.supabase.co; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; connect-src 'self' ws: wss: ws://localhost:* ws://127.0.0.1:* http://localhost:* https://*.supabase.co https://*.supabase.net https://generativelanguage.googleapis.com https://api.cohere.com https://api.openai.com https://api.groq.com https://*.upstash.io;",
           },
         ],
       },

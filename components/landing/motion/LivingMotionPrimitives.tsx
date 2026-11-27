@@ -61,22 +61,17 @@ export function MagneticCircleButton({
 
   const sizeClass =
     size === 'lg'
-      ? 'w-[122px] h-[122px] sm:w-[134px] sm:h-[134px] xl:w-[148px] xl:h-[148px]'
-      : 'w-[104px] h-[104px] sm:w-[116px] sm:h-[116px]'
-
-  const circleClasses =
-    'inline-flex flex-col items-center justify-center text-center rounded-full bg-[#101211] hover:bg-[#191D20] dark:bg-[#161B20] dark:hover:bg-[#1E242B] text-[#F4F6F2] border border-[#101211]/15 dark:border-white/[0.16] shadow-[0_24px_56px_-14px_rgba(16,18,17,0.42),0_0_32px_-12px_rgba(205,255,69,0.22)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45] focus-visible:ring-offset-4'
+      ? 'w-[122px] h-[122px] sm:w-[138px] sm:h-[138px] xl:w-[154px] xl:h-[154px] 2xl:w-[168px] 2xl:h-[168px]'
+      : 'w-[108px] h-[108px] sm:w-[124px] sm:h-[124px]'
 
   const innerContent = (
-    <span className="flex flex-col items-center justify-center gap-1.5 px-3 leading-tight">
-      <span className="w-8 h-8 rounded-full bg-[#CDFF45] text-[#101211] flex items-center justify-center shadow-[0_6px_18px_rgba(205,255,69,0.38)] group-hover:scale-105 transition-transform duration-200">
-        <Play className="w-3.5 h-3.5 fill-[#101211] text-[#101211] translate-x-[0.5px]" />
-      </span>
-      <span className="text-[13px] xl:text-[13.5px] font-semibold tracking-[-0.015em] text-[#F4F6F2]">
-        {label}
+    <span className="flex flex-col items-center justify-center gap-1 px-4 leading-tight">
+      <span className="inline-flex items-center gap-1.5 text-[13px] sm:text-[14px] xl:text-[15px] font-bold tracking-[-0.015em] text-[#101211]">
+        <Play className="w-3 h-3 xl:w-3.5 xl:h-3.5 fill-[#101211] text-[#101211] shrink-0" />
+        <span>{label}</span>
       </span>
       {sublabel && (
-        <span className="text-[10.5px] font-medium text-[#A4AEA9] tracking-[-0.01em]">
+        <span className="text-[11px] xl:text-[11.5px] font-medium text-[#101211]/75 tracking-[-0.01em]">
           {sublabel}
         </span>
       )}
@@ -89,7 +84,7 @@ export function MagneticCircleButton({
       style={reduced ? undefined : { x, y }}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetPointer}
-      whileHover={reduced ? undefined : { scale: 1.04 }}
+      whileHover={reduced ? undefined : { scale: 1.045 }}
       whileTap={reduced ? undefined : { scale: 0.96 }}
       className={cn('inline-block group', className)}
     >
@@ -97,11 +92,11 @@ export function MagneticCircleButton({
         <a
           href={href}
           onClick={onClick}
-          className={cn(circleClasses, sizeClass, 'relative overflow-hidden')}
+          className={cn(VG_COMPONENTS.buttons.limeCircle, sizeClass, 'relative overflow-hidden')}
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#CDFF45]/[0.20] group-hover:border-[#CDFF45]/[0.45] group-hover:scale-[1.03] transition-all duration-300"
+            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#101211]/[0.12] group-hover:scale-105 transition-transform duration-300"
           />
           {innerContent}
         </a>
@@ -109,11 +104,11 @@ export function MagneticCircleButton({
         <button
           type="button"
           onClick={onClick}
-          className={cn(circleClasses, sizeClass, 'relative overflow-hidden')}
+          className={cn(VG_COMPONENTS.buttons.limeCircle, sizeClass, 'relative overflow-hidden')}
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#CDFF45]/[0.20] group-hover:border-[#CDFF45]/[0.45] group-hover:scale-[1.03] transition-all duration-300"
+            className="pointer-events-none absolute inset-1.5 rounded-full border border-[#101211]/[0.12] group-hover:scale-105 transition-transform duration-300"
           />
           {innerContent}
         </button>

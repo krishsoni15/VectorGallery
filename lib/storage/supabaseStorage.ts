@@ -1,5 +1,39 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getAdminSupabase, isServiceRoleConfigured } from '../supabase'
 import { IStorageDriver, StorageUploadOptions, StorageUploadResult } from './types'
+
+/**
+ * Batch-signs private Supabase storage object keys into short-lived URLs for API responses.
+ */
+export async function signSupabaseFileUrls<
+  T extends { storage_key?: string | null; thumbnail_url?: string | null }
+>(supabase: SupabaseClient, files: T[], expiresInSeconds: number = 3600): Promise<T[]> {
+  if (!isServiceRoleConfigured() || files.length === 0) return files
+  const requested = (process.env.STORAGE_DRIVER || process.env.STORAGE_PROVIDER || 'supabase').toLowerCase()
+  if (requested === 'local') return files
+
+  const keys = files.map((f) => f.storage_key).filter((k): k is string => Boolean(k))
+  if (keys.length === 0) return files
+
+  try {
+    const bucketName = process.env.SUPABASE_STORAGE_BUCKET || 'documents'
+    const { data: signedList } = await supabase.storage
+      .from(bucketName)
+      .createSignedUrls(keys, expiresInSeconds)
+    if (!Array.isArray(signedList)) return files
+
+    const urlMap = new Map<string, string>()
+    for (const item of signedList) {
+      if (item?.path && item?.signedUrl) urlMap.set(item.path, item.signedUrl)
+    }
+    return files.map((f) => ({
+      ...f,
+      thumbnail_url: (f.storage_key && urlMap.get(f.storage_key)) || f.thumbnail_url,
+    }))
+  } catch {
+    return files
+  }
+}
 
 export class SupabaseStorageDriver implements IStorageDriver {
   private bucket: string

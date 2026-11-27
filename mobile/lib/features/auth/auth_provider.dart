@@ -62,10 +62,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
           final res = await _api.dio.get('/api/auth/session');
           final userMap = res.data is Map ? res.data['user'] : null;
           if (userMap is Map) {
+            final meta = userMap['user_metadata'] is Map ? userMap['user_metadata'] as Map : null;
             state = state.copyWith(
               isAuthenticated: true,
               email: userMap['email']?.toString() ?? email,
-              displayName: userMap['name']?.toString() ?? name,
+              displayName: userMap['name']?.toString() ?? meta?['full_name']?.toString() ?? name,
               token: token,
             );
           } else {
@@ -100,10 +101,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         data: {'email': cleanEmail, 'password': password},
       );
       final data = res.data is Map ? res.data as Map : {};
-      final token = data['sessionToken']?.toString() ?? '';
+      final sessionMap = data['session'] is Map ? data['session'] as Map : null;
+      final token = data['sessionToken']?.toString() ?? sessionMap?['access_token']?.toString() ?? '';
       final userMap = data['user'] is Map ? data['user'] as Map : {};
+      final userMeta = userMap['user_metadata'] is Map ? userMap['user_metadata'] as Map : null;
       final resolvedEmail = userMap['email']?.toString() ?? cleanEmail;
-      final resolvedName = userMap['name']?.toString() ?? resolvedEmail.split('@').first;
+      final resolvedName = userMap['name']?.toString() ??
+          userMeta?['full_name']?.toString() ??
+          resolvedEmail.split('@').first;
 
       if (token.isEmpty) {
         state = state.copyWith(isLoading: false, error: 'Server did not return a valid session token');
@@ -137,10 +142,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         data: {'name': cleanName, 'email': cleanEmail, 'password': password},
       );
       final data = res.data is Map ? res.data as Map : {};
-      final token = data['sessionToken']?.toString() ?? '';
+      final sessionMap = data['session'] is Map ? data['session'] as Map : null;
+      final token = data['sessionToken']?.toString() ?? sessionMap?['access_token']?.toString() ?? '';
       final userMap = data['user'] is Map ? data['user'] as Map : {};
+      final userMeta = userMap['user_metadata'] is Map ? userMap['user_metadata'] as Map : null;
       final resolvedEmail = userMap['email']?.toString() ?? cleanEmail;
-      final resolvedName = userMap['name']?.toString() ?? cleanName;
+      final resolvedName = userMap['name']?.toString() ??
+          userMeta?['full_name']?.toString() ??
+          cleanName;
 
       if (token.isEmpty) {
         state = state.copyWith(isLoading: false, error: 'Signup succeeded without session token');

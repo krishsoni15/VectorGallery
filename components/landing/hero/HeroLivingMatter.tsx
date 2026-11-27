@@ -119,23 +119,23 @@ export function HeroLivingMatter() {
           />
         </div>
 
-        {/* Desktop Centered Dominant Sculpture anchored slightly lower for clear wordmark readability */}
-        <div className="hidden lg:flex pointer-events-none absolute inset-x-0 top-[17.5%] xl:top-[18.5%] 2xl:top-[19.5%] justify-center z-20">
+        {/* Desktop Centered Dominant Sculpture lowered clearly beneath VECTORGALLERY. wordmark */}
+        <div className="hidden lg:flex pointer-events-none absolute inset-x-0 lg:top-[208px] xl:top-[242px] 2xl:top-[290px] justify-center z-20">
           <MemorySphereCanvas
             mode="hero"
             priority
             entranceProgress={entranceProgress}
             showPauseControl
-            className="w-[clamp(480px,43.5vw,750px)]"
+            className="w-[clamp(420px,38.5vw,660px)]"
           />
         </div>
 
         {/* BOTTOM FLANKING QUADRANTS: Apple-Caliber Double-Tone Editorial Composition */}
-        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-end gap-6 sm:gap-8 lg:gap-4 lg:pt-[205px] xl:pt-[245px] 2xl:pt-[285px]">
+        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-end gap-6 sm:gap-8 lg:gap-4 lg:pt-[225px] xl:pt-[260px] 2xl:pt-[300px]">
           {/* LEFT QUADRANT: Refined Provenance Pill + Editorial Statement + Single-Row Action Bar */}
           <div
             ref={copyRef}
-            className="lg:col-span-5 flex flex-col justify-between gap-5 lg:gap-7"
+            className="lg:col-span-4 flex flex-col justify-between gap-5 lg:gap-7"
           >
             {/* Tactile Provenance Capsule */}
             <div className="inline-flex items-center gap-3 self-start pl-1.5 pr-4 py-1.5 rounded-full bg-[#FFFFFF]/82 dark:bg-[#111416]/88 backdrop-blur-xl border border-[var(--vg-border)] shadow-sm">
@@ -192,18 +192,15 @@ export function HeroLivingMatter() {
             </div>
           </div>
 
-          {/* RIGHT QUADRANT: Frosted Triad Telemetry Dock + Sculpted Obsidian Story Button */}
-          <div className="lg:col-span-4 lg:col-start-9 flex flex-row lg:flex-col items-end justify-between lg:h-full gap-5">
-            <div
-              ref={triadRef}
-              className="w-full max-w-[260px] p-4 rounded-2xl bg-[#FFFFFF]/76 dark:bg-[#111416]/82 backdrop-blur-xl border border-[var(--vg-border)] shadow-sm flex flex-col lg:items-end gap-2"
-            >
+          {/* RIGHT QUADRANT: Borderless Floating Triad + Magnetic Volt-Lime Story Circle */}
+          <div className="lg:col-span-4 lg:col-start-9 flex flex-row lg:flex-col items-end justify-between lg:h-full gap-6">
+            <div ref={triadRef} className="flex flex-col lg:items-end gap-2">
               <InteractiveTriadIndex
                 items={HERO_TRIAD}
                 activeIndex={activeTriad}
                 onSelect={setActiveTriad}
               />
-              <p className="hidden sm:block text-[11.5px] text-[var(--vg-ink-2)] lg:text-right leading-snug pt-1 border-t border-[var(--vg-border)] w-full">
+              <p className="hidden sm:block text-[12px] text-[var(--vg-ink-2)] lg:text-right max-w-[230px] leading-snug">
                 {HERO_TRIAD[activeTriad]?.hint}
               </p>
             </div>

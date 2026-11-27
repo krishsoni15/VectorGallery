@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  res.setHeader('Set-Cookie', 'sb-access-token=; Path=/; Max-Age=0; SameSite=Lax')
+  const secureFlag = process.env.NODE_ENV === 'production' ? '; Secure' : ''
+  res.setHeader('Set-Cookie', `sb-access-token=; Path=/; Max-Age=0; SameSite=Lax${secureFlag}`)
   return res.status(200).json({ success: true })
 }
-

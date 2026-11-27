@@ -1,172 +1,129 @@
-# VectorGallery — Hosting & Deployment Step-by-Step Guide
+# VectorGallery — Hosting & Production Launch Guide (`https://vectorgallery.vercel.app`)
 
-This guide walks through **exact, practical steps** to host VectorGallery online for real users—using either **Cloud Mode (Vercel + Supabase)**, **Self-Hosted Mode (VPS / Docker / Home Server with persistent local disk)**, and how to connect the **Android Companion App (.apk)** to your live server.
-
----
-
-## Important Rule Before Choosing a Host
-
-VectorGallery supports two storage/database modes automatically:
-
-| Mode | Triggered When | Best Hosts | Why |
-| :--- | :--- | :--- | :--- |
-| **Cloud Mode** (`Supabase + pgvector`) | `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set (`STORAGE_DRIVER=supabase`) | **Vercel**, Netlify, Cloud Run, Fly.io | Stateless serverless hosts wipe local disks between deployments/restarts; Supabase persists DB, auth, and private files permanently. |
-| **Local Mode** (`Local JSON + Local FS`) | Supabase keys are omitted (`STORAGE_DRIVER=local`) | **Ubuntu VPS (DigitalOcean / Hetzner / AWS EC2)**, Render/Railway **with a Persistent Volume**, Local LAN PC | Stores data in `data/*.json` and files in `public/uploads/`. Needs a real persistent filesystem (do **not** use Local Mode on Vercel). |
+Exact step-by-step instructions to make your live Vercel deployment (`https://vectorgallery.vercel.app`) work end-to-end for all Web and Android users—including **every required credential, AI API key, Supabase table setup, and APK distribution details**.
 
 ---
 
-## Option A — Recommended Cloud Deployment (Vercel + Supabase Free Tier Friendly)
+## Quick Checklist: What You Need to Do Next for `https://vectorgallery.vercel.app`
 
-### Step 1: Set Up Supabase Project & Database
-1. Go to [app.supabase.com](https://app.supabase.com/) and create a new project.
-2. Open **SQL Editor** in the Supabase dashboard and run the migration files from `supabase/migrations/` in exact chronological order:
+Because Vercel runs **serverless functions** (ephemeral filesystem — no persistent `data/*.json` disk!), **all users on `https://vectorgallery.vercel.app` require Supabase Cloud + Environment Variables**. Follow these 4 steps once:
+
+### 1. Create Your Free Supabase Project & Tables
+1. Go to [supabase.com](https://supabase.com/) → **New Project** (e.g., `vectorgallery-prod`).
+2. Wait ~2 minutes for the database to start, then open **SQL Editor** in the left sidebar.
+3. Copy and run the SQL files from `supabase/migrations/` **one-by-one in this exact order**:
    1. `supabase/migrations/20230406025118_init.sql`
    2. `supabase/migrations/20260521092518_hybrid_search.sql`
    3. `supabase/migrations/20260521160800_ultra_upgrade.sql`
    4. `supabase/migrations/20260908_auth_and_keys.sql`
    5. `supabase/migrations/20261117_vectormind_v2_core.sql`
    6. `supabase/migrations/20261117_vectormind_v2_extensions.sql`
-3. Open **Storage** in Supabase → Create a **Private** bucket named `documents` (keep **Public bucket = OFF** so files remain isolated per user via signed URLs and `/api/preview/[filename]`).
-4. Go to **Project Settings → API** and copy:
-   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `service_role` secret key → `SUPABASE_SERVICE_ROLE_KEY`
+4. Open **Storage** in Supabase → click **New bucket** → name it **`documents`** → keep **Public bucket = OFF** (private & secure; VectorGallery generates per-user signed URLs automatically).
+5. Open **Project Settings → API** and copy these 3 credentials:
+   - **Project URL** (`https://xxxx.supabase.co`)
+   - **anon / public key**
+   - **service_role / secret key** *(keep strictly server-side — never expose in client code)*
 
-### Step 2: Generate Security Secrets
-Run locally to generate a 32-byte (64-hex-character) AES-256-GCM encryption key:
+### 2. Get AI API Keys (What Each Key Powers)
+Open the dashboard links below to create keys:
+- **Required for Vision OCR + Embeddings + Default AI Assistant (`GEMINI_API_KEY`):**
+  - Free/paid key from [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+  - Powers image/receipt/screenshot text extraction (OCR), dense semantic embeddings (`pgvector`), and Gemini chat responses.
+- **Recommended Ultra-Fast Backup LLM (`GROQ_API_KEY`):**
+  - Key from [console.groq.com/keys](https://console.groq.com/keys)
+  - Fast fallback LLM chat provider when users switch model in Assistant or rate limits trigger.
+- **Optional Providers (`COHERE_API_KEY`, `OPENAI_API_KEY`):**
+  - [dashboard.cohere.com/api-keys](https://dashboard.cohere.com/api-keys) / [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+  - Users can also enter their **own personal keys** inside **Settings → AI Providers** in the app (encrypted at rest via `CREDENTIAL_ENCRYPTION_KEY`). If you don't add global server keys on Vercel, users still get **offline keyword search & offline grounded excerpts**, or can paste their own Gemini/Groq key!
+- **Optional Production Rate Limiting (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`):**
+  - Free Redis database from [console.upstash.com](https://console.upstash.com/) to prevent API abuse across Vercel serverless instances.
+
+### 3. Generate Your Encryption Secret & Set All Vercel Environment Variables
+On your terminal, run:
 ```bash
 openssl rand -hex 32
 ```
-Save this value for `CREDENTIAL_ENCRYPTION_KEY`. *(Never commit `.env.local` to GitHub.)*
+Open **Vercel Dashboard → `vectorgallery` project → Settings → Environment Variables** and add these for **Production & Preview**:
 
-### Step 3: Deploy Web & API to Vercel
-1. Push your repository to GitHub (make sure `public/Generated Video November 27, 2026 - 2_43PM.mp4` is included if you deploy from Git, or host/replace the hero video asset).
-2. In [vercel.com](https://vercel.com/), click **Add New → Project** and import your GitHub repo.
-3. Under **Build & Development Settings**, keep defaults (`Next.js`, build command `npm run build`).
-4. Under **Environment Variables**, add:
-   - `NEXT_PUBLIC_SUPABASE_URL` = your Supabase URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon key
-   - `SUPABASE_SERVICE_ROLE_KEY` = your Supabase service role key
-   - `STORAGE_DRIVER` = `supabase`
-   - `SUPABASE_STORAGE_BUCKET` = `documents`
-   - `CREDENTIAL_ENCRYPTION_KEY` = your 64-hex string from Step 2
-   - *(Optional AI keys — app still works without them using local OCR & keyword recall)*:
-     - `GEMINI_API_KEY` (for Vision OCR + Gemini chat + `embedding` vectors)
-     - `GROQ_API_KEY` / `COHERE_API_KEY` / `OPENAI_API_KEY`
-   - *(Optional Redis rate limiting)*: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-5. Click **Deploy**.
-6. Verify your live site immediately:
+| Variable Name | Value / Where to Get It | Required? |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project Settings → API → Project URL | **Yes** |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Project Settings → API → `anon` key | **Yes** |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Project Settings → API → `service_role` key | **Yes** |
+| `STORAGE_DRIVER` | `supabase` | **Yes** |
+| `SUPABASE_STORAGE_BUCKET` | `documents` | **Yes** |
+| `CREDENTIAL_ENCRYPTION_KEY` | Your 64-hex string from `openssl rand -hex 32` | **Yes** |
+| `GEMINI_API_KEY` | From Google AI Studio (shared app Vision OCR + embeddings + AI) | **Recommended** |
+| `GROQ_API_KEY` | From Groq Console (fast AI chat backup) | Recommended |
+| `COHERE_API_KEY` | From Cohere Dashboard (optional embeddings/chat) | Optional |
+| `OPENAI_API_KEY` | From OpenAI Platform (optional GPT chat) | Optional |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST URL | Optional |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST Token | Optional |
+
+### 4. Push to GitHub & Redeploy Vercel (Includes Pre-Configured Android APK!)
+1. Push your local `main` commits to GitHub:
    ```bash
-   curl https://your-app.vercel.app/api/health
+   git push origin main
    ```
-   Confirm `"database": { "configured": true }`, `"storage": { "driver": "supabase", "ready": true }`.
+2. Trigger **Redeploy** in Vercel after saving the Environment Variables (important: `NEXT_PUBLIC_*` vars are baked at build time!).
+3. Once deployed, verify live health immediately:
+   ```bash
+   curl https://vectorgallery.vercel.app/api/health
+   ```
+   Confirm:
+   - `"database": { "configured": true, "clientConfigured": true }`
+   - `"storage": { "driver": "supabase", "ready": true }`
+   - `"aiProviders": { "gemini": true, ... }`
+4. Test `https://vectorgallery.vercel.app/vectorgallery.apk` (`200 OK`) & `/install`!
+   - The compiled `public/vectorgallery.apk` ships pre-configured with **`https://vectorgallery.vercel.app`** (`mobile/lib/core/network/api_client.dart`), so **anyone on any Android phone can tap "Download APK" on your website, install it, sign up/log in, and sync straight to your live website with zero IP setup!**
 
 ---
 
-## Option B — Self-Hosted VPS / Ubuntu Server (Works with Local Mode or Cloud Mode)
+## How to Prevent Supabase Free Tier from Auto-Pausing (Zero Cost, Automatic)
 
-Best if you want **100% zero external database dependency** on a VPS (e.g., \$5/month Ubuntu server with PM2 + Nginx SSL) or home network.
+Supabase pauses free-tier projects only after **7 days with zero database traffic**. You do **NOT** need to rewrite the app for MongoDB:
 
-### Step 1: Server Prerequisites
-Install **Node.js 22 LTS**, **npm**, **git**, **nginx**, and **pm2**:
-```bash
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get install -y nodejs git nginx
-sudo npm install -g pm2
-```
+- **Why keep Supabase instead of switching to MongoDB?** VectorGallery relies on PostgreSQL `pgvector` vector similarity, full-text GIN (`tsvector`) indexes, Row-Level Security (`RLS`), and built-in Auth + Storage buckets. Moving to MongoDB would require rewriting ~20 API routes, replacing Auth, and provisioning separate vector search and file storage.
+- **Built-in automatic keep-alive included in this repo:**
+  - `.github/workflows/supabase-keepalive.yml` runs every 3 days on GitHub Actions and calls `https://vectorgallery.vercel.app/api/health`.
+  - `/api/health` executes a tiny read-only 1-row Supabase ping (`user_profiles`), resetting Supabase's inactivity timer automatically forever at \$0/month!
+  - *(If your project is already paused right now: open Supabase Dashboard → click **Restore / Resume project** once, push to `main`, and the GitHub workflow keeps it awake from then on.)*
 
-### Step 2: Clone, Configure, Build & Run
-```bash
-git clone https://github.com/krishsoni15/VectorGallery.git
-cd VectorGallery
-npm ci
-
-cp .env.example .env.local
-nano .env.local
-```
-In `.env.local` for **Local Zero-Database Mode**, keep Supabase keys empty and set:
-```env
-STORAGE_DRIVER=local
-CREDENTIAL_ENCRYPTION_KEY=<paste output of: openssl rand -hex 32>
-# Optional AI keys (or add them per-user inside Web Settings -> AI Providers)
-GEMINI_API_KEY=
-GROQ_API_KEY=
-```
-Build and launch with PM2:
-```bash
-npm run build
-pm2 start npm --name "vectorgallery-web" -- start
-pm2 save
-```
-*(Optional background ingestion worker if using Supabase async queue:)*
-```bash
-pm2 start npm --name "vectorgallery-worker" -- run worker
-```
-
-### Step 3: Domain + HTTPS via Nginx & Certbot
-Create `/etc/nginx/sites-available/vectorgallery`:
-```nginx
-server {
-    server_name vault.yourdomain.com;
-    client_max_body_size 55M; # matches 50 MB API upload limit + JSON overhead
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_buffering off; # important for SSE AI streaming (/api/v2/chat)
-    }
-}
-```
-Enable site & free Let's Encrypt SSL:
-```bash
-sudo ln -s /etc/nginx/sites-available/vectorgallery /etc/nginx/sites-enabled/
-sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d vault.yourdomain.com
-```
-> **Crucial Nginx detail:** Keep `client_max_body_size 55M` (otherwise Nginx rejects large uploads with `413` before Next.js sees them) and `proxy_buffering off` (so SSE AI chat tokens stream live word-by-word instead of waiting for stream end).
-
-### Step 4: Backups (Local Mode Only)
-Back up these two directories regularly:
-- `data/` (`local_users.json`, `local_files.json`, `local_vectors.json`, `local_collections.json`, `local_conversations.json`, `local_search_history.json`, `local_devices.json`, `user_keys.json`)
-- `public/uploads/` (raw user photos, PDFs, notes, and videos)
+## Why "Create Account" Fails Without Supabase Env Vars (And How It's Fixed)
+1. **Before Supabase keys are added on Vercel:** Vercel's serverless filesystem is read-only (`EROFS`), so local JSON signup fails unless Supabase keys are set in Vercel Project Settings. `/api/auth/signup` now detects Vercel and gives an explicit error instead of crashing silently.
+2. **Email confirmation / rate limits bypassed cleanly:** Web & Mobile signup now share `/api/auth/signup` (which confirms accounts server-side via `SUPABASE_SERVICE_ROLE_KEY`), avoiding Supabase's default empty `session: null` response and the 4 emails/hour free SMTP limit.
 
 ---
 
-## Option C — Connect & Distribute the Android App (`.apk`)
+## Important Note on Vercel File Upload Sizes
+- Vercel Serverless Functions enforce a **4.5 MB** platform HTTP body limit per request. Photos and PDFs up to ~3 MB upload smoothly via base64 API routes; for larger videos or raw camera backups (> 3 MB per file) without hitting Vercel's 4.5 MB body cap, deploy on a persistent Node VPS/container (Option B below) or upgrade ingestion to direct pre-signed Supabase Storage URLs.
 
-The Flutter app (`mobile/`) defaults to `http://10.0.2.2:3000` (Android Emulator localhost). For a hosted website you have **two ways**:
+---
 
-### Fast Method (No Rebuild Needed)
-1. Download and install `/vectorgallery.apk` from your site or `/install`.
-2. Open the **Profile / Settings** tab in the Android app.
-3. Update the **Server URL** field to `https://vault.yourdomain.com` (stored securely via `FlutterSecureStorage` under `vm_api_base_url` in `mobile/lib/core/network/api_client.dart`).
+## Alternative — Self-Hosted VPS / Ubuntu Server (No 4.5 MB Limit, Works with Local Disk Mode)
 
-### Production Custom-Baked APK Method
-1. Build a release APK pointing directly to your hosted URL:
+Best if you want **50 MB direct uploads** and optional zero-Supabase local storage (`data/*.json` + `public/uploads/`):
+
+1. Install **Node.js 22 LTS**, **nginx**, and **pm2** on Ubuntu:
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+   sudo apt-get install -y nodejs git nginx
+   sudo npm install -g pm2
+   ```
+2. Clone, configure `.env.local` (leave Supabase empty for Local Disk Mode or fill Supabase for Cloud Mode), build, and launch:
+   ```bash
+   git clone https://github.com/krishsoni15/VectorGallery.git && cd VectorGallery
+   npm ci && cp .env.example .env.local
+   npm run build
+   pm2 start npm --name "vectorgallery-web" -- start
+   pm2 save
+   ```
+3. Configure Nginx HTTPS proxy (`client_max_body_size 55M;` for 50 MB uploads and `proxy_buffering off;` for live SSE AI chat) + `certbot --nginx -d yourdomain.com`.
+4. To point the Android APK to a custom self-hosted domain:
    ```bash
    cd mobile
-   flutter pub get
-   flutter build apk --release --dart-define=VECTORGALLERY_API_URL=https://vault.yourdomain.com
-   ```
-2. Copy the APK into `public/` and compute its SHA-256:
-   ```bash
+   flutter build apk --release --dart-define=VECTORGALLERY_API_URL=https://yourdomain.com
    cp build/app/outputs/flutter-apk/app-release.apk ../public/vectorgallery.apk
    sha256sum ../public/vectorgallery.apk
    ```
-3. Paste the new SHA-256 hash into `APK_EXPECTED_SHA256` inside `components/landing/tokens.ts` and rebuild/deploy the web app so `/install` displays the matching checksum.
-
----
-
-## Post-Deploy Verification Checklist
-1. `GET /api/health` returns `200 OK` and `storage.ready: true`.
-2. `POST /api/auth/signup` + login works and isolates two test accounts cleanly.
-3. `GET /api/preview/<file>` returns `401` when logged out and `200` when signed in as the file owner.
-4. `GET /api/proxy?url=http://127.0.0.1:3000/` returns `403` (SSRF protection active).
-5. Upload a text note or photo, search for a keyword inside it, and verify AI Assistant cites it cleanly.
-
+   *(Or users can update the server URL inside Android **Settings → Configure URL** anytime without rebuilding the APK.)*

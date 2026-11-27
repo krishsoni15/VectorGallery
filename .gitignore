@@ -42,7 +42,7 @@ next-env.d.ts
 
 # compiled binaries & runtime local vault data
 *.apk
-public/vectorgallery.apk
+!public/vectorgallery.apk
 public/vectormind.apk
 /data/*.json
 !/data/.gitkeep

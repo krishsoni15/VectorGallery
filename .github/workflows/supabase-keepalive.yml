@@ -1,0 +1,17 @@
+name: Supabase Keep-Alive Ping
+
+on:
+  schedule:
+    # Pings /api/health every 3 days to keep free-tier Supabase PostgreSQL active automatically
+    - cron: '0 9 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping-health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping live Vercel health endpoint
+        run: |
+          curl -fsS --retry 2 "https://vectorgallery.vercel.app/api/health"
+          echo ""
+

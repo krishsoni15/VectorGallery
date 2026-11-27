@@ -18,8 +18,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signUp: async () => ({ data: null, error: null }),
   signIn: async () => ({ data: null, error: null }),
-  signOut: async () => {},
-  refreshSession: async () => {},
+  signOut: async () => { },
+  refreshSession: async () => { },
 })
 
 function syncBrowserUserCache(currentUser: User | null, token?: string | null) {
@@ -112,41 +112,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [hydrateSession, supabaseEnabled])
 
   const signUp = async (email: string, password: string, name?: string) => {
-    if (!supabaseEnabled) {
-      try {
-        const res = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, name }),
-        })
-        const json = await res.json()
-        if (!res.ok) {
-          return { data: null, error: { message: json.error || 'Failed to create account' } }
-        }
-        setSession(json.session)
-        setUser(json.user)
-        syncBrowserUserCache(json.user, json.session?.access_token)
-        return { data: json, error: null }
-      } catch (err: any) {
-        return { data: null, error: { message: err.message || 'Network error during signup' } }
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        return { data: null, error: { message: json.error || 'Failed to create account' } }
       }
+      if (supabaseEnabled && json?.session?.access_token && json?.session?.refresh_token) {
+        await supabase.auth
+          .setSession({
+            access_token: json.session.access_token,
+            refresh_token: json.session.refresh_token,
+          })
+          .catch(() => {})
+      }
+      setSession(json.session)
+      setUser(json.user)
+      syncBrowserUserCache(json.user, json.session?.access_token)
+      return { data: json, error: null }
+    } catch (err: any) {
+      return { data: null, error: { message: err.message || 'Network error during signup' } }
     }
-
-    const res = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name || '',
-        },
-      },
-    })
-    if (res.data?.session) {
-      setSession(res.data.session)
-      setUser(res.data.session.user)
-      syncBrowserUserCache(res.data.session.user, res.data.session.access_token)
-    }
-    return res
   }
 
   const signIn = async (email: string, password: string) => {
@@ -184,9 +174,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     if (!supabaseEnabled) {
-      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => { })
     } else {
-      await supabase.auth.signOut().catch(() => {})
+      await supabase.auth.signOut().catch(() => { })
     }
     setSession(null)
     setUser(null)
