@@ -95,14 +95,14 @@ export function MemorySphereCanvas({
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center select-none pointer-events-none',
+        'group relative flex items-center justify-center select-none pointer-events-none',
         className
       )}
     >
       {/* Grounded contact shadow & soft emerald-lime floor bounce beneath the floating sculpture */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-3%] left-1/2 -translate-x-1/2 w-[56%] h-[18%] rounded-full blur-2xl opacity-65 dark:opacity-85 transition-opacity duration-500"
+        className="pointer-events-none absolute bottom-[-2%] left-1/2 -translate-x-1/2 w-[60%] h-[18%] rounded-full blur-2xl opacity-70 dark:opacity-85 transition-opacity duration-500"
         style={{
           background:
             resolvedTheme === 'dark'
@@ -175,7 +175,7 @@ export function MemorySphereCanvas({
           onClick={() => setPaused((p) => !p)}
           aria-label={paused ? 'Resume Memory Sphere motion' : 'Pause Memory Sphere motion'}
           title={paused ? 'Resume animation' : 'Pause animation'}
-          className="pointer-events-auto absolute bottom-2 right-2 sm:bottom-4 sm:right-6 z-30 w-8 h-8 rounded-full bg-[var(--vg-surface)]/75 opacity-55 hover:opacity-100 focus-visible:opacity-100 border border-[var(--vg-border)] backdrop-blur-md flex items-center justify-center text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
+          className="pointer-events-auto absolute bottom-2 right-2 sm:bottom-4 sm:right-6 z-30 w-8 h-8 rounded-full bg-[var(--vg-surface)]/85 opacity-0 hover:opacity-100 focus-visible:opacity-100 border border-[var(--vg-border)] backdrop-blur-md flex items-center justify-center text-[var(--vg-ink-2)] hover:text-[var(--vg-ink)] transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#087F5B] dark:focus-visible:ring-[#CDFF45]"
         >
           {paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
         </button>

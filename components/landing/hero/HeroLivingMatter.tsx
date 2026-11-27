@@ -96,19 +96,19 @@ export function HeroLivingMatter() {
           <h1
             ref={wordmarkRef}
             id="hero-monument-heading"
-            className="font-display font-bold uppercase text-center select-none whitespace-nowrap w-full max-w-full tracking-[-0.048em] leading-[0.88] text-[#101211] dark:text-[#F4F6F2]"
+            className="font-display font-bold uppercase text-center select-none whitespace-nowrap w-full max-w-full tracking-[-0.054em] leading-[0.86] text-[#101211] dark:text-[#F4F6F2]"
             style={{
-              fontSize: 'clamp(2.25rem, 11.2vw, 13.6rem)',
+              fontSize: 'clamp(2.1rem, 11.45vw, 14.8rem)',
             }}
           >
             <span>VECTORGALLERY</span>
-            <span className="text-[#087F5B] dark:text-[#CDFF45]">.</span>
+            <span className="text-[#101211] dark:text-[#CDFF45]">.</span>
           </h1>
         </div>
 
         {/* CENTER STAGE: Iconic Smooth Studio Memory Sphere Sculpture */}
         {/* Mobile & Tablet Placement */}
-        <div className="lg:hidden relative z-20 -mt-1 mb-3 flex justify-center">
+        <div className="lg:hidden relative z-20 mt-1 mb-3 flex justify-center">
           <MemorySphereCanvas
             mode="hero"
             priority
@@ -117,19 +117,19 @@ export function HeroLivingMatter() {
           />
         </div>
 
-        {/* Desktop Centered Dominant Sculpture overlapping lower baseline of wordmark smoothly */}
-        <div className="hidden lg:flex pointer-events-none absolute inset-x-0 top-[9%] xl:top-[10%] justify-center z-20">
+        {/* Desktop Centered Dominant Sculpture anchored slightly lower for clear wordmark readability */}
+        <div className="hidden lg:flex pointer-events-none absolute inset-x-0 top-[17.5%] xl:top-[18.5%] 2xl:top-[19.5%] justify-center z-20">
           <MemorySphereCanvas
             mode="hero"
             priority
             entranceProgress={entranceProgress}
             showPauseControl
-            className="w-[clamp(470px,42vw,720px)]"
+            className="w-[clamp(480px,43.5vw,750px)]"
           />
         </div>
 
         {/* BOTTOM FLANKING QUADRANTS: Balanced Editorial Copy + Primary Actions + Triad + Magnetic CTA */}
-        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-end gap-6 sm:gap-8 lg:gap-4 lg:pt-[190px] xl:pt-[225px] 2xl:pt-[275px]">
+        <div className="relative z-30 flex-1 grid grid-cols-1 lg:grid-cols-12 items-end gap-6 sm:gap-8 lg:gap-4 lg:pt-[205px] xl:pt-[245px] 2xl:pt-[290px]">
           {/* LEFT QUADRANT: Product Descriptor + Main Promise + Action Row */}
           <div
             ref={copyRef}
