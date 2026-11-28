@@ -5,7 +5,7 @@ export const SECURITY_DOC_URL = `${REPO_URL}/blob/main/docs/SECURITY.md`
 export const CONTRIBUTING_URL = `${REPO_URL}/blob/main/CONTRIBUTING.md`
 export const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`
 export const APK_EXPECTED_SHA256 =
-  'b7caae2f8176afc9126d0d9a9a5e3eb2995edecf650c68cc570d8f1fc8fb0801'
+  'a3261087f3504d37628f6b43be9204fa904b45649cfddce20ffb0b2401eaf006'
 
 export interface ShowcasePhoto {
   id: string

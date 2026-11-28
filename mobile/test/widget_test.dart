@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vectorgallery_mobile/core/network/api_client.dart';
 import 'package:vectorgallery_mobile/core/theme/app_theme.dart';
 import 'package:vectorgallery_mobile/features/auth/auth_provider.dart';
+import 'package:vectorgallery_mobile/features/chat/chat_screen.dart';
 import 'package:vectorgallery_mobile/main.dart';
 
 void main() {
@@ -212,6 +213,74 @@ void main() {
     expect(requestCounts['/api/v2/dashboard/stats'] ?? 0, equals(1));
     expect(requestCounts['/api/v2/files'] ?? 0, equals(1));
     expect(requestCounts['/api/v2/auth/profile'] ?? 0, equals(1));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ChatScreen opens grounded citation in detail sheet with Open, Download, and Share',
+      (WidgetTester tester) async {
+    secureStoreMemory
+      ..clear()
+      ..[ApiClient.accessTokenKey] = 'vg_local_verified_token.sig'
+      ..[ApiClient.userEmailKey] = 'test@example.com';
+
+    ApiClient().dio.interceptors.insert(
+      0,
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (options.path == '/api/v2/chat') {
+            return handler.resolve(
+              Response(
+                requestOptions: options,
+                statusCode: 200,
+                data: 'data: {"type":"token","content":"Found your exam PDF."}\n'
+                    'data: {"type":"citations","citations":[{"id":1,"file_id":"f-exam-1","file_name":"Exam_Syllabus.pdf","category":"documents","excerpt":"Compiler Design 3170701"}]}\n'
+                    'data: [DONE]\n',
+              ),
+            );
+          }
+          if (options.path == '/api/v2/files/f-exam-1') {
+            return handler.resolve(
+              Response(
+                requestOptions: options,
+                statusCode: 200,
+                data: {
+                  'file': {
+                    'id': 'f-exam-1',
+                    'original_name': 'Exam_Syllabus.pdf',
+                    'category': 'documents',
+                    'mime_type': 'application/pdf',
+                    'size_bytes': 204800,
+                    'download_url': 'https://example.com/Exam_Syllabus.pdf',
+                    'extracted_text': 'Compiler Design 3170701',
+                  },
+                },
+              ),
+            );
+          }
+          return handler.next(options);
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: ChatScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'Find my exam syllabus');
+    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Exam_Syllabus.pdf'), findsOneWidget);
+    expect(find.text('Open'), findsOneWidget);
+
+    await tester.tap(find.text('Exam_Syllabus.pdf'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Download'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

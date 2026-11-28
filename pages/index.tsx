@@ -36,7 +36,7 @@ export default function HomePage() {
     language: 'TypeScript + Dart',
     live: false,
   })
-  const [apkSizeLabel, setApkSizeLabel] = useState('23.1 MB')
+  const [apkSizeLabel, setApkSizeLabel] = useState('23.2 MB')
   const [hasLocalApk, setHasLocalApk] = useState(true)
 
   useEffect(() => {

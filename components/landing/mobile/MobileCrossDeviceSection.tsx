@@ -46,7 +46,7 @@ const SYNC_STAGES: Array<{ id: SyncStage; label: string; caption: string; phoneT
  * Connects a realistic sculpted titanium Android bezel to a desktop vault frame
  * via an aligned horizontal luminance conduit showing live capture-to-desktop flow.
  */
-export function MobileCrossDeviceSection({ apkSizeLabel = '23.1 MB' }: MobileCrossDeviceSectionProps) {
+export function MobileCrossDeviceSection({ apkSizeLabel = '23.2 MB' }: MobileCrossDeviceSectionProps) {
   const reduced = useReducedMotion()
   const [syncStage, setSyncStage] = useState<SyncStage>('library')
 

@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/network/api_client.dart';
+import '../../core/services/file_actions_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../auth/auth_provider.dart';
 import '../auth/auth_sheet.dart';
+import '../files/file_detail_sheet.dart';
 
 class ChatMessage {
   final String role;
@@ -260,44 +263,77 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
-  void _showCitationPreview(Map<String, dynamic> cite) {
-    final surface = AppTheme.surfaceOf(context);
-    final primaryText = AppTheme.textPrimaryOf(context);
-    final secondaryText = AppTheme.textSecondaryOf(context);
-    final brand = AppTheme.brandOf(context);
+  Future<void> _openCitationFile(Map<String, dynamic> cite) async {
+    final fileId = (cite['file_id'] ?? cite['id'])?.toString() ?? '';
+    final fileName = (cite['file_name'] ?? cite['original_name'] ?? 'Verified File').toString();
 
-    showModalBottomSheet(
+    if (fileId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No file ID linked for "$fileName".')),
+      );
+      return;
+    }
+
+    // Hydrate full metadata + signed download URL so user can View / Open / Download / Share immediately.
+    Map<String, dynamic> resolved = {
+      'id': fileId,
+      'file_id': fileId,
+      'original_name': fileName,
+      'file_name': fileName,
+      'category': cite['category']?.toString() ?? 'documents',
+      'thumbnail_url': cite['thumbnail_url']?.toString() ?? '',
+      'excerpt': cite['excerpt']?.toString() ?? '',
+    };
+
+    try {
+      resolved = await VaultFileActionsService.hydrateFileMetadata(_api, resolved);
+    } catch (_) {}
+
+    if (!mounted) return;
+    showVaultFileDetailSheet(
       context: context,
-      backgroundColor: surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.description_outlined, color: brand),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    cite['file_name']?.toString() ?? 'Verified File',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: primaryText),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              cite['excerpt']?.toString() ?? 'Matched file chunk in your vault.',
-              style: TextStyle(fontSize: 13, height: 1.5, color: secondaryText),
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
+      file: resolved,
+      api: _api,
     );
+  }
+
+  Future<void> _downloadCitationFile(Map<String, dynamic> cite) async {
+    final fileName = (cite['file_name'] ?? cite['original_name'] ?? 'File').toString();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Downloading "$fileName"...')),
+    );
+    try {
+      final saved = await VaultFileActionsService.saveToDownloads(_api, {
+        'id': (cite['file_id'] ?? cite['id'])?.toString() ?? '',
+        'original_name': fileName,
+        'category': cite['category']?.toString() ?? 'documents',
+        'thumbnail_url': cite['thumbnail_url']?.toString() ?? '',
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved "$fileName" to $saved')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ApiClient.extractErrorMessage(e))),
+        );
+      }
+    }
+  }
+
+  void _resetChat() {
+    setState(() {
+      _messages
+        ..clear()
+        ..add(ChatMessage(
+          role: 'assistant',
+          content: 'Hello! I am your VectorGallery AI Digital Memory Assistant.\n\n'
+              'Ask anything about your uploaded photos, receipts, screenshots, or documents. '
+              'Tap any source card below my answer to open, preview, download, or share it.',
+        ));
+    });
   }
 
   @override
@@ -313,7 +349,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final isDark = AppTheme.isDark(context);
     final surface = AppTheme.surfaceOf(context);
-    final elevated = AppTheme.elevatedOf(context);
     final border = AppTheme.borderOf(context);
     final primaryText = AppTheme.textPrimaryOf(context);
     final secondaryText = AppTheme.textSecondaryOf(context);
@@ -348,6 +383,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               PopupMenuItem(value: 'groq', child: Text('Groq (Llama 3.3)')),
               PopupMenuItem(value: 'cohere', child: Text('Cohere')),
             ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_comment_outlined),
+            tooltip: 'New Chat',
+            onPressed: _resetChat,
           ),
           IconButton(
             icon: const Icon(Icons.key_outlined),
@@ -428,43 +468,127 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   ),
                                 ],
                               )
-                            : SelectableText(
-                                msg.content,
-                                style: TextStyle(
-                                  color: isUser ? userFg : primaryText,
-                                  fontSize: 13.5,
-                                  height: 1.45,
-                                  fontWeight: isUser ? FontWeight.w600 : FontWeight.normal,
-                                ),
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SelectableText(
+                                    msg.content,
+                                    style: TextStyle(
+                                      color: isUser ? userFg : primaryText,
+                                      fontSize: 13.5,
+                                      height: 1.48,
+                                      fontWeight: isUser ? FontWeight.w600 : FontWeight.normal,
+                                    ),
+                                  ),
+                                  if (!isUser && msg.content.trim().isNotEmpty && index > 0) ...[
+                                    const SizedBox(height: 8),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Clipboard.setData(ClipboardData(text: msg.content));
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Copied answer')),
+                                          );
+                                        },
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.copy_rounded, size: 12.5, color: secondaryText),
+                                              const SizedBox(width: 4),
+                                              Text('Copy', style: TextStyle(fontSize: 11, color: secondaryText)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                       ),
                       if (msg.citations != null && msg.citations!.isNotEmpty) ...[
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: msg.citations!.map((c) {
                             final citeMap = c is Map<String, dynamic> ? c : Map<String, dynamic>.from(c as Map);
-                            return InkWell(
-                              onTap: () => _showCitationPreview(citeMap),
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: elevated,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: border),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.description_outlined, size: 13, color: brand),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      citeMap['file_name']?.toString() ?? 'File',
-                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primaryText),
-                                    ),
-                                  ],
+                            final citeName = citeMap['file_name']?.toString() ?? 'Verified File';
+                            final citeCat = citeMap['category']?.toString() ?? 'documents';
+                            final citeExcerpt = citeMap['excerpt']?.toString().trim() ?? '';
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.88),
+                              decoration: BoxDecoration(
+                                color: surface,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: brand.withOpacity(0.28)),
+                              ),
+                              child: InkWell(
+                                onTap: () => _openCitationFile(citeMap),
+                                borderRadius: BorderRadius.circular(14),
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: brand.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Icon(categoryIconFor(citeCat), size: 17, color: brand),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              citeName,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: primaryText),
+                                            ),
+                                            if (citeExcerpt.isNotEmpty) ...[
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                citeExcerpt,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontSize: 11, color: secondaryText),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      IconButton(
+                                        tooltip: 'Download to phone',
+                                        visualDensity: VisualDensity.compact,
+                                        icon: Icon(Icons.download_rounded, size: 18, color: brand),
+                                        onPressed: () => _downloadCitationFile(citeMap),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.voltLime,
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        child: const Text(
+                                          'Open',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            color: Color(0xFF101211),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -505,18 +629,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               border: Border(top: BorderSide(color: border)),
             ),
             child: SafeArea(
-              child: TextField(
-                controller: _inputController,
-                style: TextStyle(color: primaryText),
-                textInputAction: TextInputAction.send,
-                onSubmitted: _sendMessage,
-                decoration: InputDecoration(
-                  hintText: 'Ask VectorGallery about your vault...',
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.send_rounded, color: brand),
-                    onPressed: () => _sendMessage(_inputController.text),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _inputController,
+                      style: TextStyle(color: primaryText, fontSize: 14),
+                      minLines: 1,
+                      maxLines: 4,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: _sendMessage,
+                      decoration: const InputDecoration(
+                        hintText: 'Ask VectorGallery to find, open, or summarize...',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 44,
+                    width: 44,
+                    child: ElevatedButton(
+                      onPressed: _isSending ? null : () => _sendMessage(_inputController.text),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        backgroundColor: AppTheme.voltLime,
+                        foregroundColor: const Color(0xFF101211),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: _isSending
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF101211)),
+                            )
+                          : const Icon(Icons.send_rounded, size: 19),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
