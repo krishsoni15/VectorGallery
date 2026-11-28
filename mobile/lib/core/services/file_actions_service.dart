@@ -126,6 +126,31 @@ class VaultFileActionsService {
     return savedPath ?? 'Downloads/VectorGallery/$fileName';
   }
 
+  /// Resolves the best available image/preview URL, preferring fresh signed `download_url`.
+  static String resolveBestImageUrl(ApiClient api, Map<String, dynamic> file) {
+    final download = file['download_url']?.toString().trim() ?? '';
+    final thumb = file['thumbnail_url']?.toString().trim() ?? '';
+    final chosen = (download.isNotEmpty && (download.startsWith('http://') || download.startsWith('https://')))
+        ? download
+        : (thumb.isNotEmpty ? thumb : download);
+    if (chosen.isEmpty) return '';
+    if (chosen.startsWith('http://') || chosen.startsWith('https://')) return chosen;
+    return '${api.dio.options.baseUrl}$chosen';
+  }
+
+  static bool isSameOriginUrl(ApiClient api, String url) {
+    return url.isNotEmpty && url.startsWith(api.dio.options.baseUrl);
+  }
+
+  /// Renders PDF pages into cached PNG file paths via native Android PdfRenderer.
+  static Future<List<String>> renderPdfPages(File pdfFile, {int maxPages = 20}) async {
+    final res = await _channel.invokeMethod<List<dynamic>>('renderPdfPages', {
+      'filePath': pdfFile.path,
+      'maxPages': maxPages,
+    });
+    return (res ?? []).map((e) => e.toString()).where((p) => p.isNotEmpty).toList();
+  }
+
   /// Downloads and opens the file in the device's native viewer (PDF, image, doc, video).
   static Future<void> openExternally(
     ApiClient api,

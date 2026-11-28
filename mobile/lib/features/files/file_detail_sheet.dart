@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/network/api_client.dart';
@@ -9,8 +10,8 @@ bool isRenderableImageFile(Map<String, dynamic> file) {
   final category = file['category']?.toString() ?? '';
   final mime = file['mime_type']?.toString() ?? '';
   final name = (file['original_name'] ?? file['file_name'] ?? file['name'] ?? '').toString().toLowerCase();
-  final thumb = file['thumbnail_url']?.toString() ?? '';
-  return thumb.isNotEmpty &&
+  final thumb = (file['download_url'] ?? file['thumbnail_url'] ?? '').toString();
+  return (thumb.isNotEmpty || (file['id'] ?? file['file_id']) != null) &&
       (category == 'photos' ||
           category == 'screenshots' ||
           mime.startsWith('image/') ||
@@ -33,7 +34,8 @@ IconData categoryIconFor(String category) {
 }
 
 /// Shared website-aligned file preview sheet with full-screen pinch-to-zoom image viewer,
-/// native Open, Download to Phone, Share, OCR excerpt copy, Ask AI, Star, Rename, Album, and Trash/Restore.
+/// in-app PDF & Document reader, native Open, Download to Phone, Share, OCR excerpt copy,
+/// Ask AI, Star, Rename, Album, and Trash/Restore.
 void showVaultFileDetailSheet({
   required BuildContext context,
   required Map<String, dynamic> file,
@@ -77,14 +79,23 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
   bool _isBusyAction = false;
   String? _busyLabel;
   double? _downloadProgress;
+  String? _authToken;
 
   @override
   void initState() {
     super.initState();
     _file = Map<String, dynamic>.from(widget.initialFile);
+    _loadToken();
     final id = (_file['id'] ?? _file['file_id'])?.toString() ?? '';
     if (id.isNotEmpty && (_file['download_url'] == null || _file['size_bytes'] == null)) {
       _hydrate();
+    }
+  }
+
+  Future<void> _loadToken() async {
+    final token = await widget.api.getAccessToken();
+    if (mounted && token != null && token.isNotEmpty) {
+      setState(() => _authToken = token);
     }
   }
 
@@ -114,11 +125,7 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
       '';
   bool get _isFavorite => _file['is_favorite'] == true;
 
-  String get _fullImageUrl {
-    final thumb = _file['thumbnail_url']?.toString() ?? '';
-    if (thumb.isEmpty) return '';
-    return thumb.startsWith('http') ? thumb : '${widget.api.dio.options.baseUrl}$thumb';
-  }
+  String get _fullImageUrl => VaultFileActionsService.resolveBestImageUrl(widget.api, _file);
 
   String get _sizeLabel {
     final sizeBytes = (_file['size_bytes'] as num?)?.toDouble();
@@ -165,13 +172,14 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
   }
 
   Future<void> _handleOpen() async {
-    if (isRenderableImageFile(_file) && _fullImageUrl.isNotEmpty) {
+    if (isRenderableImageFile(_file)) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => _FullScreenImageViewer(
             title: _name,
             imageUrl: _fullImageUrl,
+            authToken: _authToken,
             file: _file,
             api: widget.api,
           ),
@@ -373,7 +381,7 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
     final primaryText = AppTheme.textPrimaryOf(context);
     final secondaryText = AppTheme.textSecondaryOf(context);
     final brand = AppTheme.brandOf(context);
-    final hasImage = isRenderableImageFile(_file) && _fullImageUrl.isNotEmpty;
+    final hasImage = isRenderableImageFile(_file);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.72,
@@ -526,26 +534,14 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
                         height: 240,
                         width: double.infinity,
                         color: elevated,
-                        child: Image.network(
-                          _fullImageUrl,
-                          fit: BoxFit.contain,
+                        child: _VaultImagePreview(
+                          api: widget.api,
+                          file: _file,
+                          imageUrl: _fullImageUrl,
+                          authToken: _authToken,
                           cacheWidth: 1080,
-                          filterQuality: FilterQuality.medium,
-                          gaplessPlayback: true,
-                          loadingBuilder: (_, child, progress) {
-                            if (progress == null) return child;
-                            return Center(child: CircularProgressIndicator(strokeWidth: 2, color: brand));
-                          },
-                          errorBuilder: (_, __, ___) => Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.broken_image_outlined, color: secondaryText, size: 36),
-                                const SizedBox(height: 6),
-                                Text('Tap Open or Download to view', style: TextStyle(color: secondaryText, fontSize: 11.5)),
-                              ],
-                            ),
-                          ),
+                          fit: BoxFit.contain,
+                          isHydrating: _isHydrating,
                         ),
                       ),
                       Positioned(
@@ -690,6 +686,131 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
   }
 }
 
+/// Resilient image previewer: uses signed URL or same-origin Bearer auth headers,
+/// and automatically falls back to Dio authenticated download if Image.network fails.
+class _VaultImagePreview extends StatefulWidget {
+  final ApiClient api;
+  final Map<String, dynamic> file;
+  final String imageUrl;
+  final String? authToken;
+  final int? cacheWidth;
+  final BoxFit fit;
+  final bool isHydrating;
+  final bool darkMode;
+
+  const _VaultImagePreview({
+    required this.api,
+    required this.file,
+    required this.imageUrl,
+    required this.authToken,
+    this.cacheWidth,
+    this.fit = BoxFit.contain,
+    this.isHydrating = false,
+    this.darkMode = false,
+  });
+
+  @override
+  State<_VaultImagePreview> createState() => _VaultImagePreviewState();
+}
+
+class _VaultImagePreviewState extends State<_VaultImagePreview> {
+  File? _fallbackFile;
+  bool _loadingFallback = false;
+  bool _fallbackFailed = false;
+
+  Future<void> _loadFallback() async {
+    if (_loadingFallback || _fallbackFile != null || _fallbackFailed) return;
+    setState(() => _loadingFallback = true);
+    try {
+      final f = await VaultFileActionsService.downloadToTemp(widget.api, widget.file);
+      if (mounted) {
+        setState(() {
+          _fallbackFile = f;
+          _loadingFallback = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _loadingFallback = false;
+          _fallbackFailed = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = AppTheme.brandOf(context);
+    final secondaryText = widget.darkMode ? Colors.white70 : AppTheme.textSecondaryOf(context);
+
+    if (_fallbackFile != null) {
+      return Image.file(
+        _fallbackFile!,
+        fit: widget.fit,
+        cacheWidth: widget.cacheWidth,
+        filterQuality: FilterQuality.medium,
+        gaplessPlayback: true,
+      );
+    }
+
+    if (_loadingFallback || (widget.imageUrl.isEmpty && widget.isHydrating)) {
+      return Center(child: CircularProgressIndicator(strokeWidth: 2, color: brand));
+    }
+
+    if (widget.imageUrl.isEmpty) {
+      if (!_fallbackFailed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _loadFallback());
+        return Center(child: CircularProgressIndicator(strokeWidth: 2, color: brand));
+      }
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.broken_image_outlined, color: secondaryText, size: 36),
+            const SizedBox(height: 6),
+            Text('Tap Download to save image', style: TextStyle(color: secondaryText, fontSize: 11.5)),
+          ],
+        ),
+      );
+    }
+
+    final sameOrigin = VaultFileActionsService.isSameOriginUrl(widget.api, widget.imageUrl);
+    final headers = sameOrigin && widget.authToken != null && widget.authToken!.isNotEmpty
+        ? {'Authorization': 'Bearer ${widget.authToken}'}
+        : null;
+
+    return Image.network(
+      widget.imageUrl,
+      headers: headers,
+      fit: widget.fit,
+      cacheWidth: widget.cacheWidth,
+      filterQuality: FilterQuality.medium,
+      gaplessPlayback: true,
+      loadingBuilder: (_, child, progress) {
+        if (progress == null) return child;
+        return Center(child: CircularProgressIndicator(strokeWidth: 2, color: brand));
+      },
+      errorBuilder: (_, __, ___) {
+        if (!_fallbackFailed) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => _loadFallback());
+          return Center(child: CircularProgressIndicator(strokeWidth: 2, color: brand));
+        }
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.broken_image_outlined, color: secondaryText, size: 36),
+              const SizedBox(height: 6),
+              Text('Tap Download to save image', style: TextStyle(color: secondaryText, fontSize: 11.5)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _InAppDocumentViewer extends StatefulWidget {
   final String title;
   final String mimeType;
@@ -713,39 +834,66 @@ class _InAppDocumentViewer extends StatefulWidget {
 
 class _InAppDocumentViewerState extends State<_InAppDocumentViewer> {
   late String _contentText;
-  bool _isLoadingText = false;
+  List<String> _pdfPagePaths = [];
+  bool _isLoading = true;
+  bool _showTextView = false;
   bool _isBusy = false;
+  String? _loadError;
+
+  bool get _isPdf =>
+      widget.mimeType.toLowerCase() == 'application/pdf' ||
+      widget.title.toLowerCase().endsWith('.pdf');
 
   @override
   void initState() {
     super.initState();
     _contentText = widget.initialText;
-    if (_contentText.trim().isEmpty) {
-      _loadFromVault();
-    }
+    _loadDocument();
   }
 
-  Future<void> _loadFromVault() async {
-    setState(() => _isLoadingText = true);
+  Future<void> _loadDocument() async {
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
     try {
       final hydrated = await VaultFileActionsService.hydrateFileMetadata(widget.api, widget.file);
       final extracted = hydrated['extracted_text']?.toString().trim() ?? '';
-      if (extracted.isNotEmpty) {
-        if (mounted) setState(() => _contentText = extracted);
+      if (extracted.isNotEmpty && _contentText.trim().isEmpty) {
+        _contentText = extracted;
+      }
+
+      if (_isPdf) {
+        final pdfFile = await VaultFileActionsService.downloadToTemp(widget.api, hydrated);
+        final pages = await VaultFileActionsService.renderPdfPages(pdfFile);
+        if (mounted) {
+          setState(() {
+            _pdfPagePaths = pages;
+            _showTextView = pages.isEmpty && _contentText.trim().isNotEmpty;
+          });
+        }
       } else {
         final lower = widget.title.toLowerCase();
-        if (lower.endsWith('.txt') ||
-            lower.endsWith('.md') ||
-            lower.endsWith('.json') ||
-            lower.endsWith('.csv')) {
+        if (_contentText.trim().isEmpty &&
+            (lower.endsWith('.txt') ||
+                lower.endsWith('.md') ||
+                lower.endsWith('.json') ||
+                lower.endsWith('.csv'))) {
           final f = await VaultFileActionsService.downloadToTemp(widget.api, hydrated);
           final raw = await f.readAsString();
-          if (mounted) setState(() => _contentText = raw);
+          if (mounted) _contentText = raw;
+        }
+        _showTextView = true;
+      }
+    } catch (e) {
+      if (mounted) {
+        _loadError = ApiClient.extractErrorMessage(e);
+        if (_contentText.trim().isNotEmpty) {
+          _showTextView = true;
         }
       }
-    } catch (_) {
     } finally {
-      if (mounted) setState(() => _isLoadingText = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -783,10 +931,21 @@ class _InAppDocumentViewerState extends State<_InAppDocumentViewer> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15)),
-            Text('${widget.mimeType} • ${widget.sizeLabel}', style: TextStyle(fontSize: 11, color: secondaryText)),
+            Text(
+              _pdfPagePaths.isNotEmpty
+                  ? '${_pdfPagePaths.length} page${_pdfPagePaths.length == 1 ? '' : 's'} • ${widget.sizeLabel}'
+                  : '${widget.mimeType} • ${widget.sizeLabel}',
+              style: TextStyle(fontSize: 11, color: secondaryText),
+            ),
           ],
         ),
         actions: [
+          if (_pdfPagePaths.isNotEmpty && _contentText.trim().isNotEmpty)
+            IconButton(
+              tooltip: _showTextView ? 'Show PDF Pages' : 'Show Extracted Text',
+              icon: Icon(_showTextView ? Icons.picture_as_pdf_outlined : Icons.text_snippet_outlined),
+              onPressed: () => setState(() => _showTextView = !_showTextView),
+            ),
           IconButton(
             tooltip: 'Open in external app',
             icon: const Icon(Icons.open_in_new_rounded),
@@ -823,83 +982,131 @@ class _InAppDocumentViewerState extends State<_InAppDocumentViewer> {
           ),
         ],
       ),
-      body: _isLoadingText
-          ? Center(child: CircularProgressIndicator(color: brand))
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                if (_contentText.trim().isNotEmpty) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Document Reader',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: brand),
+      body: _isLoading
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: brand),
+                  const SizedBox(height: 12),
+                  Text('Rendering preview...', style: TextStyle(fontSize: 12.5, color: secondaryText)),
+                ],
+              ),
+            )
+          : (!_showTextView && _pdfPagePaths.isNotEmpty)
+              ? ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
+                  itemCount: _pdfPagePaths.length,
+                  itemBuilder: (_, idx) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: border),
                       ),
-                      TextButton.icon(
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: _contentText));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Copied document text')),
-                          );
-                        },
-                        icon: Icon(Icons.copy_rounded, size: 14, color: brand),
-                        label: Text('Copy Text', style: TextStyle(fontSize: 12, color: brand)),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: border),
-                    ),
-                    child: SelectableText(
-                      _contentText,
-                      style: TextStyle(fontSize: 13.5, height: 1.55, color: primaryText),
-                    ),
-                  ),
-                ] else
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: surface,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: border),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.description_outlined, size: 44, color: brand),
-                        const SizedBox(height: 12),
-                        Text(
-                          widget.title,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: primaryText),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'No extracted text preview is stored for this binary file. Use Open in App or Download above to view it.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12.5, color: secondaryText, height: 1.4),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _isBusy ? null : _openWithExternalApp,
-                          icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                          label: const Text('Open in Native App', style: TextStyle(fontWeight: FontWeight.w800)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.voltLime,
-                            foregroundColor: const Color(0xFF101211),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            color: surface,
+                            child: Text(
+                              'Page ${idx + 1} of ${_pdfPagePaths.length}',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: secondaryText),
+                            ),
                           ),
+                          InteractiveViewer(
+                            minScale: 1.0,
+                            maxScale: 4.0,
+                            child: Image.file(
+                              File(_pdfPagePaths[idx]),
+                              fit: BoxFit.fitWidth,
+                              gaplessPlayback: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                )
+              : ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    if (_contentText.trim().isNotEmpty) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Document Reader',
+                            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: brand),
+                          ),
+                          TextButton.icon(
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: _contentText));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Copied document text')),
+                              );
+                            },
+                            icon: Icon(Icons.copy_rounded, size: 14, color: brand),
+                            label: Text('Copy Text', style: TextStyle(fontSize: 12, color: brand)),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: border),
                         ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
+                        child: SelectableText(
+                          _contentText,
+                          style: TextStyle(fontSize: 13.5, height: 1.55, color: primaryText),
+                        ),
+                      ),
+                    ] else
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: surface,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: border),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.description_outlined, size: 44, color: brand),
+                            const SizedBox(height: 12),
+                            Text(
+                              widget.title,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: primaryText),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              _loadError ??
+                                  'Preview unavailable for this file format. Use Open in Native App or Download above.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 12.5, color: secondaryText, height: 1.4),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: _isBusy ? null : _openWithExternalApp,
+                              icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                              label: const Text('Open in Native App', style: TextStyle(fontWeight: FontWeight.w800)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.voltLime,
+                                foregroundColor: const Color(0xFF101211),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
     );
   }
 }
@@ -907,12 +1114,14 @@ class _InAppDocumentViewerState extends State<_InAppDocumentViewer> {
 class _FullScreenImageViewer extends StatelessWidget {
   final String title;
   final String imageUrl;
+  final String? authToken;
   final Map<String, dynamic> file;
   final ApiClient api;
 
   const _FullScreenImageViewer({
     required this.title,
     required this.imageUrl,
+    this.authToken,
     required this.file,
     required this.api,
   });
@@ -961,16 +1170,13 @@ class _FullScreenImageViewer extends StatelessWidget {
         child: InteractiveViewer(
           minScale: 0.8,
           maxScale: 5.0,
-          child: Image.network(
-            imageUrl,
+          child: _VaultImagePreview(
+            api: api,
+            file: file,
+            imageUrl: imageUrl,
+            authToken: authToken,
             fit: BoxFit.contain,
-            loadingBuilder: (_, child, progress) {
-              if (progress == null) return child;
-              return const Center(child: CircularProgressIndicator(color: AppTheme.voltLime));
-            },
-            errorBuilder: (_, __, ___) => const Center(
-              child: Text('Unable to load image preview', style: TextStyle(color: Colors.white70)),
-            ),
+            darkMode: true,
           ),
         ),
       ),

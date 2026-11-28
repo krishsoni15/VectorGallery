@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getAdminSupabase, getServerUser, hasExplicitCredential, isServiceRoleConfigured } from '@/lib/supabase'
+import { signSupabaseFileUrls } from '@/lib/storage/supabaseStorage'
 import {
   CHAT_PROVIDERS,
   EMBEDDING_PROVIDERS,
@@ -277,7 +278,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
       }
     })
-    const citations = Array.from(uniqueCitationsMap.values())
+    let citations = Array.from(uniqueCitationsMap.values())
+    if (isServiceRoleConfigured() && citations.length > 0) {
+      try {
+        const supabase = getAdminSupabase()
+        const citeIds = citations.map((c) => c.file_id).filter(Boolean)
+        const { data: fileRows } = await supabase
+          .from('files')
+          .select('id, storage_key, thumbnail_url')
+          .eq('user_id', userId)
+          .in('id', citeIds)
+        if (Array.isArray(fileRows) && fileRows.length > 0) {
+          const signedRows = await signSupabaseFileUrls(supabase, fileRows)
+          const thumbById = new Map(signedRows.map((r: any) => [r.id, r.thumbnail_url]))
+          citations = citations.map((c) => ({
+            ...c,
+            thumbnail_url: thumbById.get(c.file_id) || c.thumbnail_url,
+          }))
+        }
+      } catch (_) {}
+    }
 
     const contextBlock =
       contextDocs.length > 0

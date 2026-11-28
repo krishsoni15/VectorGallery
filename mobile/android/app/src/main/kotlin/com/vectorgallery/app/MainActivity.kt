@@ -3,8 +3,13 @@ package com.vectorgallery.app
 import android.content.ActivityNotFoundException
 import android.content.ContentValues
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
 import android.os.Build
 import android.os.Environment
+import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
@@ -12,6 +17,8 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
+import kotlin.math.min
 
 class MainActivity : FlutterActivity() {
     private val channelName = "vectorgallery/files"
@@ -80,6 +87,22 @@ class MainActivity : FlutterActivity() {
                         result.error("SHARE_FAILED", e.message ?: "Unable to share file", null)
                     }
                 }
+                "renderPdfPages" -> {
+                    val filePath = call.argument<String>("filePath")
+                    val maxPages = call.argument<Int>("maxPages") ?: 20
+                    if (filePath.isNullOrBlank()) {
+                        result.error("INVALID_ARGS", "Missing filePath", null)
+                        return@setMethodCallHandler
+                    }
+                    Thread {
+                        try {
+                            val rendered = renderPdfToPngs(File(filePath), maxPages)
+                            runOnUiThread { result.success(rendered) }
+                        } catch (e: Exception) {
+                            runOnUiThread { result.error("PDF_RENDER_FAILED", e.message ?: "Failed to render PDF", null) }
+                        }
+                    }.start()
+                }
                 else -> result.notImplemented()
             }
         }
@@ -122,5 +145,41 @@ class MainActivity : FlutterActivity() {
             source.copyTo(dest, overwrite = true)
             return dest.absolutePath
         }
+    }
+
+    private fun renderPdfToPngs(pdfFile: File, maxPages: Int): List<String> {
+        val outDir = File(cacheDir, "pdf_pages_${pdfFile.nameWithoutExtension}_${pdfFile.length()}")
+        if (!outDir.exists()) outDir.mkdirs()
+
+        val pfd = ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        val renderer = PdfRenderer(pfd)
+        val paths = mutableListOf<String>()
+        try {
+            val count = min(renderer.pageCount, maxPages)
+            for (i in 0 until count) {
+                val outFile = File(outDir, "page_$i.png")
+                if (outFile.exists() && outFile.length() > 0) {
+                    paths.add(outFile.absolutePath)
+                    continue
+                }
+                renderer.openPage(i).use { page ->
+                    val targetWidth = 1240
+                    val scale = targetWidth.toFloat() / page.width.coerceAtLeast(1)
+                    val targetHeight = (page.height * scale).toInt().coerceAtLeast(1)
+                    val bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
+                    Canvas(bitmap).drawColor(Color.WHITE)
+                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                    FileOutputStream(outFile).use { fos ->
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 92, fos)
+                    }
+                    bitmap.recycle()
+                }
+                paths.add(outFile.absolutePath)
+            }
+        } finally {
+            renderer.close()
+            pfd.close()
+        }
+        return paths
     }
 }

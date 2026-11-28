@@ -79,6 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({
         file: {
           ...file,
+          thumbnail_url: signedUrl || file.thumbnail_url,
           download_url: signedUrl,
         },
       })

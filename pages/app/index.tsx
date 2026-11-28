@@ -263,19 +263,23 @@ export default function AppPage() {
   }
 
   const handleOpenFileById = async (fileId: string) => {
-    let f = files.find((file) => file.id === fileId) || stats.recent_files?.find((file) => file.id === fileId)
-    if (!f || !f.sha256_hash) {
-      try {
-        const res = await fetch(`/api/v2/files/${fileId}`)
-        if (res.ok) {
-          const data = await res.json()
-          f = data.file || f
-        }
-      } catch (e) {
-        console.error('[App] Failed to fetch file by id:', e)
-      }
+    const existing =
+      files.find((file) => file.id === fileId) ||
+      stats.recent_files?.find((file) => file.id === fileId)
+    if (existing) {
+      setPreviewFile(existing)
     }
-    if (f) setPreviewFile(f)
+    try {
+      const res = await fetch(`/api/v2/files/${fileId}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.file) {
+          setPreviewFile(data.file)
+        }
+      }
+    } catch (e) {
+      console.error('[App] Failed to fetch file by id:', e)
+    }
   }
 
   const handleBulkAction = async (
