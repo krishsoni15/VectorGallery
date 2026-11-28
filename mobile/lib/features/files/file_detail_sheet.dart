@@ -179,33 +179,19 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
       );
       return;
     }
-    if (_isBusyAction) return;
-    setState(() {
-      _isBusyAction = true;
-      _busyLabel = 'Opening "$_name"...';
-      _downloadProgress = 0.0;
-    });
-    try {
-      await VaultFileActionsService.openExternally(
-        widget.api,
-        _file,
-        onProgress: (p) {
-          if (mounted) setState(() => _downloadProgress = p);
-        },
-      );
-    } on PlatformException catch (e) {
-      _showSnack(e.message ?? 'No app found to open this file type.');
-    } catch (e) {
-      _showSnack(ApiClient.extractErrorMessage(e));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isBusyAction = false;
-          _busyLabel = null;
-          _downloadProgress = null;
-        });
-      }
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _InAppDocumentViewer(
+          title: _name,
+          mimeType: _mime,
+          sizeLabel: _sizeLabel,
+          initialText: _text,
+          file: _file,
+          api: widget.api,
+        ),
+      ),
+    );
   }
 
   Future<void> _handleShare() async {
@@ -700,6 +686,220 @@ class _VaultFileDetailSheetState extends State<_VaultFileDetailSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _InAppDocumentViewer extends StatefulWidget {
+  final String title;
+  final String mimeType;
+  final String sizeLabel;
+  final String initialText;
+  final Map<String, dynamic> file;
+  final ApiClient api;
+
+  const _InAppDocumentViewer({
+    required this.title,
+    required this.mimeType,
+    required this.sizeLabel,
+    required this.initialText,
+    required this.file,
+    required this.api,
+  });
+
+  @override
+  State<_InAppDocumentViewer> createState() => _InAppDocumentViewerState();
+}
+
+class _InAppDocumentViewerState extends State<_InAppDocumentViewer> {
+  late String _contentText;
+  bool _isLoadingText = false;
+  bool _isBusy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _contentText = widget.initialText;
+    if (_contentText.trim().isEmpty) {
+      _loadFromVault();
+    }
+  }
+
+  Future<void> _loadFromVault() async {
+    setState(() => _isLoadingText = true);
+    try {
+      final hydrated = await VaultFileActionsService.hydrateFileMetadata(widget.api, widget.file);
+      final extracted = hydrated['extracted_text']?.toString().trim() ?? '';
+      if (extracted.isNotEmpty) {
+        if (mounted) setState(() => _contentText = extracted);
+      } else {
+        final lower = widget.title.toLowerCase();
+        if (lower.endsWith('.txt') ||
+            lower.endsWith('.md') ||
+            lower.endsWith('.json') ||
+            lower.endsWith('.csv')) {
+          final f = await VaultFileActionsService.downloadToTemp(widget.api, hydrated);
+          final raw = await f.readAsString();
+          if (mounted) setState(() => _contentText = raw);
+        }
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _isLoadingText = false);
+    }
+  }
+
+  Future<void> _openWithExternalApp() async {
+    if (_isBusy) return;
+    setState(() => _isBusy = true);
+    try {
+      await VaultFileActionsService.openExternally(widget.api, widget.file);
+    } on PlatformException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'No external viewer app installed for this file type.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ApiClient.extractErrorMessage(e))));
+      }
+    } finally {
+      if (mounted) setState(() => _isBusy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = AppTheme.surfaceOf(context);
+    final border = AppTheme.borderOf(context);
+    final primaryText = AppTheme.textPrimaryOf(context);
+    final secondaryText = AppTheme.textSecondaryOf(context);
+    final brand = AppTheme.brandOf(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15)),
+            Text('${widget.mimeType} • ${widget.sizeLabel}', style: TextStyle(fontSize: 11, color: secondaryText)),
+          ],
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Open in external app',
+            icon: const Icon(Icons.open_in_new_rounded),
+            onPressed: _isBusy ? null : _openWithExternalApp,
+          ),
+          IconButton(
+            tooltip: 'Download to phone',
+            icon: const Icon(Icons.download_rounded),
+            onPressed: () async {
+              try {
+                final saved = await VaultFileActionsService.saveToDownloads(widget.api, widget.file);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Saved to $saved')));
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ApiClient.extractErrorMessage(e))));
+                }
+              }
+            },
+          ),
+          IconButton(
+            tooltip: 'Share',
+            icon: const Icon(Icons.share_outlined),
+            onPressed: () async {
+              try {
+                await VaultFileActionsService.shareVaultFile(widget.api, widget.file);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ApiClient.extractErrorMessage(e))));
+                }
+              }
+            },
+          ),
+        ],
+      ),
+      body: _isLoadingText
+          ? Center(child: CircularProgressIndicator(color: brand))
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                if (_contentText.trim().isNotEmpty) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Document Reader',
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: brand),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: _contentText));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Copied document text')),
+                          );
+                        },
+                        icon: Icon(Icons.copy_rounded, size: 14, color: brand),
+                        label: Text('Copy Text', style: TextStyle(fontSize: 12, color: brand)),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: border),
+                    ),
+                    child: SelectableText(
+                      _contentText,
+                      style: TextStyle(fontSize: 13.5, height: 1.55, color: primaryText),
+                    ),
+                  ),
+                ] else
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: surface,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: border),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.description_outlined, size: 44, color: brand),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.title,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: primaryText),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'No extracted text preview is stored for this binary file. Use Open in App or Download above to view it.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12.5, color: secondaryText, height: 1.4),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _isBusy ? null : _openWithExternalApp,
+                          icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                          label: const Text('Open in Native App', style: TextStyle(fontWeight: FontWeight.w800)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.voltLime,
+                            foregroundColor: const Color(0xFF101211),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 }

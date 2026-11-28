@@ -107,10 +107,10 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   const canRenderMainImage = isImage && !brokenThumbs[mainThumbKey]
   const formattedDate = file.created_at
     ? new Date(file.created_at).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
     : 'Recent'
 
   const handleCopyOcr = () => {
@@ -171,20 +171,19 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           <button
             onClick={() => {
               if (typeof navigator !== 'undefined' && navigator.share) {
-                navigator.share({ title: displayName, url: file.thumbnail_url }).catch(() => {})
+                navigator.share({ title: displayName, url: file.thumbnail_url }).catch(() => { })
               } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                navigator.clipboard.writeText(`${window.location.origin}${file.thumbnail_url || ''}`).catch(() => {})
+                navigator.clipboard.writeText(`${window.location.origin}${file.thumbnail_url || ''}`).catch(() => { })
                 setCopiedLink(true)
                 setTimeout(() => setCopiedLink(false), 1800)
               }
             }}
             title={copiedLink ? 'Link copied' : 'Copy link'}
             aria-label={copiedLink ? 'Link copied' : 'Share file link'}
-            className={`p-2 rounded-full transition-colors ${
-              copiedLink
+            className={`p-2 rounded-full transition-colors ${copiedLink
                 ? 'bg-[#CDFF45]/20 text-[#CDFF45]'
                 : 'bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300 hover:text-[#CDFF45]'
-            }`}
+              }`}
           >
             {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
           </button>
@@ -200,9 +199,8 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           <button
             onClick={() => setShowInfo(!showInfo)}
             title="Toggle Info Drawer"
-            className={`p-2 rounded-full transition-colors ${
-              showInfo ? 'bg-[#CFFF49] text-[#101211] font-bold' : 'bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300'
-            }`}
+            className={`p-2 rounded-full transition-colors ${showInfo ? 'bg-[#CFFF49] text-[#101211] font-bold' : 'bg-white/[0.08] hover:bg-white/[0.16] text-zinc-300'
+              }`}
           >
             <Info className="w-4 h-4" />
           </button>
@@ -244,6 +242,69 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                 setBrokenThumbs((prev) => ({ ...prev, [mainThumbKey]: true }))
               }
             />
+          ) : (displayMime === 'application/pdf' || /\.pdf$/i.test(displayName)) &&
+            (file.download_url || file.thumbnail_url) ? (
+            <div className="w-full max-w-4xl h-[74vh] sm:h-[82vh] mx-4 flex flex-col rounded-2xl overflow-hidden border border-white/[0.12] bg-[#131715] shadow-2xl">
+              <iframe
+                src={file.download_url || file.thumbnail_url}
+                title={displayName}
+                className="w-full flex-1 bg-white"
+              />
+              <div className="px-4 py-2.5 bg-black/80 border-t border-white/[0.08] flex items-center justify-between text-xs text-zinc-300">
+                <span className="truncate">{displayName}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <a
+                    href={file.download_url || file.thumbnail_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> Open Tab
+                  </a>
+                  <button
+                    onClick={() => onDownload(file)}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#CFFF49] text-[#101211] font-bold"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (displayMime.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(displayName)) &&
+            (file.download_url || file.thumbnail_url) ? (
+            <video
+              controls
+              playsInline
+              src={file.download_url || file.thumbnail_url}
+              className="max-h-[75vh] max-w-[92vw] rounded-xl shadow-2xl bg-black"
+            />
+          ) : (displayMime.startsWith('audio/') || /\.(mp3|wav|m4a|ogg)$/i.test(displayName)) &&
+            (file.download_url || file.thumbnail_url) ? (
+            <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-[#131715]/95 border border-white/[0.12] space-y-4 text-center w-full max-w-md mx-4">
+              <h4 className="text-base font-bold text-white truncate max-w-full">{displayName}</h4>
+              <audio controls src={file.download_url || file.thumbnail_url} className="w-full" />
+              <button
+                onClick={() => onDownload(file)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#CFFF49] hover:bg-[#D8FF6B] text-xs font-bold text-[#101211]"
+              >
+                <Download className="w-4 h-4" /> Download Audio
+              </button>
+            </div>
+          ) : file.extracted_text ? (
+            <div className="w-full max-w-3xl max-h-[76vh] mx-4 flex flex-col rounded-2xl bg-[#131715]/95 border border-white/[0.12] shadow-2xl overflow-hidden">
+              <div className="px-5 py-3 border-b border-white/[0.08] flex items-center justify-between">
+                <span className="text-xs font-semibold text-white truncate">{displayName}</span>
+                <button
+                  onClick={() => onDownload(file)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#CFFF49] text-[#101211] text-xs font-bold"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download
+                </button>
+              </div>
+              <pre className="p-5 text-xs sm:text-[13px] text-zinc-200 whitespace-pre-wrap font-sans leading-relaxed overflow-y-auto custom-scrollbar">
+                {file.extracted_text}
+              </pre>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-12 rounded-3xl bg-[#131715]/90 border border-white/[0.10] space-y-4 text-center max-w-md mx-4">
               <div className="p-4 rounded-2xl bg-[#CFFF49]/15 text-[#CFFF49]">

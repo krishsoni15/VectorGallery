@@ -8,6 +8,8 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/local_database.dart';
 
@@ -174,14 +176,14 @@ class BackupEngine extends ChangeNotifier {
     }
   }
 
-  // 4. User Action: Pick and upload documents
+  // 4. User Action: Pick and upload documents (PDF, DOCX, TXT, CSV, JSON, MD, XLSX)
   Future<int> pickAndUploadDocuments() async {
     if (!await _ensureAuthenticatedBeforeBackup()) return -1;
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: true,
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'csv', 'xlsx', 'xls', 'json', 'md'],
+        type: FileType.any,
+        withData: true,
       );
 
       if (result == null || result.files.isEmpty) return 0;
@@ -192,12 +194,38 @@ class BackupEngine extends ChangeNotifier {
       lastStatusMessage = 'Selected ${result.files.length} document(s). Preparing queue...';
       notifyListeners();
 
+      final tempDir = await getTemporaryDirectory();
+      final pickedDir = Directory(p.join(tempDir.path, 'picked_docs'));
+      if (!await pickedDir.exists()) {
+        await pickedDir.create(recursive: true);
+      }
+
       int enqueued = 0;
       for (final item in result.files) {
-        if (item.path == null) continue;
-        final file = File(item.path!);
-        final added = await enqueueCandidate(file, 'documents');
+        File? candidate;
+        if (item.path != null && item.path!.isNotEmpty) {
+          final direct = File(item.path!);
+          if (await direct.exists()) {
+            candidate = direct;
+          }
+        }
+        if (candidate == null && item.bytes != null && item.bytes!.isNotEmpty) {
+          final safeName = item.name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+          final staged = File(p.join(pickedDir.path, '${DateTime.now().millisecondsSinceEpoch}_$safeName'));
+          await staged.writeAsBytes(item.bytes!, flush: true);
+          candidate = staged;
+        }
+        if (candidate == null) continue;
+        final cat = inferCategory(candidate.path);
+        final added = await enqueueCandidate(candidate, cat == 'other' ? 'documents' : cat);
         if (added) enqueued++;
+      }
+
+      if (enqueued == 0 && result.files.isNotEmpty) {
+        status = BackupStatus.completed;
+        lastStatusMessage = 'Selected file(s) already backed up or unreadable from provider.';
+        notifyListeners();
+        return 0;
       }
 
       lastStatusMessage = 'Queued $enqueued document(s) (${result.files.length - enqueued} skipped).';
@@ -420,7 +448,9 @@ class BackupEngine extends ChangeNotifier {
         }
       } catch (e) {
         if (e is DioException && e.response?.statusCode == 401) rethrow;
-        // Fall through cleanly only when file might still fit or direct sign unavailable
+        if (bytes.length > 4 * 1024 * 1024) {
+          rethrow;
+        }
       }
     }
 
